@@ -62,7 +62,7 @@ Try: "How late can my neighbour run a leaf blower?" · "What does § 591-2.1 say
    from [`STACK.md`](STACK.md#store-supabase-postgres-alone) verbatim.
 5. **Decisions.** One line each linking `CORPUS.md`, `CHUNKING.md`, `CONTRACT.md`,
    `STACK.md`, `GUARDRAILS.md`, `EVALS.md`, `evals/LADDER.md`, `UI.md`, `INGESTION.md`.
-6. **Cost.** ≈ $0.0011 per answer, $5 prepaid hard cap, daily limits, and what the demo
+6. **Cost.** ≈ $0.0011 per answer, $10 prepaid hard cap, daily limits, and what the demo
    does when it's out of money (examples and evals still work).
 7. **Operations.** The keep-alive crons, and: "GitHub disables scheduled workflows after 60
    days without a commit. If the DB health check stops, re-enable it in Actions."
