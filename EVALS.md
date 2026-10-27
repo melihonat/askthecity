@@ -1,15 +1,14 @@
 # Eval scoring
 
 What each column of the eval table measures, how gold is written and what a committed run
-records. Decided in
-[⑦ Eval scoring rules](.scratch/ask-the-city/issues/07-eval-scoring-rules.md). The response
+records. The response
 shape and the `debug` event are in [`CONTRACT.md`](CONTRACT.md); terms are defined in
 [`CONTEXT.md`](CONTEXT.md).
 
 ## Harness
 
 - Python, on the offline side of the language split. It calls the deployed `/api/ask` over
-  HTTP with the **eval header** (⑪), which bypasses the answer cache and the rate limits and
+  HTTP with the **eval header** ([`GUARDRAILS.md`](GUARDRAILS.md#the-eval-header)), which bypasses the answer cache and the rate limits and
   unlocks the `debug` event. Retrieval logic exists only in the app.
 - Calls are **sequential**, never concurrent. The first call of a run is a discarded
   warm-up.
@@ -98,7 +97,6 @@ No judge.
 
 ## Refusal threshold
 
-Decided in [⑨ How the system decides "the documents don't cover this"](.scratch/ask-the-city/issues/09-refusal-rule.md).
 The gate's only job is never to refuse an answerable question, so the threshold comes from a
 rule, not a search:
 
@@ -119,8 +117,7 @@ rule, not a search:
 ## Ladder
 
 The rungs, their order, the ship bar and the spend preflight are pre-registered in
-[`evals/LADDER.md`](evals/LADDER.md), decided in
-[⑩ The experiment ladder](.scratch/ask-the-city/issues/10-experiment-ladder.md). The judge
+[`evals/LADDER.md`](evals/LADDER.md). The judge
 calls Anthropic directly on its own capped key, not through the app. `run.json`'s header
 also records the `rung` and its resolved `RungConfig`, and each rung's real Gateway spend
 read back from its `eval:<run-id>` tag.
@@ -142,7 +139,7 @@ evals/
   reranker, LLM and judge model ids, judge and generation prompt hashes, refusal threshold,
   harness version, date), then per question per run: the `AskResponse`, the `debug` event and the judge
   verdicts.
-- **Passage `body` is stripped** before committing (③: City text stays out of the public
+- **Passage `body` is stripped** before committing ([`CORPUS.md`](CORPUS.md#copyright): City text stays out of the public
   repo). Chunk ids, labels and hrefs stay, so every citation can still be followed to the
   City's PDF. The model's answer text stays.
 - **`report.md`**: citations outside `required`/`acceptable` listed by name (widen

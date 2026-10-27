@@ -1,9 +1,7 @@
 # Extraction and chunking
 
-How the snapshot's documents become chunks. Decided in
-[④ Extraction and section-aware chunking](.scratch/ask-the-city/issues/04-extraction-and-chunking-prototype.md);
-evidence in [its prototype findings](.scratch/ask-the-city/prototypes/04-extraction/FINDINGS.md).
-Terms are defined in [`CONTEXT.md`](CONTEXT.md).
+How the snapshot's documents become chunks, as tested on real samples of the Code, amending
+by-laws and item pages. What enters the corpus is in [`CORPUS.md`](CORPUS.md). Terms are defined in [`CONTEXT.md`](CONTEXT.md).
 
 ## Engine
 
@@ -65,8 +63,7 @@ says it differs ("comes into force on January 1, 2027").
 
 **Whole-chapter replacement** (1511-2025 → Ch 497, 1512-2025 → Ch 629): the by-law runs
 through the chapter splitter as that chapter. Its chunks carry the by-law as source and its
-`in_force` date. **It supersedes only once in force** (decided in
-[⑧](.scratch/ask-the-city/issues/08-write-the-eval-set.md)):
+`in_force` date. **It supersedes only once in force:**
 
 - **In force on the snapshot date** (1511-2025, 2026-06-01): the stale consolidated PDF is
   dropped and the replacement's §§ take `tmc:` ids.
@@ -131,4 +128,4 @@ CONTACT, SIGNATURE and the ATTACHMENTS list are dropped. Tables as in the Code.
 | `item_id`, `committee`, `meeting`, `stage`, `status`, `decision_date`, `bylaws[]` | — | — | ✓ | ✓ |
 | `breadcrumb`, `text`, `tokens` | ✓ | ✓ | ✓ | ✓ |
 
-How these land in Postgres, and how a citation is shaped from them, is ⑤'s call.
+How these land in Postgres, and how a citation is shaped from them, is in [`CONTRACT.md`](CONTRACT.md).

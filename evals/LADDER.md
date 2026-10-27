@@ -1,7 +1,6 @@
 # Experiment ladder (pre-registered)
 
-The rungs the committed eval table walks through, fixed **before the first run**. Decided in
-[⑩ The experiment ladder](../.scratch/ask-the-city/issues/10-experiment-ladder.md). Columns,
+The rungs the committed eval table walks through, fixed **before the first run**. Columns,
 noise rule and `run.json` are in [`EVALS.md`](../EVALS.md); the `rung` request field is in
 [`CONTRACT.md`](../CONTRACT.md#rungs-eval-header-only).
 
@@ -27,7 +26,7 @@ Ends exactly at the shipped stack. Anything not listed is as `shipped`.
   only. `rerank` uses the shipped reranker, so it shares the shipped threshold.
 - **No fixed-size chunking rung.** A second chunker means a second ingestion and second
   chunk ids, which breaks gold. Chunking was decided by prototype
-  ([④](../.scratch/ask-the-city/issues/04-extraction-and-chunking-prototype.md)), not measured.
+  ([`CHUNKING.md`](../CHUNKING.md)), not measured.
 
 ## Side table: alternatives to the shipped stack
 
@@ -39,7 +38,7 @@ against each other.
 | `side-sonnet` | Generator Sonnet 5, same prompt | Is the bigger model worth ~3–5× the generation cost? |
 | `side-quoted` | Prompt and output also ask for the supporting sentence per citation | Does quoting raise cite precision? |
 
-- `side-quoted`'s sentences go to `debug` only, never the public contract (⑤ ruled spans
+- `side-quoted`'s sentences go to `debug` only, never the public contract (the contract rules spans
   out). Adopting it would be a contract change, not a ladder edit.
 - No embedder side rung: swapping it costs a second embedding column and ingestion pass.
 

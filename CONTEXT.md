@@ -1,6 +1,6 @@
 # Ask the City — domain language
 
-Terms settled while planning (see `.scratch/ask-the-city/map.md`). Use these words in code,
+Terms settled while planning. Use these words in code,
 docs and UI copy.
 
 - **Snapshot** — the frozen, dated set of source documents the assistant knows. Taken by

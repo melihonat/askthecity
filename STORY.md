@@ -1,9 +1,7 @@
 # README and eval-page copy
 
 The words a 3-minute reader sees: the README's order and first screen, and the copy on the
-`/evals` page. Decided in
-[⑭ The README and the 3-minute story](.scratch/ask-the-city/issues/14-readme-and-story.md).
-Layout of `/evals` is in [`UI.md`](UI.md#evals); columns and noise rules in
+`/evals` page. Layout of `/evals` is in [`UI.md`](UI.md#evals); columns and noise rules in
 [`EVALS.md`](EVALS.md); rungs in [`evals/LADDER.md`](evals/LADDER.md).
 
 Numbers are never hand-typed. Every number below comes from the same run data as
@@ -57,13 +55,13 @@ Try: "How late can my neighbour run a leaf blower?" · "What does § 591-2.1 say
                                                       → Haiku 5.5 → validate [n] citations
    eval harness ──── HTTP ────► the same /api/ask    → answer | refusal | limit
    ```
-3. **What it knows.** The scope sentence from ③ verbatim, then: "Parking schedules and
+3. **What it knows.** The scope sentence from [`CORPUS.md`](CORPUS.md#scope-sentence)
+   verbatim, then: "Parking schedules and
    zoning are left out on purpose; they're the obvious trick questions."
-4. **Why Postgres and not Pinecone.** Its own short section, ⑥'s Neuraflow paragraph
-   verbatim (in
-   [⑥'s resolution](.scratch/ask-the-city/issues/06-retrieval-stack.md)).
-5. **Decisions.** One line each linking `CHUNKING.md`, `CONTRACT.md`, `EVALS.md`,
-   `evals/LADDER.md`, `UI.md`.
+4. **Why Postgres and not Pinecone.** Its own short section, the Neuraflow paragraph
+   from [`STACK.md`](STACK.md#store-supabase-postgres-alone) verbatim.
+5. **Decisions.** One line each linking `CORPUS.md`, `CHUNKING.md`, `CONTRACT.md`,
+   `STACK.md`, `GUARDRAILS.md`, `EVALS.md`, `evals/LADDER.md`, `UI.md`, `INGESTION.md`.
 6. **Cost.** ≈ $0.0011 per answer, $5 prepaid hard cap, daily limits, and what the demo
    does when it's out of money (examples and evals still work).
 7. **Operations.** The keep-alive crons, and: "GitHub disables scheduled workflows after 60

@@ -1,8 +1,7 @@
-# Ask the City — eval set. Shape and scoring in EVALS.md; chosen in
-# .scratch/ask-the-city/issues/08-write-the-eval-set.md.
+# Ask the City — eval set. Shape and scoring in EVALS.md.
 #
-# 24 reported questions (split: test). The refusal threshold is never tuned on them: ⑨
-# adds ~10 `split: dev` questions (5 answer, 5 refuse) that never appear in the table.
+# 24 reported questions (split: test). The refusal threshold is never tuned on them: the
+# refusal rule adds ~10 `split: dev` questions (5 answer, 5 refuse) that never appear in the table.
 #
 # Snapshot facts checked 2026-10-26 against the cached Code, the 120 candidate amending
 # by-laws and the live item pages. Patterns marked `pin` name a by-law clause whose exact
@@ -135,7 +134,7 @@
     - Vehicles may idle no more than one minute in any sixty-minute period.
   split: test
 
-# ── section_lookup: ⑥'s exact-match path ─────────────────────────────────────────────
+# ── section_lookup: the section-number exact-match path ─────────────────────────────
 
 - id: lookup-591-2-1
   question: What does 591-2.1 say?
@@ -295,7 +294,7 @@
   split: test
   notes: Set by a yearly by-law outside the Code. Trap - Ch 767.
 
-# ── dev: threshold and decline-prompt tuning only, never in the table (⑨) ─────────────
+# ── dev: threshold and decline-prompt tuning only, never in the table ─────────────────
 # Answers are worded to score low on the gate: the lowest un-pinned one sets the
 # threshold (EVALS.md, "Refusal threshold"). Two off-corpus refusals exercise the gate;
 # the near-misses exercise the model's decline. No § here is test gold.

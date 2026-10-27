@@ -1,9 +1,8 @@
 # Answer and citation contract
 
 What `/api/ask` returns, how a citation is produced and checked, and the Postgres schema the
-Python ingester writes and the TypeScript app reads. Decided in
-[⑤ Domain model and the citation contract](.scratch/ask-the-city/issues/05-domain-model-and-citation-contract.md).
-Chunking is in [`CHUNKING.md`](CHUNKING.md); terms are defined in [`CONTEXT.md`](CONTEXT.md).
+Python ingester writes and the TypeScript app reads. The models behind it are in
+[`STACK.md`](STACK.md). Chunking is in [`CHUNKING.md`](CHUNKING.md); terms are defined in [`CONTEXT.md`](CONTEXT.md).
 
 ## Citation
 
@@ -49,7 +48,6 @@ sentence; how often that holds is measured by the eval as citation coverage.
 
 ## Refusal rule
 
-Decided in [⑨ How the system decides "the documents don't cover this"](.scratch/ask-the-city/issues/09-refusal-rule.md).
 The gate filters, the model judges, validation catches the rest.
 
 1. **Gate (`below_threshold`)**, after reranking, before generation: the top rerank score
@@ -74,7 +72,7 @@ is all there is to say — only trap-passage trivia beside it — the model decl
 
 **Wording is fixed per reason and rendered by the client.** No model-written text appears in
 a refusal; on a decline, the model's `text` goes only to the `debug` event. Meaning fixed
-here, visual treatment owned by [⑫](.scratch/ask-the-city/issues/12-answer-ui-prototype.md):
+here, visual treatment in [`UI.md`](UI.md#refusal):
 
 | Reason | Line under the headline **"The documents don't cover this."** | Nearest-passages heading |
 | --- | --- | --- |
@@ -119,7 +117,7 @@ this same object.
 
 ### The `debug` event (eval header only)
 
-A request carrying the eval header (⑪) gets a third event, `debug`, before the final
+A request carrying the eval header ([`GUARDRAILS.md`](GUARDRAILS.md#the-eval-header)) gets a third event, `debug`, before the final
 `AskResponse`. Same code path; it only exposes what the path already computed. Never sent to
 the public. Scoring that uses it is in [`EVALS.md`](EVALS.md).
 
@@ -137,8 +135,7 @@ type DebugEvent = {
 
 ### Rungs (eval header only)
 
-Decided in [⑩ The experiment ladder](.scratch/ask-the-city/issues/10-experiment-ladder.md);
-the rungs themselves are in [`evals/LADDER.md`](evals/LADDER.md).
+The rungs themselves are in [`evals/LADDER.md`](evals/LADDER.md).
 
 A request carrying the eval header may name a `rung`. Without the header the field is
 ignored and every request is `shipped`.
@@ -214,7 +211,7 @@ amendments -- the join behind companion passages
 ```
 
 - No `sections` table: a § is a column on its chunks; §-level matching uses the id prefix.
-- `usage_daily` and `answer_cache` (from ⑪) live alongside and are never touched by
+- `usage_daily` and `answer_cache` ([`GUARDRAILS.md`](GUARDRAILS.md)) live alongside and are never touched by
   ingestion.
 
 ## Re-ingestion
@@ -226,5 +223,4 @@ one, never a mix. The answer cache invalidates itself because its key includes
 
 The rows come from a `staging` schema with the same tables and RPC, filled by `load` and
 checked by `smoke` before the swap copies it into live. Run mechanics are in
-[`INGESTION.md`](INGESTION.md) (decided in
-[⑮](.scratch/ask-the-city/issues/15-ingestion-run-mechanics.md)).
+[`INGESTION.md`](INGESTION.md).

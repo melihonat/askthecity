@@ -1,10 +1,7 @@
 # Answer UI
 
-How an answer, its citations, a refusal, a limit and the eval table look. Decided in
-[⑫ Answer and cited-passages UI](.scratch/ask-the-city/issues/12-answer-ui-prototype.md)
-from three throwaway variants; the winner is variant A of the
-[prototype](.scratch/ask-the-city/prototypes/12-answer-ui/index.html) (`?variant=A`). The
-response shape is in [`CONTRACT.md`](CONTRACT.md); terms are defined in
+How an answer, its citations, a refusal, a limit and the eval table look. Chosen from three
+throwaway prototype variants. The response shape is in [`CONTRACT.md`](CONTRACT.md); terms are defined in
 [`CONTEXT.md`](CONTEXT.md).
 
 ## Shape
@@ -73,6 +70,4 @@ works in every limit state. Full width, no sources panel. One-line intro (24 que
 written before the build, 7 meant to be refused), the main ladder table with `shipped`
 highlighted, one muted "why" line under each rung name, `n` under each column heading,
 then the judge/human agreement line and the spread rule, then the side-rung table. The
-words are owned by
-[⑭ The README and the 3-minute story](.scratch/ask-the-city/issues/14-readme-and-story.md)
-and written in [`STORY.md`](STORY.md).
+words are in [`STORY.md`](STORY.md).

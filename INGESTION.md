@@ -1,8 +1,7 @@
 # Ingestion
 
-How the one-off snapshot is built, and rebuilt by hand later. Decided in
-[⑮ Ingestion run mechanics](.scratch/ask-the-city/issues/15-ingestion-run-mechanics.md).
-What enters the corpus is [③](.scratch/ask-the-city/issues/03-corpus-boundary.md); how it
+How the one-off snapshot is built, and rebuilt by hand later. What enters
+the corpus is in [`CORPUS.md`](CORPUS.md); how it
 is chunked is [`CHUNKING.md`](CHUNKING.md); the tables it fills are in
 [`CONTRACT.md`](CONTRACT.md). Terms are defined in [`CONTEXT.md`](CONTEXT.md).
 
@@ -40,7 +39,7 @@ the chunk stage.
 | `encoding` | `windows-1252` for item pages; empty for PDFs |
 
 Saved item pages keep the HTML only, never the browser's `_files/` folder.
-`snapshot/SNAPSHOT.md` records the snapshot date (the day `fetch-rules` runs, ③), row
+`snapshot/SNAPSHOT.md` records the snapshot date (the day `fetch-rules` runs), row
 counts per kind, and the restore command.
 
 ## Stages
@@ -66,16 +65,16 @@ any stage re-runs alone.
   replaces stages 1–4 on a new machine; nothing is re-fetched from the City.
 - **`all`** runs stages 3–8 in order and stops at the first failure.
 - **`swap` is never automatic.** The run is `all` → `smoke` → `swap`, by hand.
-- Item pages are saved **within 7 days** of `fetch-rules` (③); `check-saves` reads
+- Item pages are saved **within 7 days** of `fetch-rules`; `check-saves` reads
   `obtained_at` to enforce it.
 
 ## Saving TMMIS item pages
 
-Scripts get Akamai 403 (⑬); the agent-driven preview browser loads the pages (④, ⑧). So
+Scripts get an Akamai 403; the agent-driven preview browser loads the pages. So
 stage 2 is a runbook an agent session follows, `ingest/SAVE_TMMIS.md`, not pipeline code.
 
 1. Open the 8 IE24–IE31 meeting pages and write the 115 item ids to
-   `snapshot/tmmis_items.txt`. Counts per meeting must match ⑬ (15, 14, 19, 17, 14, 10, 14,
+   `snapshot/tmmis_items.txt`. Counts per meeting must match (15, 14, 19, 17, 14, 10, 14,
    12) or stop.
 2. For each id, open the item page and run `fetch(location.href)` **inside the page** to get
    the exact bytes as served (the DOM would be already decoded, so its hash would mean
@@ -111,12 +110,12 @@ re-run.**
   Voyage's 200M free tokens.
 - Paid by a **separate Voyage key used only by ingestion**, calling Voyage directly (not
   AI Gateway), so it draws on the free tokens for certain and never touches the demo's $5
-  prepaid credit (⑪). Account spend limit ~$2.
+  prepaid credit ([`GUARDRAILS.md`](GUARDRAILS.md#spend)). Account spend limit ~$2.
 - `embed` prints the token count and cost estimate and asks before spending.
 - Cached by `(model, sha256 of chunk text)`: a re-run pays only for changed chunks. It
   throttles itself and resumes from the cache, so it works with or without a card on the
   Voyage account (a card only makes it faster).
-- Query-time embeddings stay on Gateway under the $5 credit (⑥, ⑪).
+- Query-time embeddings stay on Gateway under the $5 credit ([`STACK.md`](STACK.md#embeddings)).
 
 ## Smoke check before `swap`
 
@@ -127,9 +126,9 @@ re-run.**
    `windows-1252` decode went wrong).
 2. **Pins:** five fixed section lookups (e.g. `§ 681-4`, `§ 591-2`, a Ch 497 § from the
    replacement) return the expected chunk ids.
-3. **Dev split:** ⑨'s 10-question dev split through `/api/ask` on a local `next dev` with
+3. **Dev split:** the 10-question dev split ([`EVALS.md`](EVALS.md#refusal-threshold)) through `/api/ask` on a local `next dev` with
    `DB_SCHEMA=staging` and the eval header. It must score at least what the previous
-   snapshot scored, or meet ⑨'s calibration bar on the first run.
+   snapshot scored, or meet the refusal-threshold calibration bar on the first run.
 
 The full eval set and the experiment ladder ([`evals/LADDER.md`](evals/LADDER.md)) run
 **after** `swap`, as evidence, not as a gate.
