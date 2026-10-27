@@ -109,13 +109,13 @@ re-run.**
 - `voyage-4-large`, ~2–3M tokens, ≈ $0.25–0.40 at list price; in practice $0 inside
   Voyage's 200M free tokens.
 - Paid by a **separate Voyage key used only by ingestion**, calling Voyage directly (not
-  AI Gateway), so it draws on the free tokens for certain and never touches the demo's $5
+  AI Gateway), so it draws on the free tokens for certain and never touches the demo's $10
   prepaid credit ([`GUARDRAILS.md`](GUARDRAILS.md#spend)). Account spend limit ~$2.
 - `embed` prints the token count and cost estimate and asks before spending.
 - Cached by `(model, sha256 of chunk text)`: a re-run pays only for changed chunks. It
   throttles itself and resumes from the cache, so it works with or without a card on the
   Voyage account (a card only makes it faster).
-- Query-time embeddings stay on Gateway under the $5 credit ([`STACK.md`](STACK.md#embeddings)).
+- Query-time embeddings stay on Gateway under the $10 credit ([`STACK.md`](STACK.md#embeddings)).
 
 ## Smoke check before `swap`
 

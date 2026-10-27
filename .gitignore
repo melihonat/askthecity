@@ -11,3 +11,6 @@ __pycache__/
 
 # Planning notes stay local
 .scratch/
+
+.vercel
+.env*
