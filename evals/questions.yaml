@@ -1,0 +1,394 @@
+# Ask the City — eval set. Shape and scoring in EVALS.md; chosen in
+# .scratch/ask-the-city/issues/08-write-the-eval-set.md.
+#
+# 24 reported questions (split: test). The refusal threshold is never tuned on them: ⑨
+# adds ~10 `split: dev` questions (5 answer, 5 refuse) that never appear in the table.
+#
+# Snapshot facts checked 2026-10-26 against the cached Code, the 120 candidate amending
+# by-laws and the live item pages. Patterns marked `pin` name a by-law clause whose exact
+# chunk id depends on how the chunker splits it; pin them against the first ingestion
+# (a pattern matching nothing is stale gold, never a miss).
+#
+# A § amended since its chapter's consolidation makes the amending clause a required
+# group: an answer from the stale consolidation alone is incomplete even when its facts
+# happen to match.
+
+# ── resident_rules: everyday words, not by-law vocabulary ─────────────────────────────
+
+- id: rules-drone-park
+  question: Can I fly my drone in High Park?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:608-19:*" ]
+    - [ "bl:1482-2025:cl1*" ]          # pin: the item replacing § 608-19 (in force 2026-03-02)
+  acceptable: [ "tmc:608-1:*" ]
+  key_facts:
+    - Operating a drone in a City park is not allowed without a permit.
+  split: test
+  notes: >
+    The consolidated § 608-19 says "powered models of aircraft"; 1482-2025 rewrote it to
+    name drones. Lexical search now finds the companion, semantic search the old text.
+
+- id: rules-saturday-drilling
+  question: My contractor wants to start drilling at 7:30 on a Saturday. Is that allowed?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:591-2.3:*" ]
+  acceptable: [ "tmc:591-1.1:*" ]
+  key_facts:
+    - No — audible construction noise is prohibited before 9 a.m. on Saturdays.
+  split: test
+
+- id: rules-apartment-heat
+  question: My apartment is freezing. How warm does my landlord have to keep it?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:497-2.1:*" ]              # new Ch 497 (By-law 1511-2025, in force 2026-06-01)
+  acceptable: [ "tmc:497-1.1:*" ]
+  key_facts:
+    - The landlord must keep at least 21 °C.
+    - The requirement runs from October 1 to May 15.
+    - It applies only where heat is normally included at the landlord's expense.
+  split: test
+  notes: >
+    The 2025 consolidation of Ch 497 is stale (whole chapter replaced). Same numbers, new
+    § 497-2.1, now measured 1.5 m above the floor.
+
+- id: rules-sidewalk-snow
+  question: How long do I have to shovel the sidewalk after it snows?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:719-2:*" ]
+  key_facts:
+    - Within 12 hours after the snowfall has stopped.
+    - It does not apply where the City has taken on clearing that sidewalk.
+  split: test
+
+- id: rules-car-idling
+  question: How long can I leave my car running while I wait for someone?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:517-2:*" ]
+  key_facts:
+    - No more than one minute in any sixty-minute period.
+  split: test
+
+- id: rules-dogs-limit
+  question: How many dogs am I allowed to have?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:349-5:*" ]
+  key_facts:
+    - Three dogs per dwelling unit.
+    - Service animals are not counted.
+  split: test
+  notes: Deliberately lexical-easy; a baseline the BM25-only rung should already win.
+
+- id: rules-yard-sales
+  question: How many yard sales can I hold a year?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:480-2:*" ]
+  acceptable: [ "tmc:480-1:*" ]
+  key_facts:
+    - Two garage sales per year from a residential premises.
+    - The limit applies to the premises, however many people hold the sales.
+  split: test
+
+# ── multi_section: needs two §§ ───────────────────────────────────────────────────────
+
+- id: multi-dead-tree
+  question: The big tree in my backyard is dead. Can I just cut it down?
+  category: multi_section
+  expect: answer
+  required:
+    - [ "tmc:813-12:*" ]
+    - [ "tmc:813-13:*" ]
+    - [ "bl:402-2026:cl1*" ]           # pin: the item replacing § 813-12 (in force 2026-09-01)
+  acceptable: [ "tmc:813-11:*", "ie:2026.IE27.8:*" ]
+  key_facts:
+    - A permit is needed to remove a tree with a stem of 30 cm or more at 1.4 m above ground.
+    - A dead tree is exempt only once the City certifies it as dead.
+  split: test
+  notes: >
+    The naive answer ("dead trees are exempt") misses the certification condition.
+    402-2026 also protects trees planted as a condition of an approval at any size and
+    moves certification from the General Manager to the Executive Director.
+
+- id: multi-reno-hours-idling
+  question: We're renovating. What hours can the crew work, and can they leave their trucks idling?
+  category: multi_section
+  expect: answer
+  required:
+    - [ "tmc:591-2.3:*" ]
+    - [ "tmc:517-2:*" ]
+  key_facts:
+    - Audible construction noise is not allowed from 7 p.m. to 7 a.m. (to 9 a.m. on Saturdays).
+    - Audible construction noise is not allowed at all on Sundays and statutory holidays.
+    - Vehicles may idle no more than one minute in any sixty-minute period.
+  split: test
+
+# ── section_lookup: ⑥'s exact-match path ─────────────────────────────────────────────
+
+- id: lookup-591-2-1
+  question: What does 591-2.1 say?
+  category: section_lookup
+  expect: answer
+  required:
+    - [ "tmc:591-2.1:*" ]
+  key_facts:
+    - It limits amplified or instrument sound measured at a point of reception.
+    - The limit is 50 dB(A) / 65 dB(C) from 11 p.m. to 7 a.m. and 55 dB(A) / 70 dB(C) from 7 a.m. to 11 p.m.
+  split: test
+
+- id: lookup-709-3
+  question: Summarize Toronto Municipal Code s. 709-3.
+  category: section_lookup
+  expect: answer
+  required:
+    - [ "tmc:709-3:*" ]
+  key_facts:
+    - No smoking within nine metres of any entrance or exit of a public building.
+    - The ban does not apply to the part of that radius on the public highway.
+  split: test
+  notes: Different notation from lookup-591-2-1 on purpose ("s. 709-3").
+
+# ── amended_since: the right answer needs a companion passage ─────────────────────────
+
+- id: amended-manganese-limit
+  question: How much manganese can a business discharge into the storm sewers?
+  category: amended_since
+  expect: answer
+  required:
+    - [ "tmc:681-4:*" ]
+    - [ "bl:470-2026:cl1" ]
+  acceptable: [ "ie:2026.IE29.6:*", "sr:286369:*" ]
+  key_facts:
+    - The storm sewer limit for total manganese is 2.0 mg/L.
+    - By-law 470-2026 raised it from 0.05 mg/L, in force May 21, 2026.
+  split: test
+  notes: Stating 0.05 mg/L as the current limit contradicts the first fact.
+
+- id: amended-summer-cooling
+  question: My building has air conditioning. Does my landlord have to actually run it in summer?
+  category: amended_since
+  expect: answer
+  required:
+    - [ "tmc:497-2.2:*" ]
+  acceptable: [ "tmc:497-2.3:*", "bl:67-2026:cl1" ]
+  key_facts:
+    - An installed cooling system must keep the indoor temperature at or below 26 °C.
+    - The requirement runs from June 1 to September 30.
+    - The rule is in Chapter 497 (Indoor Temperature Standards) since June 1, 2026, not Chapter 629.
+  split: test
+  notes: >
+    The consolidated Ch 629 still carries § 629-38F with the same numbers, but 67-2026
+    deleted it. Citing it as the current source contradicts the third fact.
+
+# ── decisions: the committee's items, status stamps ───────────────────────────────────
+
+- id: decisions-electricity-referred
+  question: What did the City decide about electricity and its climate commitments in December 2025?
+  category: decisions
+  expect: answer
+  required:
+    - [ "ie:2025.IE26.14:*" ]
+  acceptable: [ "ie:2025.IE26.3:*" ]
+  key_facts:
+    - The committee referred the item to the Executive Director without making a decision.
+  split: test
+  notes: Considered together with IE26.3. Saying it was adopted contradicts the fact.
+
+- id: decisions-tree-size
+  question: Is Toronto lowering the size of tree that needs a permit to cut down?
+  category: decisions
+  expect: answer
+  required:
+    - [ "ie:2026.IE27.8:*" ]
+  acceptable: [ "tmc:813-12:*", "bl:402-2026:*" ]
+  key_facts:
+    - Council endorsed in principle reducing the protected size from 30 cm to 20 cm in 2027.
+    - Staff report back to the committee's first meeting of 2027.
+    - The 30 cm threshold still applies today.
+  split: test
+  notes: Joins Rules and Decisions. Stating 20 cm as the current law contradicts the third fact.
+
+- id: decisions-ebikes
+  question: What's the City's position on the new e-bike rules?
+  category: decisions
+  expect: answer
+  required:
+    - [ "ie:2026.IE29.10:*" ]
+  key_facts:
+    - Council supported Ontario's proposed two-class e-bike definition (32 km/h, 500 W, working pedals, minimum age 16, helmets).
+    - Council asked the Province for a 55 kg weight limit on Class 2 e-bikes.
+  split: test
+  notes: Ch 886's "power-assisted bicycle" §§ are the Rules-side trap.
+
+- id: decisions-laneway-snow
+  question: Will the City start clearing snow in laneways where people live in laneway houses?
+  category: decisions
+  expect: answer
+  required:
+    - [ "ie:2026.IE31.8:*" ]
+  key_facts:
+    - The committee referred it to the Deputy City Manager, Infrastructure Services, for a broader review of laneway snow-clearing options.
+    - No decision was made.
+  split: test
+  notes: Phrased yes/no to tempt a "yes". Neighbours rules-sidewalk-snow and refuse-laneway-setback.
+
+# ── refuse: near misses, each with a trap passage ────────────────────────────────────
+
+- id: refuse-rent-increase
+  question: Can my landlord raise my rent 5% next year?
+  category: refuse
+  expect: refuse
+  split: test
+  notes: Provincial (Residential Tenancies Act). Trap - Ch 513 defines the Rent Increase Guideline; Ch 662 cites the Act.
+
+- id: refuse-laneway-setback
+  question: How close to the back lot line can I build a laneway suite?
+  category: refuse
+  expect: refuse
+  split: test
+  notes: Zoning, a named gap. Trap - Ch 415, 519, 547 define or mention laneway suites.
+
+- id: refuse-parking-side
+  question: Which side of Vanhill Avenue is no parking?
+  category: refuse
+  expect: refuse
+  split: test
+  notes: Ch 950 schedules, a named gap. Trap - Ch 950's main-text parking rules.
+
+- id: refuse-ttc-fares
+  question: Did the TTC board approve a fare increase for 2026?
+  category: refuse
+  expect: refuse
+  split: test
+  notes: Another body. Trap - Ch 279 governs the TTC.
+
+- id: refuse-after-snapshot
+  question: What did the Infrastructure and Environment Committee decide at its October 2026 meeting?
+  category: refuse
+  expect: refuse
+  split: test
+  notes: After the snapshot (IE24–IE31 ends July 2026). Trap - the same committee's real items.
+
+- id: refuse-demerit-points
+  question: How many demerit points do I get for speeding in a school zone?
+  category: refuse
+  expect: refuse
+  split: test
+  notes: Provincial (Highway Traffic Act). Trap - IE30.2 school zones, IE25.8 speed cameras.
+
+- id: refuse-tax-rate
+  question: What's the 2026 residential property tax rate?
+  category: refuse
+  expect: refuse
+  split: test
+  notes: Set by a yearly by-law outside the Code. Trap - Ch 767.
+
+# ── dev: threshold and decline-prompt tuning only, never in the table (⑨) ─────────────
+# Answers are worded to score low on the gate: the lowest un-pinned one sets the
+# threshold (EVALS.md, "Refusal threshold"). Two off-corpus refusals exercise the gate;
+# the near-misses exercise the model's decline. No § here is test gold.
+
+- id: dev-refuse-garbage-day
+  question: When is garbage day on my street?
+  category: refuse
+  expect: refuse
+  split: dev
+  notes: Operational fact, not in the Code. Trap - Ch 844 collection rules and times.
+
+- id: dev-refuse-landlord-entry
+  question: Can my landlord come into my apartment without notice?
+  category: refuse
+  expect: refuse
+  split: dev
+  notes: Provincial (Residential Tenancies Act). Trap - Ch 629 property standards, Ch 354 apartment buildings.
+
+- id: dev-refuse-401-speed
+  question: What's the speed limit on the 401?
+  category: refuse
+  expect: refuse
+  split: dev
+  notes: A provincial highway. Trap - Ch 950's speed-limit rules for City streets.
+
+- id: dev-refuse-patio
+  question: What's the best patio in the Annex?
+  category: refuse
+  expect: refuse
+  split: dev
+  notes: Off-corpus; should fall below the gate with no LLM call.
+
+- id: dev-refuse-leafs
+  question: Did the Leafs win last night?
+  category: refuse
+  expect: refuse
+  split: dev
+  notes: Off-corpus; should fall below the gate with no LLM call.
+
+- id: dev-fireworks-backyard
+  question: When am I allowed to set off fireworks in my backyard?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:466-5:*" ]
+  acceptable: [ "tmc:466-1:*", "tmc:466-6:*" ]
+  key_facts:
+    - Only on Victoria Day and Canada Day, and not after 11 p.m., unless a special occasions permit has been issued.
+  split: dev
+
+- id: dev-pool-permit
+  question: We're putting in a backyard pool. Do we need anything from the City first?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:447-1.3:*" ]
+  acceptable: [ "tmc:447-1.1:*" ]
+  key_facts:
+    - A swimming pool enclosure permit is needed before excavating for or building the pool.
+    - The enclosure must completely surround the pool, with no opening except a compliant gate.
+  split: dev
+
+- id: dev-lawn-height
+  question: How long can I let my lawn grow before I get in trouble?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:489-2:*" ]
+  acceptable: [ "tmc:489-1:*" ]
+  key_facts:
+    - Grass must be cut once it grows past 20 centimetres.
+  split: dev
+  notes: The Code says "turfgrass"; a vocabulary gap meant to score low on the gate.
+
+- id: dev-park-bonfire
+  question: Can we have a bonfire at the park for a birthday?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:608-10:*" ]
+  key_facts:
+    - An open fire or bonfire in a park needs a permit.
+  split: dev
+
+- id: dev-driverless-tickets
+  question: Can the City ticket a driverless car?
+  category: decisions
+  expect: answer
+  required:
+    - [ "sr:287415:*" ]                # staff report for the June 10, 2026 IE meeting
+  acceptable: [ "ie:*" ]               # pin: narrow to the item id once its page is saved
+  key_facts:
+    - The Province (Ministry of Transportation) licenses automated vehicle operations.
+    - Owner liability already covers parking, stopping and standing violations in the Code.
+    - Many moving violations assume a human driver, so they don't fit driverless vehicles.
+  split: dev

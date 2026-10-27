@@ -1,0 +1,13 @@
+# City of Toronto source documents: never committed (see ③ corpus boundary)
+corpus/
+build/
+.scratch/**/cache/
+.scratch/**/research/samples/
+
+.env
+.env.*
+__pycache__/
+*.pyc
+
+# Planning notes stay local
+.scratch/
