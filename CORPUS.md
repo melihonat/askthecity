@@ -56,7 +56,9 @@ pages are saved within 7 days of it, and the manifest records the real per-file 
 
 ## Copyright
 
-The source text is © City of Toronto.
+The source text is © City of Toronto. Asked by email, the City confirmed (2026-10-28) that
+short quoted passages from the Code and TMMIS records in this non-commercial demo, with
+attribution and links back to toronto.ca and without redistributing the documents, are fine.
 
 - **Committed (public):** code, the snapshot manifest, the eval set and result tables.
 - **Never committed:** raw PDFs, saved item pages, extracted text. They live in a gitignored
