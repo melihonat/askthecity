@@ -19,8 +19,10 @@ docs and UI copy.
   changes its main text. Ingested alongside the chapter so answers aren't stale.
 - **In force** — the date a by-law takes effect, when it differs from enactment (Ch 611:
   May 1, 2027).
-- **Schedule** — a table appended to a chapter (e.g. Ch 950's street-by-street parking
-  schedules). Not in the snapshot.
+- **Schedule** — a table or list appended to a chapter. Those printed inside the chapter PDF
+  after its last § (Ch 349's prohibited animals, Ch 610's penalty amounts) are in the
+  snapshot as their own chunks; separately published ones (Ch 950's street-by-street parking
+  schedules) are not.
 - **Decisions** — the Infrastructure and Environment Committee's (IE) items, IE24–IE31.
 - **Item** — one agenda item (e.g. 2026.IE29.6): its **item page** (decision text, status per
   stage, motions, votes) plus its **staff reports**. Attachments and communications are not

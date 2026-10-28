@@ -20,26 +20,43 @@ chapter, including the 21 without § bookmarks.
 
 ## Rules: Municipal Code chapters
 
-1. **Drop** the 8 "Reserved" stubs (one page, no sections), the running header (top 62 pt),
-   the footer (bottom 62 pt) after reading its date as `consolidated_as_of`, and the page-1
-   table of contents (bold § lines before the body starts).
+1. **Drop** the 9 "Reserved" stubs (one page, no sections), the running header (top 62 pt),
+   the footer after reading its date as `consolidated_as_of`, footnotes (under 11 pt), the
+   page-1 table of contents (bold § lines before the body starts) and each article's
+   `[Adopted …]` note. The footer is the page-number line (`681-12 May 21, 2026`) in the
+   bottom 75 pt; position alone can't tell it from body text, which reaches 71 pt from the
+   bottom. Five chapters (39, 95, 433, 789, 835) print no date: their chunks say
+   "consolidation date not printed". The chapter number comes from the manifest ref, the
+   title from the running header (`CHAPTER 591, NOISE`, `CHAPTER 142 LOCAL APPEAL BODY`, or
+   only `TAXATION, VACANT HOME TAX`).
 2. **Section boundary** = a bold line at the left margin matching
    `^§\s*(\d+[A-Z]?-\d+(?:\.\d+)*[A-Z]?)\.?\s+(.*)`. Inline references are regular weight
    and never split. Article headings are tracked for the breadcrumb.
-3. **Chunk unit = one §.** Empty sections (schedule stubs, repealed, reserved) are dropped.
+3. **Chunk unit = one §.** Empty sections (schedule stubs, repealed, reserved: nothing but
+   a bracketed note) are dropped. A note that starts on the heading line belongs to the body.
 4. **A § over the ceiling** splits at its top-level subsections (`A.`, `B.`, … at x≈72),
    packing consecutive subsections up to the ceiling. The chunk records the range
-   (`C–D`). A single subsection still over the ceiling splits at its `(1)` level the same
-   way. **Definitions** sections split into runs of whole defined terms.
+   (`C–D`). A single subsection still over the ceiling splits at its next level the same
+   way (`C(1)–C(3)`, then `C(3)(a)–C(3)(k)`). Levels are `A.`/`A.1.`, `1.`, `(1)`, `(a)`; a
+   label counts only if it continues its sequence, and the level whose sequence starts
+   first wins (a `1.` list can sit inside a `(8)`). **Definitions** sections split into
+   runs of whole defined terms (`TERM - …` paragraphs at a shared indent); the range names
+   the first and last term. With no structure left, whole paragraphs are packed (`C(3),
+   part 2`), and a single paragraph over the ceiling splits at sentences, then words.
 5. **A heading never separates from its body**; a subsection's lead-in line stays with its
-   first item.
+   first item, and a table's title or lead-in moves with the table.
 6. **Tables**: cells from pdfplumber, rendered as markdown inside the chunk of the
    subsection they belong to; their region is removed from the line text so they don't
    appear twice. Two-column-pair layouts (Ch 681 Table 2) unfold into one row per
-   parameter. A table split across chunks repeats its header row. Footnote markers
-   (`mg/L5`) are kept as-is.
+   parameter; empty rows are dropped. A table over the ceiling fills the current chunk row
+   by row and carries on in the next, repeating its header row; one that fits alone but not
+   beside the text before it starts the next chunk. Footnote markers (`mg/L5`) are kept
+   as-is.
 7. **Lists** stay with their parent clause. **`[Amended … by By-law …]`** notes stay in the
    text and are also parsed into `amended_by`.
+8. **Schedules and appendices** printed after the last § (`Schedule A …`, `Appendix A …`)
+   are their own units: id `tmc:349:schedule-a`, label `Ch 349 Schedule A`, no `section`
+   (so never pinned), split like a §.
 
 Breadcrumb:
 

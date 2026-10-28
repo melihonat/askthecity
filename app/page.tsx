@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { parseBody } from "@/lib/ask/body";
 import type { AskEvent, AskResponse, PassageView } from "@/lib/ask/types";
 
 const REFUSAL_LINE = {
@@ -128,7 +129,32 @@ function Card({ p, dim }: { p: PassageView; dim?: boolean }) {
           source ↗
         </a>
       </div>
-      <p className="body">{p.body}</p>
+      <div className="body">
+        {parseBody(p.body).map((b, i) =>
+          b.kind === "text" ? (
+            <p key={i}>{b.text}</p>
+          ) : (
+            <table key={i}>
+              <thead>
+                <tr>
+                  {b.header.map((h, j) => (
+                    <th key={j}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {b.rows.map((r, j) => (
+                  <tr key={j}>
+                    {r.map((c, k) => (
+                      <td key={k}>{c}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ),
+        )}
+      </div>
     </article>
   );
 }

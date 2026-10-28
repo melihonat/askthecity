@@ -17,8 +17,11 @@ def chapter_urls() -> dict[str, str]:
     return {ch: url.replace("http://", "https://", 1) for url, ch in links}
 
 
-def fetch_rules(chapters: list[str]) -> None:
+def fetch_rules(chapters: list[str] | None = None) -> None:
+    """Fetch the given chapters, or every chapter on the index (stubs included; `chunk` drops them)."""
     urls = chapter_urls()
+    chapters = chapters or sorted(urls, key=lambda c: (int(re.match(r"\d+", c)[0]), c))
+    print(f"{len(chapters)} chapters")
     for ch in chapters:
         url = urls.get(ch)
         if not url:

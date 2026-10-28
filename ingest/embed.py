@@ -2,7 +2,8 @@
 
 Cached by (model, sha256 of the embedded text): a re-run pays only for changed chunks. Prints
 the token count and cost estimate and asks before spending. Batches stay under the no-card
-free tier's 10K tokens/minute and wait out a 429, so an interrupted run resumes from the cache.
+free tier's 10K tokens/minute; a 429 is waited out, so the run goes as fast as the account's
+limits allow, and an interrupted run resumes from the cache.
 """
 from __future__ import annotations
 
@@ -86,8 +87,6 @@ def embed(yes: bool = False) -> None:
         spent = 0
         with config.EMBED_CACHE.open("a", encoding="utf-8", newline="\n") as f:
             for i, batch in enumerate(batches(list(todo.values()))):
-                if i:
-                    time.sleep(61)  # 10K TPM on the free tier without a card
                 vectors, used = call_voyage([text for _, text, _ in batch])
                 spent += used
                 for (h, _, _), v in zip(batch, vectors):
@@ -96,6 +95,7 @@ def embed(yes: bool = False) -> None:
                     cache[h] = v
                     f.write(json.dumps({"model": config.EMBED_MODEL, "dim": config.EMBED_DIM,
                                         "hash": h, "embedding": v}) + "\n")
+                f.flush()
                 print(f"  batch {i + 1}: {len(batch)} chunks, {used:,} tokens")
         print(f"embedded {len(todo)} chunks, {spent:,} Voyage tokens")
 

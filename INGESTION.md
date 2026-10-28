@@ -63,8 +63,13 @@ any stage re-runs alone.
 
 - **`restore`** pulls every manifest row from R2 into `corpus/`, verifying sha256. It
   replaces stages 1–4 on a new machine; nothing is re-fetched from the City.
-- **`all`** runs stages 3–8 in order and stops at the first failure.
-- **`swap` is never automatic.** The run is `all` → `smoke` → `swap`, by hand.
+- **`all`** runs stages 3–8 in order and stops at the first failure (today 5–8: the
+  Decisions stages don't exist yet).
+- **`swap` is never automatic.** The run is `all` → `smoke` → `swap`, by hand, and `swap`
+  re-runs the `smoke` database checks itself and refuses if any fails.
+- **`chunker_version`** (in `ingest/config.py`, stored on the `snapshot` row) is bumped
+  whenever `chunk` would produce different output from the same input; `smoke` checks the
+  loaded snapshot carries the current one.
 - Item pages are saved **within 7 days** of `fetch-rules`; `check-saves` reads
   `obtained_at` to enforce it.
 
@@ -121,12 +126,14 @@ re-run.**
 
 `smoke` runs against the `staging` schema and fails loudly on any of:
 
-1. **Counts:** chunk count within ±10% of `build/chunks.jsonl`; every manifest row
-   produced at least one chunk; no chunk without an embedding; no U+FFFD anywhere (a
-   `windows-1252` decode went wrong).
-2. **Pins:** five fixed section lookups (e.g. `§ 681-4`, `§ 591-2`, a Ch 497 § from the
-   replacement) return the expected chunk ids.
-3. **Dev split:** the 10-question dev split ([`EVALS.md`](EVALS.md#refusal-threshold)) through `/api/ask` on a local `next dev` with
+1. **Counts:** exactly one `snapshot` row with the current `chunker_version`; chunk count
+   within ±10% of `build/chunks.jsonl`; every manifest row produced at least one chunk
+   (except those `chunk` listed in `build/skipped.jsonl`, the Reserved stubs); no chunk
+   without an embedding; no U+FFFD anywhere (a `windows-1252` decode went wrong).
+2. **Pins:** five fixed §§ (`§ 591-2.6`, `§ 591-1.1`, `§ 681-4`, `§ 681-5`, `§ 349-1`; a
+   Ch 497 § joins with the replacement by-laws) hold exactly the expected chunk ids
+   (`PINS` in `ingest/db.py`).
+3. **Dev split** (not wired yet; it arrives with the refusal-threshold calibration): the 10-question dev split ([`EVALS.md`](EVALS.md#refusal-threshold)) through `/api/ask` on a local `next dev` with
    `DB_SCHEMA=staging` and the eval header. It must score at least what the previous
    snapshot scored, or meet the refusal-threshold calibration bar on the first run.
 

@@ -6,11 +6,15 @@ Terms are defined in [`CONTEXT.md`](CONTEXT.md).
 
 ## Rules: the Toronto Municipal Code
 
-- **All 127 main chapter PDFs** from `lawmcode.htm`, plus **Ch 611**, which exists only as
-  By-law 1513-2025. The whole Code rather than a curated set, so a refusal means "the Code
-  is silent", not "we left that chapter out".
-- **Out:** schedule and map appendices (Ch 950's 44 parking schedules included), the legacy
-  former-City (C285, C313) and Etobicoke codes, and the one-page "Reserved" stubs.
+- **Every chapter PDF** linked from `lawmcode.htm` (128 on 2026-10-28, 9 of them one-page
+  "Reserved" stubs that are fetched and recorded but yield no chunks), plus **Ch 611**, which
+  exists only as By-law 1513-2025. The whole Code rather than a curated set, so a refusal
+  means "the Code is silent", not "we left that chapter out".
+- **Schedules printed inside a chapter PDF** after its last § are in, as their own chunks
+  (36 chapters, ~78k tokens: Ch 349's prohibited animals, Ch 610's penalty amounts, Ch 415's
+  development-charge rates).
+- **Out:** separately published schedule and map appendices (Ch 950's 44 parking schedules
+  included) and the legacy former-City (C285, C313) and Etobicoke codes.
 - **Schedules have no structured lookup.** Ch 950's main text stays, so the general parking
   rule is answered and the street-specific one refused. A lookup over the Open Data
   schedules would be a second system (street matching, routing, its own evals) for one

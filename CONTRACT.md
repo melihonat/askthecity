@@ -166,7 +166,10 @@ id on every ingestion:
 
 | Chunk | Id |
 | --- | --- |
-| Code § (with subsection range) | `tmc:681-5:C-D` |
+| Code § (with subsection range) | `tmc:681-5:C-D`, `tmc:681-2:A(3)(a)-A(3)(k)` |
+| Code definitions run (first term) | `tmc:591-1.1:ambient-sound-level` |
+| Code §, part of a unit split by paragraph | `tmc:681-4:Jp2`, `tmc:213-2.4:p1` |
+| Code schedule printed in the chapter | `tmc:349:schedule-a` |
 | Amending by-law clause | `bl:470-2026:cl1` |
 | Replacement chapter §, in force | `tmc:497-2.1` (document `bl:1511-2025`) |
 | Replacement chapter §, not yet in force | `bl:1512-2025:629-4.25` (a companion of the old §) |
