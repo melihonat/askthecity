@@ -17,6 +17,7 @@ MANIFEST = SNAPSHOT / "manifest.csv"
 TEXT_DIR = BUILD / "text"
 DOCUMENTS = BUILD / "documents.jsonl"
 CHUNKS = BUILD / "chunks.jsonl"
+SKIPPED = BUILD / "skipped.jsonl"   # manifest files that rightly yield no chunk ("Reserved" stubs)
 EMBEDDINGS = BUILD / "embeddings.jsonl"
 EMBED_CACHE = BUILD / "embed_cache.jsonl"
 
@@ -27,7 +28,7 @@ EMBED_MODEL = "voyage-4-large"
 EMBED_DIM = 1024
 EMBED_PRICE_PER_MTOK = 0.12         # list price, USD; real spend is $0 inside Voyage's free tokens
 
-CHUNKER_VERSION = "code-basic-1"
+CHUNKER_VERSION = "code-2"    # bump whenever chunk output changes for the same input
 
 SCOPE_SENTENCE = (
     "Knows the Toronto Municipal Code, including by-laws that have amended it since, and the "

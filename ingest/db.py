@@ -1,4 +1,4 @@
-"""load: build/ → the staging schema. swap: staging → live, in one transaction."""
+"""load: build/ → the staging schema. smoke: check staging. swap: staging → live, in one transaction."""
 from __future__ import annotations
 
 import hashlib
@@ -77,14 +77,83 @@ def load() -> None:
     print(f"staging: snapshot {snapshot['id']}, {len(documents)} documents, {len(chunks)} chunks")
 
 
+REPLACEMENT_CHAR = chr(0xFFFD)   # a windows-1252 decode gone wrong
+
+# Fixed § lookups: every chunk id of the § must be in staging, and no others.
+PINS = {
+    "591-2.6": ["tmc:591-2.6"],
+    "591-1.1": ["tmc:591-1.1:ambient-sound-level", "tmc:591-1.1:living-area", "tmc:591-1.1:unreasonable-noise"],
+    "681-4": ["tmc:681-4:A-I", "tmc:681-4:J", "tmc:681-4:Jp2", "tmc:681-4:K"],
+    "681-5": ["tmc:681-5:A-G", "tmc:681-5:H-L"],
+    "349-1": ["tmc:349-1:animal", "tmc:349-1:guard-dog"],
+}
+
+
+def smoke_failures(stats: dict, chunks: list[dict], manifest: list[store.ManifestRow],
+                   skipped: list[str]) -> list[str]:
+    """Pure: what staging (`stats`) gets wrong against the build files. Empty means pass."""
+    fail = []
+    if stats["snapshots"] != 1:
+        fail.append(f"{stats['snapshots']} snapshot rows, expected 1")
+    elif stats["chunker_version"] != config.CHUNKER_VERSION:
+        fail.append(f"chunker_version {stats['chunker_version']!r}, expected {config.CHUNKER_VERSION!r}")
+    if abs(stats["chunks"] - len(chunks)) > 0.1 * len(chunks):
+        fail.append(f"{stats['chunks']} chunks in staging, build/chunks.jsonl has {len(chunks)} (±10%)")
+    if stats["without_embedding"]:
+        fail.append(f"{stats['without_embedding']} chunks without an embedding")
+    if stats["replacement_char"]:
+        fail.append(f"U+FFFD in {stats['replacement_char']} chunks or documents: {stats['replacement_ids'][:5]}")
+    if bare := [r.ref for r in manifest if r.ref not in skipped and r.sha256 not in stats["shas_with_chunks"]]:
+        fail.append(f"{len(bare)} manifest files produced no chunk: {bare[:10]}")
+    for section, ids in PINS.items():
+        if (got := stats["pins"].get(section, [])) != sorted(ids):
+            fail.append(f"pin § {section}: {got}, expected {ids}")
+    return fail
+
+
+def staging_stats(conn: psycopg.Connection) -> dict:
+    one = lambda sql, *a: conn.execute(sql, a).fetchone()[0]
+    fffd = conn.execute(
+        "select id from staging.chunks where strpos(breadcrumb || body || label || sublabel || "
+        "coalesce(heading, ''), %(c)s) > 0 union all select id from staging.documents "
+        "where strpos(title, %(c)s) > 0 order by 1", {"c": REPLACEMENT_CHAR}).fetchall()
+    pins: dict[str, list[str]] = {}
+    for section, cid in conn.execute("select section, id from staging.chunks where section = any(%s)",
+                                     (list(PINS),)):
+        pins.setdefault(section, []).append(cid)
+    pins = {s: sorted(ids) for s, ids in pins.items()}    # Python order, not the DB collation's
+    return {
+        "snapshots": one("select count(*) from staging.snapshot"),
+        "chunker_version": one("select min(chunker_version) from staging.snapshot"),
+        "chunks": one("select count(*) from staging.chunks"),
+        "without_embedding": one("select count(*) from staging.chunks where embedding is null"),
+        "replacement_char": len(fffd), "replacement_ids": [r[0] for r in fffd],
+        "shas_with_chunks": {r[0] for r in conn.execute(
+            "select distinct d.sha256 from staging.documents d join staging.chunks c on c.document_id = d.id")},
+        "pins": pins,
+    }
+
+
+def check_staging(conn: psycopg.Connection) -> list[str]:
+    skipped = [json.loads(line)["ref"] for line in config.SKIPPED.read_text(encoding="utf-8").splitlines()]
+    return smoke_failures(staging_stats(conn), _jsonl(config.CHUNKS), store.read_manifest(), skipped)
+
+
+def smoke() -> None:
+    with connect() as conn:
+        apply_schema(conn)
+        fail = check_staging(conn)
+    if fail:
+        raise SystemExit("smoke FAILED:" + "".join(f"\n  {f}" for f in fail))
+    print("smoke passed")
+
+
 def swap() -> None:
     with connect() as conn:
         apply_schema(conn)
-        (snapshots,) = conn.execute("select count(*) from staging.snapshot").fetchone()
+        if fail := check_staging(conn):
+            raise SystemExit("refusing to swap; smoke fails on staging:" + "".join(f"\n  {f}" for f in fail))
         (n_chunks,) = conn.execute("select count(*) from staging.chunks").fetchone()
-        if snapshots != 1 or n_chunks == 0:
-            raise SystemExit(f"staging is not a complete snapshot ({snapshots} snapshot rows, "
-                             f"{n_chunks} chunks); run `load` first")
         with conn.transaction():
             for t in reversed(TABLES):
                 conn.execute(f"delete from public.{t}")

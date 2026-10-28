@@ -90,13 +90,18 @@ def put(data: bytes, row: ManifestRow) -> ManifestRow:
     return row
 
 
-def restore() -> None:
-    """Pull every manifest row from R2 into corpus/, verifying sha256."""
-    r2, bucket = _r2(), config.env("R2_BUCKET")
-    for row in read_manifest():
+def restore(r2=None, bucket: str | None = None) -> None:
+    """Pull every manifest row from R2 into corpus/, verifying sha256. Bad bytes are never written."""
+    r2, bucket = r2 or _r2(), bucket or config.env("R2_BUCKET")
+    rows, bad = read_manifest(), []
+    for row in rows:
         data = r2.get_object(Bucket=bucket, Key=row.key)["Body"].read()
         if hashlib.sha256(data).hexdigest() != row.sha256:
-            raise SystemExit(f"sha256 mismatch for {row.ref} ({row.key})")
+            bad.append(f"{row.ref} ({row.key})")
+            continue
         row.local_path.parent.mkdir(parents=True, exist_ok=True)
         row.local_path.write_bytes(data)
-        print(f"restored {row.local_path.relative_to(config.ROOT)}")
+    if bad:
+        raise SystemExit(f"sha256 mismatch for {len(bad)} of {len(rows)} files; corpus/ is incomplete:\n  "
+                         + "\n  ".join(bad))
+    print(f"restored {len(rows)} files into {config.CORPUS.relative_to(config.ROOT)}/, sha256 verified")
