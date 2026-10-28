@@ -1,0 +1,13 @@
+body { font: 16px/1.5 system-ui, sans-serif; margin: 0; color: #1a1a1a; }
+main { max-width: 760px; margin: 0 auto; padding: 2rem 1rem; }
+textarea { width: 100%; font: inherit; padding: .5rem; box-sizing: border-box; }
+button { margin-top: .5rem; font: inherit; padding: .4rem 1rem; }
+.answer { font-size: 1.15rem; }
+.muted { color: #666; font-size: .9rem; }
+.error { color: #b00020; }
+.notice { background: #eaf2fd; padding: .75rem; border-radius: 6px; }
+.card { border: 1px solid #ddd; border-radius: 6px; padding: .75rem; margin: .5rem 0; }
+.card.dim { opacity: .6; }
+.card .body { white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; margin: .5rem 0 0; }
+.tag { display: inline-block; min-width: 1.4em; text-align: center; background: #333; color: #fff; border-radius: 4px; font-size: .8rem; }
+footer { margin-top: 3rem; }
