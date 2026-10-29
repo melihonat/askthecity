@@ -1,10 +1,10 @@
 import "server-only";
 
 import { createClient } from "@supabase/supabase-js";
-import { embed, generateText, Output } from "ai";
+import { embed, generateText, Output, rerank as rerankDocuments } from "ai";
 import { z } from "zod";
 import type { AskDeps } from "./ask";
-import { CorpusMismatchError, EMBEDDING, MAX_OUTPUT_TOKENS, checkCorpus } from "./config";
+import { CANDIDATES, CorpusMismatchError, EMBEDDING, MAX_OUTPUT_TOKENS, RERANK_MODEL, checkCorpus } from "./config";
 import type { SearchRow, Snapshot } from "./types";
 
 const db = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
@@ -56,10 +56,17 @@ export const deps: AskDeps = {
       query_text: question,
       query_embedding: JSON.stringify(embedding),
       mode,
-      match_count: 20,
+      match_count: CANDIDATES,
     });
     if (error) throw new Error(`search_chunks: ${error.message}`);
     return data as SearchRow[];
+  },
+
+  async rerank(question, documents) {
+    const { ranking } = await rerankDocuments({ model: RERANK_MODEL, query: question, documents });
+    const scores = new Array<number>(documents.length).fill(0);
+    for (const r of ranking) scores[r.originalIndex] = r.score;
+    return scores;
   },
 
   async generate({ model, system, prompt }) {
