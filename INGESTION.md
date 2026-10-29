@@ -51,16 +51,21 @@ any stage re-runs alone.
 | # | Stage | Reads → writes | Stops when |
 | --- | --- | --- | --- |
 | 1 | `fetch-rules` | toronto.ca → `corpus/`, R2, manifest rows | a download fails |
+| 1b | `fetch-bylaws` | yearly by-law lists + `build/documents.jsonl` → `corpus/`, R2, manifest rows | a download fails |
 | 2 | *save TMMIS* | agent runbook → `corpus/item_page/` | — (see below) |
 | 3 | `check-saves` | `snapshot/tmmis_items.txt` vs saved files | any id lacks a passing file |
 | 4 | `fetch-reports` | `bgrd/` links on saved pages → `corpus/`, R2, manifest | an unreviewed label appears |
 | 5 | `extract` | `corpus/` → `build/text/` | — |
-| 6 | `chunk` | `build/text/` + `snapshot/review/` → `build/chunks.jsonl` | a § map is missing or incomplete |
+| 6 | `chunk` | `build/text/` + `snapshot/review/` → `build/chunks.jsonl`, `build/amendments.jsonl` | a § map is missing or incomplete |
 | 7 | `embed` | chunks → `build/embeddings` | spend estimate not confirmed |
 | 8 | `load` | → `staging` schema in Postgres | — |
 | 9 | `smoke` | `staging` | any check fails |
 | 10 | `swap` | `staging` → live, one transaction | — |
 
+- **`fetch-bylaws`** needs each chapter's consolidated-as-of date, so it runs after a first
+  `extract` + `chunk` of the chapters; then `extract` and `chunk` run again with the by-laws.
+  It skips by-laws already in `corpus/`. The `chunk` stage links them (which are already
+  folded in, which amend schedules only) and lists the dropped ones in `build/skipped.jsonl`.
 - **`restore`** pulls every manifest row from R2 into `corpus/`, verifying sha256. It
   replaces stages 1–4 on a new machine; nothing is re-fetched from the City.
 - **`all`** runs stages 3–8 in order and stops at the first failure (today 5–8: the
@@ -130,9 +135,11 @@ re-run.**
    within ±10% of `build/chunks.jsonl`; every manifest row produced at least one chunk
    (except those `chunk` listed in `build/skipped.jsonl`, the Reserved stubs); no chunk
    without an embedding; no U+FFFD anywhere (a `windows-1252` decode went wrong).
-2. **Pins:** five fixed §§ (`§ 591-2.6`, `§ 591-1.1`, `§ 681-4`, `§ 681-5`, `§ 349-1`; a
+2. **Pins:** five fixed §§ (`§ 591-2.6`, `§ 591-1.1`, `§ 681-4`, `§ 608-19`, `§ 349-1`; a
    Ch 497 § joins with the replacement by-laws) hold exactly the expected chunk ids
-   (`PINS` in `ingest/db.py`).
+   (`PINS` in `ingest/db.py`). `§ 608-19` is amended since its consolidation: each of its
+   chunks carries `amended_since` = `1482-2025` and `amendments` links exactly the expected
+   clause to it (`AMENDED_PINS`); the other pins carry neither.
 3. **Dev split** (not wired yet; it arrives with the refusal-threshold calibration): the 10-question dev split ([`EVALS.md`](EVALS.md#refusal-threshold)) through `/api/ask` on a local `next dev` with
    `DB_SCHEMA=staging` and the eval header. It must score at least what the previous
    snapshot scored, or meet the refusal-threshold calibration bar on the first run.

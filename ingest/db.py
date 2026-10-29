@@ -34,7 +34,7 @@ def _jsonl(path) -> list[dict]:
 
 
 def load() -> None:
-    documents, chunks = _jsonl(config.DOCUMENTS), _jsonl(config.CHUNKS)
+    documents, chunks, amendments = _jsonl(config.DOCUMENTS), _jsonl(config.CHUNKS), _jsonl(config.AMENDMENTS)
     embeddings = {e["chunk_id"]: e for e in _jsonl(config.EMBEDDINGS)}
 
     models = {(e["model"], e["dim"]) for e in embeddings.values()}
@@ -74,7 +74,11 @@ def load() -> None:
                 f"values ({', '.join('%s' for _ in CHUNK_COLUMNS[:-1])}, %s::extensions.halfvec)",
                 [[c[k] for k in CHUNK_COLUMNS[:-1]] + [json.dumps(embeddings[c["id"]]["embedding"])]
                  for c in chunks])
-    print(f"staging: snapshot {snapshot['id']}, {len(documents)} documents, {len(chunks)} chunks")
+            cur.executemany(
+                "insert into staging.amendments (amending_chunk_id, target_section) values (%s, %s)",
+                [[a["amending_chunk_id"], a["target_section"]] for a in amendments])
+    print(f"staging: snapshot {snapshot['id']}, {len(documents)} documents, {len(chunks)} chunks, "
+          f"{len(amendments)} amendments")
 
 
 REPLACEMENT_CHAR = chr(0xFFFD)   # a windows-1252 decode gone wrong
@@ -84,8 +88,13 @@ PINS = {
     "591-2.6": ["tmc:591-2.6"],
     "591-1.1": ["tmc:591-1.1:ambient-sound-level", "tmc:591-1.1:living-area", "tmc:591-1.1:unreasonable-noise"],
     "681-4": ["tmc:681-4:A-I", "tmc:681-4:J", "tmc:681-4:Jp2", "tmc:681-4:K"],
-    "681-5": ["tmc:681-5:A-G", "tmc:681-5:H-L"],
+    "608-19": ["tmc:608-19"],
     "349-1": ["tmc:349-1:animal", "tmc:349-1:guard-dog"],
+}
+# The pins amended since their consolidation: the by-laws on every chunk's `amended_since`, and
+# the amending chunks `amendments` links to the §. Every other pin must have neither.
+AMENDED_PINS = {
+    "608-19": (["1482-2025"], ["bl:1482-2025:cl1:O-Y"]),
 }
 
 
@@ -108,6 +117,11 @@ def smoke_failures(stats: dict, chunks: list[dict], manifest: list[store.Manifes
     for section, ids in PINS.items():
         if (got := stats["pins"].get(section, [])) != sorted(ids):
             fail.append(f"pin § {section}: {got}, expected {ids}")
+        since, companions = AMENDED_PINS.get(section, ([], []))
+        if (got := stats["pin_amended_since"].get(section, [])) != [since] * len(got):
+            fail.append(f"pin § {section}: amended_since {got}, expected {since} on each chunk")
+        if (got := stats["pin_amendments"].get(section, [])) != sorted(companions):
+            fail.append(f"pin § {section}: amendments {got}, expected {companions}")
     return fail
 
 
@@ -118,10 +132,17 @@ def staging_stats(conn: psycopg.Connection) -> dict:
         "coalesce(heading, ''), %(c)s) > 0 union all select id from staging.documents "
         "where strpos(title, %(c)s) > 0 order by 1", {"c": REPLACEMENT_CHAR}).fetchall()
     pins: dict[str, list[str]] = {}
-    for section, cid in conn.execute("select section, id from staging.chunks where section = any(%s)",
-                                     (list(PINS),)):
+    since: dict[str, list[list[str]]] = {}
+    for section, cid, amended_since in conn.execute(
+            "select section, id, amended_since from staging.chunks where section = any(%s)", (list(PINS),)):
         pins.setdefault(section, []).append(cid)
+        since.setdefault(section, []).append(amended_since)
     pins = {s: sorted(ids) for s, ids in pins.items()}    # Python order, not the DB collation's
+    amendments: dict[str, list[str]] = {}
+    for section, cid in conn.execute(
+            "select target_section, amending_chunk_id from staging.amendments where target_section = any(%s)",
+            (list(PINS),)):
+        amendments.setdefault(section, []).append(cid)
     return {
         "snapshots": one("select count(*) from staging.snapshot"),
         "chunker_version": one("select min(chunker_version) from staging.snapshot"),
@@ -131,6 +152,8 @@ def staging_stats(conn: psycopg.Connection) -> dict:
         "shas_with_chunks": {r[0] for r in conn.execute(
             "select distinct d.sha256 from staging.documents d join staging.chunks c on c.document_id = d.id")},
         "pins": pins,
+        "pin_amended_since": since,
+        "pin_amendments": {s: sorted(ids) for s, ids in amendments.items()},
     }
 
 

@@ -61,6 +61,7 @@ export default function AskPage() {
     response?.kind === "answer"
       ? response.citations.map((c) => response.passages.find((p) => p.n === c.n)!)
       : [];
+  const uncited = response?.kind === "answer" ? response.passages.filter((p) => !cited.includes(p)) : [];
   const answer = response?.kind === "answer" ? splitGap(response.text) : null;
 
   return (
@@ -102,6 +103,14 @@ export default function AskPage() {
           {cited.map((p) => (
             <Card key={p.n} p={p} />
           ))}
+          {uncited.length > 0 && (
+            <details>
+              <summary>{uncited.length} more retrieved, not cited</summary>
+              {uncited.map((p) => (
+                <Card key={p.n} p={p} dim />
+              ))}
+            </details>
+          )}
         </section>
       )}
 
@@ -130,9 +139,13 @@ export default function AskPage() {
 
 function Card({ p, dim }: { p: PassageView; dim?: boolean }) {
   return (
-    <article className={dim ? "card dim" : "card"}>
+    <article className={["card", p.companion && "companion", dim && "dim"].filter(Boolean).join(" ")}>
       <div>
         <span className="tag">{p.n}</span> <strong>{p.label}</strong>
+        {p.amendedSince.length > 0 && (
+          <span className="badge amber">amended since by {p.amendedSince.map((n) => `By-law ${n}`).join(", ")}</span>
+        )}
+        {p.companion && <span className="badge violet">amendment to a retrieved §</span>}
       </div>
       <div className="muted">
         {p.sublabel} ·{" "}

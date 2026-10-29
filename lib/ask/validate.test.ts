@@ -73,4 +73,14 @@ describe("validate", () => {
     const r = validate({ decision: "decline", text: "Try the province [1].", cited: [1] }, PASSAGES, SCOPE);
     expect(r).toEqual({ kind: "refusal", reason: "model_declined", scope: SCOPE, nearest: PASSAGES.slice(0, 3) });
   });
+
+  it("accepts citations to companion passages numbered after the retrieved ones", () => {
+    const companion: PassageView = { ...passage(6), chunkId: "bl:1482-2025:cl1:O-Y", companion: true };
+    const r = validate(answer("Drones need a permit [2][6]. Not [9].", [2, 6, 9]), [...PASSAGES, companion], SCOPE);
+    expect(r.kind === "answer" && r.text).toBe("Drones need a permit [2][6]. Not.");
+    expect(r.kind === "answer" && r.citations).toEqual([
+      { n: 2, chunkId: "tmc:591-2.2" },
+      { n: 6, chunkId: "bl:1482-2025:cl1:O-Y" },
+    ]);
+  });
 });

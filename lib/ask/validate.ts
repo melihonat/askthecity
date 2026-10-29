@@ -10,7 +10,7 @@ export const NEAREST = 3; // passages shown under a refusal
  * visitor reads, so `cited` alone never makes a citation. Uncited sentences are kept.
  */
 export function validate(output: ModelOutput, passages: PassageView[], scope: string): AskResponse {
-  const nearest = passages.slice(0, NEAREST);
+  const nearest = passages.filter((p) => !p.companion).slice(0, NEAREST);
   if (output.decision === "decline") {
     return { kind: "refusal", reason: "model_declined", scope, nearest };
   }

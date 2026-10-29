@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { type AskDeps, ask } from "./ask";
 import { DEFAULT_CONFIG, REFUSAL_THRESHOLD } from "./config";
-import type { AskEvent, ModelOutput, RungConfig, SearchRow } from "./types";
+import type { AskEvent, CompanionRow, ModelOutput, RungConfig, SearchRow } from "./types";
 
 const SCOPE = "Knows the Toronto Municipal Code…";
 
@@ -25,7 +25,23 @@ const ROWS = ["a", "b", "c", "d", "e", "f", "g"].map((s, i) => row(`tmc:591-${s}
 const LOW = REFUSAL_THRESHOLD / 2;
 const HIGH = Math.min(1, REFUSAL_THRESHOLD * 2);
 
-function fakeDeps(rows: SearchRow[], scores: number[], output: ModelOutput) {
+const amendedRow = (id: string, rank: number, bylaws: string[]): SearchRow => ({ ...row(id, rank), amended_since: bylaws });
+
+const companion = (id: string, target: string): CompanionRow => ({
+  target_section: target,
+  id,
+  document_id: id.split(":").slice(0, 2).join(":"),
+  family: "rules",
+  kind: "amending_bylaw",
+  section: null,
+  label: id,
+  sublabel: `amends § ${target} · in force 2026-03-02`,
+  href: "https://example.test/law.pdf",
+  amended_since: [],
+  body: `body of ${id}`,
+});
+
+function fakeDeps(rows: SearchRow[], scores: number[], output: ModelOutput, companions: CompanionRow[] = []) {
   return {
     snapshot: vi.fn(async () => ({
       id: "s1",
@@ -36,8 +52,9 @@ function fakeDeps(rows: SearchRow[], scores: number[], output: ModelOutput) {
     })),
     embed: vi.fn(async () => [0.1]),
     search: vi.fn(async () => rows),
+    companions: vi.fn(async (sections: string[]) => companions.filter((c) => sections.includes(c.target_section))),
     rerank: vi.fn(async () => scores),
-    generate: vi.fn(async () => output),
+    generate: vi.fn(async (_req: Parameters<AskDeps["generate"]>[0]) => output),
   } satisfies AskDeps;
 }
 
@@ -112,5 +129,93 @@ describe("ask", () => {
     const events: AskEvent[] = [];
     for await (const ev of ask("question?", DEFAULT_CONFIG, deps)) events.push(ev);
     expect(events.map((e) => e.type)).toEqual(["passages", "final"]);
+  });
+
+  describe("companion passages", () => {
+    // fused order = rerank order here: equal scores keep the fused order
+    const scores = (n: number) => Array.from({ length: n }, () => HIGH);
+
+    it("adds the amending chunks of amended §§ after the retrieved passages, numbered from 6", async () => {
+      const rows = [row("tmc:591-a", 1), amendedRow("tmc:608-19", 2, ["1482-2025"]), ...ROWS.slice(2)];
+      const deps = fakeDeps(rows, scores(rows.length), ANSWER, [companion("bl:1482-2025:cl1:O-Y", "608-19")]);
+      const { passages } = await run(deps);
+      expect(deps.companions).toHaveBeenCalledWith(["608-19"]);
+      expect(passages.map((p) => [p.n, p.chunkId, p.companion])).toEqual([
+        [1, "tmc:591-a", false],
+        [2, "tmc:608-19", false],
+        [3, "tmc:591-c", false],
+        [4, "tmc:591-d", false],
+        [5, "tmc:591-e", false],
+        [6, "bl:1482-2025:cl1:O-Y", true],
+      ]);
+      expect(passages[1].amendedSince).toEqual(["1482-2025"]);
+    });
+
+    it("caps companions at 3, in passage order, newest by-law first", async () => {
+      const rows = [amendedRow("tmc:608-1", 1, ["402-2026", "1482-2025"]), amendedRow("tmc:608-19", 2, ["1482-2025"]), ...ROWS.slice(2)];
+      const found = [
+        companion("bl:1482-2025:cl1:A-E", "608-1"),
+        companion("bl:1482-2025:cl1:F-N", "608-1"),
+        companion("bl:402-2026:cl3", "608-1"),
+        companion("bl:1482-2025:cl1:O-Y", "608-19"),
+      ];
+      const deps = fakeDeps(rows, scores(rows.length), ANSWER, found);
+      const { passages } = await run(deps);
+      expect(passages.filter((p) => p.companion).map((p) => [p.n, p.chunkId])).toEqual([
+        [6, "bl:402-2026:cl3"],
+        [7, "bl:1482-2025:cl1:A-E"],
+        [8, "bl:1482-2025:cl1:F-N"],
+      ]);
+    });
+
+    it("goes § → amendment only: a by-law chunk that ranks on its own pulls nothing in", async () => {
+      const bylawRow: SearchRow = { ...companion("bl:1482-2025:cl1:O-Y", "608-19"), rank: 1, score: 1 / 61, pinned: false };
+      const rows = [bylawRow, ...ROWS.slice(1)];
+      const deps = fakeDeps(rows, scores(rows.length), ANSWER, [companion("bl:1482-2025:cl1:O-Y", "608-19")]);
+      const { passages } = await run(deps);
+      expect(deps.companions).not.toHaveBeenCalled();
+      expect(passages).toHaveLength(5);
+    });
+
+    it("never repeats a chunk that is already a retrieved passage", async () => {
+      const bylawRow: SearchRow = { ...companion("bl:1482-2025:cl1:O-Y", "608-19"), rank: 2, score: 1 / 62, pinned: false };
+      const rows = [amendedRow("tmc:608-19", 1, ["1482-2025"]), bylawRow, ...ROWS.slice(2)];
+      const deps = fakeDeps(rows, scores(rows.length), ANSWER, [
+        companion("bl:1482-2025:cl1:O-Y", "608-19"),
+        companion("bl:402-2026:cl3", "608-19"),
+      ]);
+      const { passages } = await run(deps);
+      expect(passages.filter((p) => p.companion).map((p) => [p.n, p.chunkId])).toEqual([[6, "bl:402-2026:cl3"]]);
+    });
+
+    it("lets the answer cite a companion number", async () => {
+      const rows = [amendedRow("tmc:608-19", 1, ["1482-2025"]), ...ROWS.slice(1)];
+      const output: ModelOutput = { decision: "answer", text: "Drones need a permit [1][6].", cited: [1, 6] };
+      const deps = fakeDeps(rows, scores(rows.length), output, [companion("bl:1482-2025:cl1:O-Y", "608-19")]);
+      const { final } = await run(deps);
+      expect(final.kind === "answer" && final.citations).toEqual([
+        { n: 1, chunkId: "tmc:608-19" },
+        { n: 6, chunkId: "bl:1482-2025:cl1:O-Y" },
+      ]);
+      expect(deps.generate.mock.calls[0][0].prompt).toContain(
+        '<passage n="6" label="bl:1482-2025:cl1:O-Y" source="amends § 608-19 · in force 2026-03-02" amendment=',
+      );
+    });
+
+    it("adds none when the rung turns companions off", async () => {
+      const rows = [amendedRow("tmc:608-19", 1, ["1482-2025"]), ...ROWS.slice(1)];
+      const deps = fakeDeps(rows, scores(rows.length), ANSWER, [companion("bl:1482-2025:cl1:O-Y", "608-19")]);
+      const { passages } = await run(deps, { ...DEFAULT_CONFIG, companions: false });
+      expect(deps.companions).not.toHaveBeenCalled();
+      expect(passages).toHaveLength(5);
+    });
+
+    it("keeps companions out of a refusal's nearest passages", async () => {
+      const rows = [amendedRow("tmc:608-19", 1, ["1482-2025"]), row("tmc:591-b", 2)];
+      const deps = fakeDeps(rows, [LOW, LOW], ANSWER, [companion("bl:1482-2025:cl1:O-Y", "608-19")]);
+      const { final, passages } = await run(deps);
+      expect(passages.map((p) => p.n)).toEqual([1, 2, 3]);
+      expect(final.kind === "refusal" && final.nearest.map((p) => p.chunkId)).toEqual(["tmc:608-19", "tmc:591-b"]);
+    });
   });
 });

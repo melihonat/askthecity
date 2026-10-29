@@ -11,6 +11,7 @@ def main() -> None:
     sub = p.add_subparsers(dest="stage", required=True)
     fr = sub.add_parser("fetch-rules", help="toronto.ca → corpus/, R2, manifest")
     fr.add_argument("--chapter", action="append", help="chapter number, e.g. 591 (repeatable); default: all")
+    sub.add_parser("fetch-bylaws", help="amending by-laws for the chunked chapters → corpus/, R2, manifest")
     sub.add_parser("restore", help="R2 → corpus/, verifying sha256")
     sub.add_parser("extract", help="corpus/ → build/text/")
     sub.add_parser("chunk", help="build/text/ → build/chunks.jsonl")
@@ -26,6 +27,9 @@ def main() -> None:
     if args.stage == "fetch-rules":
         from .fetch import fetch_rules
         fetch_rules(args.chapter)
+    elif args.stage == "fetch-bylaws":
+        from .fetch import fetch_bylaws
+        fetch_bylaws()
     elif args.stage == "restore":
         from .store import restore
         restore()
