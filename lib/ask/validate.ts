@@ -1,7 +1,7 @@
 import type { AskResponse, ModelOutput, PassageView } from "./types";
 
 const MARKER = /\s*\[(\d+(?:\s*,\s*\d+)*)\]/g;
-const NEAREST = 3;
+export const NEAREST = 3; // passages shown under a refusal
 
 /**
  * Turns the model's structured output into an AskResponse (CONTRACT.md, "Generation and

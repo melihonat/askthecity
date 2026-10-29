@@ -14,3 +14,4 @@ button { margin-top: .5rem; font: inherit; padding: .4rem 1rem; }
 .card .body th, .card .body td { border: 1px solid #ddd; padding: .15rem .4rem; text-align: left; vertical-align: top; }
 .tag { display: inline-block; min-width: 1.4em; text-align: center; background: #333; color: #fff; border-radius: 4px; font-size: .8rem; }
 footer { margin-top: 3rem; }
+.gap { font-style: italic; color: #666; }

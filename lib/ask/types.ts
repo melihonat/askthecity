@@ -24,8 +24,20 @@ export type AskResponse =
   | { kind: "refusal"; reason: RefusalReason; scope: string; nearest: PassageView[] }
   | { kind: "limit"; limit: LimitKind };
 
+/** What the orchestrator already computed; sent only under the eval header (CONTRACT.md). */
+export type DebugEvent = {
+  candidates: { chunkId: string; rrfRank: number; rerankScore: number | null }[]; // the 20, fused order
+  pinned: string[]; // chunk ids placed by the § number match
+  gateScore: number | null; // top rerank score; null with rerank off
+  threshold: number;
+  gateBypassed: boolean; // a pin fired, so the threshold was not applied
+  declineText: string | null; // the model's text on decision = "decline"; never public
+  timings: { retrieval_ms: number; rerank_ms: number; generation_ms: number | null; total_ms: number };
+};
+
 export type AskEvent =
   | { type: "passages"; passages: PassageView[] }
+  | { type: "debug"; debug: DebugEvent }
   | { type: "final"; response: AskResponse };
 
 /** What the generator returns (structured output). */

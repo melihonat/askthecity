@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import { parseBody } from "@/lib/ask/body";
+import { splitGap } from "@/lib/ask/gap";
 import type { AskEvent, AskResponse, PassageView } from "@/lib/ask/types";
 
-const REFUSAL_LINE = {
-  below_threshold: "Nothing in the snapshot comes close to this question.",
-  model_declined: "I found related passages, but none of them answers it.",
-  no_valid_citation: "I couldn't back an answer with a citation, so I'm not giving one.",
+// Fixed per reason (CONTRACT.md, "Refusal rule"): no model-written text in a refusal.
+const REFUSAL = {
+  below_threshold: { line: "Nothing in the snapshot comes close to this question.", nearest: "Closest passages (not a match)" },
+  model_declined: { line: "I found related passages, but none of them answers it.", nearest: "Related, but not an answer" },
+  no_valid_citation: {
+    line: "I couldn't back an answer with a citation, so I'm not giving one.",
+    nearest: "Passages I had",
+  },
 } as const;
 
 export default function AskPage() {
@@ -42,7 +47,7 @@ export default function AskPage() {
           buf = buf.slice(i + 1);
           if (ev.type === "passages") setPassages(ev.passages);
           else if (ev.type === "final") setResponse(ev.response);
-          else setError(ev.message);
+          else if (ev.type === "error") setError(ev.message);
         }
       }
     } catch (e) {
@@ -56,6 +61,7 @@ export default function AskPage() {
     response?.kind === "answer"
       ? response.citations.map((c) => response.passages.find((p) => p.n === c.n)!)
       : [];
+  const answer = response?.kind === "answer" ? splitGap(response.text) : null;
 
   return (
     <main>
@@ -88,7 +94,10 @@ export default function AskPage() {
 
       {response?.kind === "answer" && (
         <section>
-          <p className="answer">{response.text}</p>
+          <p className="answer">
+            {answer!.body}
+            {answer!.gap && <span className="gap"> {answer!.gap}</span>}
+          </p>
           <h2>Cited ({cited.length})</h2>
           {cited.map((p) => (
             <Card key={p.n} p={p} />
@@ -99,9 +108,11 @@ export default function AskPage() {
       {response?.kind === "refusal" && (
         <section>
           <p className="answer">
-            <strong>The documents don&apos;t cover this.</strong> {REFUSAL_LINE[response.reason]}
+            <strong>The documents don&apos;t cover this.</strong>
           </p>
+          <p>{REFUSAL[response.reason].line}</p>
           <p className="muted">{response.scope}</p>
+          <h2>{REFUSAL[response.reason].nearest}</h2>
           {response.nearest.map((p) => (
             <Card key={p.n} p={p} dim />
           ))}
