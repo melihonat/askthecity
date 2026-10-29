@@ -33,6 +33,7 @@ them, in Vercel project env. Settings come from [`STACK.md`](STACK.md) and
 | `EVAL_HEADER_SECRET` | value of the eval header ([`GUARDRAILS.md`](GUARDRAILS.md#the-eval-header)) | ✓ | ✓ |
 | `IP_HASH_SALT` | salt for the per-IP hash in `usage_daily` | ✓ | ✓ |
 | `CRON_SECRET` | guards `/api/keepalive`; Vercel sends it as `Authorization: Bearer` on crons | ✓ | ✓ |
+| `TEST_DATABASE_URL` | a **local** Postgres with pgvector ≥ 0.7, for the `search_chunks` tests (they create and drop `ask_city_test`); never Supabase | ✓ | |
 
 Vercel env vars are `sensitive` and target Production and Preview; `.env` covers local runs.
 `vercel link` also writes `.env.local` with a short-lived `VERCEL_OIDC_TOKEN`

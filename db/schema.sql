@@ -70,12 +70,15 @@ alter table {schema}.documents  enable row level security;
 alter table {schema}.chunks     enable row level security;
 alter table {schema}.amendments enable row level security;
 
--- One round trip for all retrieval. Only `vector` mode exists so far; `hybrid` (FTS, RRF and
--- the section pin) arrives with the hybrid-search slice.
+-- One round trip for all retrieval (STACK.md, "Retrieval"). `hybrid`: § numbers in the query
+-- pin their chunks to the top; the rest is RRF (k = 60, equal weights) over the lexical and
+-- vector top 30. `vector`: the vector list alone, no pin, no FTS. `score` is the fused RRF
+-- score: rank arithmetic, no absolute meaning. Ties break on the chunk id in byte order, so
+-- the order never depends on the database collation.
 create or replace function {schema}.search_chunks(
   query_text      text,
   query_embedding extensions.halfvec(1024),
-  mode            text default 'vector',
+  mode            text default 'hybrid',
   match_count     int  default 20
 )
 returns table (
@@ -87,23 +90,55 @@ language plpgsql stable
 set search_path = {schema}, extensions, pg_catalog
 as $$
 #variable_conflict use_column
+declare
+  hybrid   boolean := mode = 'hybrid';
+  sections text[];
+  lexical  tsquery;
 begin
-  if mode <> 'vector' then
-    raise exception 'search_chunks: mode % is not implemented', mode;
+  if mode is null or mode not in ('vector', 'hybrid') then
+    raise exception 'search_chunks: unknown mode %', mode;
+  end if;
+  if hybrid then
+    -- '591-2.1', '950-1316B': the `english` parser splits these, so they never reach the FTS.
+    select coalesce(array_agg(distinct upper(m[1])), '{}') into sections
+    from regexp_matches(query_text, '(?<![\w.-])(\d{1,4}-\d+(?:\.\d+)*[a-z]?)(?![\w-])', 'gi') m;
+    -- websearch parsing, but any term may match: a question ANDed term by term matches nothing.
+    lexical := replace(websearch_to_tsquery('english', query_text)::text, ' & ', ' | ')::tsquery;
   end if;
   return query
-    select v.id, v.document_id, v.family, v.kind, v.section,
-           v.label, v.sublabel, v.href, v.amended_since, v.body,
-           (row_number() over (order by v.distance, v.id))::int,
-           1 - v.distance,
-           false
-    from (
-      select c.*, (c.embedding <=> query_embedding)::float8 as distance
-      from chunks c
-      order by c.embedding <=> query_embedding
+    with vec as (
+      select c.id, row_number() over (order by c.embedding <=> query_embedding, c.id collate "C") as r
+      from (select id, embedding from chunks
+            order by embedding <=> query_embedding limit 30) c
+    ),
+    lex as (
+      select c.id, row_number() over (order by ts_rank_cd(c.fts, lexical) desc, c.id collate "C") as r
+      from (select id, fts from chunks
+            where hybrid and fts @@ lexical
+            order by ts_rank_cd(fts, lexical) desc, id collate "C" limit 30) c
+    ),
+    pin as (
+      select id from chunks where hybrid and section = any(sections)
+    ),
+    fused as (
+      select coalesce(v.id, l.id) as id,
+             coalesce(1.0 / (60 + v.r), 0) + coalesce(1.0 / (60 + l.r), 0) as rrf
+      from vec v full join lex l on l.id = v.id
+    ),
+    ranked as (
+      select * from (
+        select coalesce(f.id, p.id) as id, coalesce(f.rrf, 0)::float8 as rrf, p.id is not null as is_pin
+        from fused f full join pin p on p.id = f.id
+      ) u
+      order by u.is_pin desc, u.rrf desc, u.id collate "C"
       limit match_count
-    ) v
-    order by v.distance, v.id;
+    )
+    select c.id, c.document_id, c.family, c.kind, c.section,
+           c.label, c.sublabel, c.href, c.amended_since, c.body,
+           (row_number() over (order by k.is_pin desc, k.rrf desc, k.id collate "C"))::int,
+           k.rrf, k.is_pin
+    from ranked k join chunks c on c.id = k.id
+    order by k.is_pin desc, k.rrf desc, k.id collate "C";
 end
 $$;
 

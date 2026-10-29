@@ -6,9 +6,9 @@ export const EMBEDDING = { gatewayModel: "voyage/voyage-4-large", corpusModel: "
 export const CONTEXT_PASSAGES = 5; // the model sees [1]–[5]
 export const MAX_OUTPUT_TOKENS = 400;
 
-// The tracer path: vector search, top 5 by rank, no rerank, gate or companions yet.
+// Hybrid search with § pins, top 5 by fused rank; no rerank, gate or companions yet.
 export const DEFAULT_CONFIG: RungConfig = {
-  search: "vector",
+  search: "hybrid",
   rerank: false,
   companions: false,
   model: "anthropic/claude-haiku-5.5",
