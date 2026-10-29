@@ -25,11 +25,13 @@ All search runs in one SQL RPC, `search_chunks`, in one round trip:
 1. **Section-number pin.** Each chunk stores its section number in its own column. A regex
    on the query (e.g. `591-2.1`, `950-1200`) matches it exactly and pins hits to the top,
    ahead of fusion. The `english` tokenizer can't be trusted with these.
-2. **Lexical:** `ts_rank_cd` + `websearch_to_tsquery`. No BM25: unverified on Supabase, and
-   the difference is small under a reranker.
+2. **Lexical:** `ts_rank_cd` + `websearch_to_tsquery`, with its terms ORed: ANDed, a
+   question matches no chunk at all (8 of the 10 `dev` questions). No BM25: unverified on
+   Supabase, and the difference is small under a reranker.
 3. **Vector:** `voyage-4-large`, `halfvec(1024)`, HNSW cosine.
-4. **Fusion:** top 30 from each side, RRF `k = 60`, equal weights. The merged top 20 go to
-   the reranker.
+4. **Fusion:** top 30 from each side, RRF `k = 60`, equal weights, ties broken on the chunk
+   id. The merged top 20 go to the reranker. The `vector` mode (the `dense` rung) skips the
+   pin and the lexical side.
 
 Then, in TypeScript:
 

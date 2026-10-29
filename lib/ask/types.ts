@@ -52,8 +52,8 @@ export type SearchRow = {
   amended_since: string[];
   body: string;
   rank: number;
-  score: number;
-  pinned: boolean;
+  score: number; // fused RRF score: rank arithmetic, no absolute meaning
+  pinned: boolean; // placed by the § number match; the gate skips on it
 };
 
 export type Snapshot = {
