@@ -1,4 +1,4 @@
-"""fetch-rules: Code chapter PDFs; fetch-bylaws: amending by-law PDFs. toronto.ca → the snapshot store."""
+"""fetch-rules: Code chapter PDFs; fetch-bylaws: amending and replacement by-law PDFs. toronto.ca → the snapshot store."""
 from __future__ import annotations
 
 import html
@@ -16,8 +16,11 @@ LIST_ROW = re.compile(r'<a href="([^"]+\.pdf)"[^>]*>\s*(\d+-\d{4})\s*</a>.*?</td
 TITLE_CHAPTER = re.compile(r"\bChapter\s+(\d+[A-Z]?)\b")
 # A title naming a street, an address or a ward: traffic and site-specific by-laws.
 STREET = re.compile(r"\brespecting\s+(?!the\s)[A-Z0-9]|\bin respect of \d|\bmunicipally known\b|\bat \d+(?:-\d+)? [A-Z]")
-# Whole-chapter replacements and new chapters (1511-2025, 1512-2025, 1513-2025) are their own slice.
+# Whole-chapter replacements and new chapters (1511-2025, 1512-2025, 1513-2025) are not amending by-laws.
 REPLACEMENT = re.compile(r"^To (repeal\b.*\breplace with new Chapter|enact a new\b.*\bChapter)")
+# "To repeal … Chapter 629, Property Standards and replace with new Chapter 629, …": a replacement
+# by-law. A new chapter with no old one (1513-2025, Ch 611) is out of scope.
+REPEAL_AND_REPLACE = re.compile(r"^To repeal\b.*?\bChapter (\d+[A-Z]?)\b.*\breplace with new Chapter (\d+[A-Z]?)\b")
 
 
 def chapter_urls() -> dict[str, str]:
@@ -72,36 +75,52 @@ def bylaw_candidates(listing: list[tuple[str, str, str]], consolidated: dict[str
     return out
 
 
+def replacement_candidates(listing: list[tuple[str, str, str]], consolidated: dict[str, str | None]
+                           ) -> list[tuple[str, str, str, list[str]]]:
+    """By-laws that repeal a snapshot chapter and replace it with a new one of the same number,
+    enacted in or after its consolidated-as-of year. Whether one stands in for the chapter, rides
+    along as not yet law, or is already consolidated is the chunk stage's call (ingest/replace.py)."""
+    out = []
+    for num, url, title in listing:
+        m = REPEAL_AND_REPLACE.match(title)
+        if m and m[1] == m[2] and m[1] in consolidated and num[-4:] >= (consolidated[m[1]] or "0000")[:4]:
+            out.append((num, url, title, [m[1]]))
+    return out
+
+
 def fetch_bylaws() -> None:
-    """Amending by-laws for the chapters in build/documents.jsonl (run `extract` and `chunk` first)."""
+    """Amending and replacement by-laws for the chapters in build/documents.jsonl (run `extract` and
+    `chunk` first). A replacement in force counts as its chapter, consolidated on its in-force date."""
     if not config.DOCUMENTS.exists():
         raise SystemExit(f"{config.DOCUMENTS.relative_to(config.ROOT)} is missing: run extract and chunk first")
-    consolidated = {d["id"].removeprefix("tmc:"): d["consolidated_as_of"]
-                    for d in map(json.loads, config.DOCUMENTS.read_text(encoding="utf-8").splitlines())
-                    if d["kind"] == "chapter"}
+    documents = [json.loads(line) for line in config.DOCUMENTS.read_text(encoding="utf-8").splitlines()]
+    consolidated = {d["id"].removeprefix("tmc:"): d["consolidated_as_of"] for d in documents if d["kind"] == "chapter"}
+    consolidated |= {d["chapter"]: d["in_force"] or d["enacted"] for d in documents
+                     if d["kind"] == "replacement_bylaw" and d["in_force_now"]}
     listing = []
     for year in config.BYLAW_YEARS:
         resp = requests.get(config.LAW_LIST_URL.format(year=year), timeout=60)
         resp.raise_for_status()
         listing += bylaw_list(resp.text)
-    candidates = bylaw_candidates(listing, consolidated)
-    have = {r.ref: r for r in store.read_manifest() if r.kind == "amending_bylaw"}
+    candidates = [("amending_bylaw", *c) for c in bylaw_candidates(listing, consolidated)] + \
+        [("replacement_bylaw", *c) for c in replacement_candidates(listing, consolidated)]
+    have = {(r.kind, r.ref): r for r in store.read_manifest()}
     print(f"{len(listing)} by-laws listed {config.BYLAW_YEARS[0]}–{config.BYLAW_YEARS[-1]}, "
           f"{len(candidates)} name a snapshot chapter")
-    for num, url, _, chapters in candidates:
+    for kind, num, url, _, chapters in candidates:
         ref = f"bylaw-{num}"
-        if ref in have and have[ref].local_path.exists():
+        if (kind, ref) in have and have[kind, ref].local_path.exists():
             continue
         resp = requests.get(url, timeout=600)
         resp.raise_for_status()
         row = store.put(resp.content, store.ManifestRow(
-            sha256="", kind="amending_bylaw", ref=ref, parent_ref="", source_url=url,
+            sha256="", kind=kind, ref=ref, parent_ref="", source_url=url,
             obtained_by="script",
             obtained_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             last_modified=resp.headers.get("Last-Modified", ""), etag=resp.headers.get("ETag", ""),
             bytes=0, content_type=resp.headers.get("Content-Type", ""), encoding="",
         ))
-        print(f"{ref} (Ch {', '.join(chapters)}): {row.bytes} bytes, sha256 {row.sha256[:12]}…")
+        print(f"{ref} ({kind}, Ch {', '.join(chapters)}): {row.bytes} bytes, sha256 {row.sha256[:12]}…")
     write_snapshot_md()
 
 

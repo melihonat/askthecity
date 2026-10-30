@@ -139,7 +139,7 @@ describe("ask", () => {
       const rows = [row("tmc:591-a", 1), amendedRow("tmc:608-19", 2, ["1482-2025"]), ...ROWS.slice(2)];
       const deps = fakeDeps(rows, scores(rows.length), ANSWER, [companion("bl:1482-2025:cl1:O-Y", "608-19")]);
       const { passages } = await run(deps);
-      expect(deps.companions).toHaveBeenCalledWith(["608-19"]);
+      expect(deps.companions).toHaveBeenCalledWith(["591-a", "608-19", "591-c", "591-d", "591-e"]);
       expect(passages.map((p) => [p.n, p.chunkId, p.companion])).toEqual([
         [1, "tmc:591-a", false],
         [2, "tmc:608-19", false],
@@ -173,8 +173,35 @@ describe("ask", () => {
       const rows = [bylawRow, ...ROWS.slice(1)];
       const deps = fakeDeps(rows, scores(rows.length), ANSWER, [companion("bl:1482-2025:cl1:O-Y", "608-19")]);
       const { passages } = await run(deps);
-      expect(deps.companions).not.toHaveBeenCalled();
+      expect(deps.companions).not.toHaveBeenCalledWith(expect.arrayContaining(["608-19"]));
       expect(passages).toHaveLength(5);
+    });
+
+    it("adds a replacement's not-yet-law § for a § it replaces, though that § is not amended", async () => {
+      const replacement: CompanionRow = {
+        ...companion("bl:1512-2025:629-4.25", "629-38"),
+        kind: "replacement_bylaw",
+        section: "629-4.25",
+        label: "Ch 629 § 629-4.25",
+        sublabel: "By-law 1512-2025 · in force 2027-05-01, not yet law",
+      };
+      const rows = [row("tmc:629-38", 1), ...ROWS.slice(1)];
+      const deps = fakeDeps(rows, scores(rows.length), ANSWER, [replacement]);
+      const { passages } = await run(deps);
+      expect(passages[0]).toMatchObject({ chunkId: "tmc:629-38", notYetLaw: false, amendedSince: [] });
+      expect(passages[5]).toMatchObject({ n: 6, chunkId: "bl:1512-2025:629-4.25", companion: true, notYetLaw: true });
+      expect(deps.generate.mock.calls[0][0].prompt).toContain(
+        '<passage n="6" label="Ch 629 § 629-4.25" source="By-law 1512-2025 · in force 2027-05-01, not yet law" ' +
+          'replacement="replaces a section among these passages" not_yet_law=',
+      );
+    });
+
+    it("treats an in-force replacement's tmc: § as the Code, not as not yet law", async () => {
+      const inForce: SearchRow = { ...row("tmc:497-2.2", 1), document_id: "bl:1511-2025", kind: "replacement_bylaw" };
+      const deps = fakeDeps([inForce, ...ROWS.slice(1)], scores(ROWS.length), ANSWER);
+      const { passages } = await run(deps);
+      expect(passages[0].notYetLaw).toBe(false);
+      expect(deps.companions).toHaveBeenCalledWith(expect.arrayContaining(["497-2.2"]));
     });
 
     it("never repeats a chunk that is already a retrieved passage", async () => {

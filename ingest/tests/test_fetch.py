@@ -1,5 +1,5 @@
-"""fetch-bylaws: reading a yearly law list and choosing the candidate amending by-laws."""
-from ingest.fetch import bylaw_candidates, bylaw_list
+"""fetch-bylaws: reading a yearly law list and choosing the candidate amending and replacement by-laws."""
+from ingest.fetch import bylaw_candidates, bylaw_list, replacement_candidates
 
 PAGE = """
 <tr><td class="bylawNum"><font><a href="http://www.toronto.ca/legdocs/bylaws/2026/law0470.pdf" target="_blank">
@@ -47,3 +47,19 @@ def test_street_address_and_replacement_titles_are_left_out_but_not_other_respec
         ("1381-2025", "u", "To amend City of Toronto Municipal Code Chapter 608, in respect of increased penalty amounts"),
     ]
     assert [n for n, *_ in bylaw_candidates(listing, CONSOLIDATED)] == ["1086-2025", "1381-2025"]
+
+
+def test_replacement_candidates_repeal_and_replace_the_same_snapshot_chapter():
+    listing = [
+        ("1512-2025", "u1", "To repeal City of Toronto Municipal Code Chapter 629, Property Standards and replace "
+                            "with new Chapter 629, Property Standards as set out in Schedule A to this by-law"),
+        ("1511-2025", "u2", "To repeal City of Toronto Municipal Code Chapter 497, Heating and replace with new "
+                            "Chapter 497, Indoor Temperature Standards"),     # Ch 497 consolidated 2025: in
+        ("1498-2019", "u3", "To repeal the current City of Toronto Municipal Code Chapter 681, Sewers, and replace "
+                            "it with a new City of Toronto Municipal Code Chapter 681, Sewers."),   # before 2023
+        ("1513-2025", "u4", "To enact a new City of Toronto Municipal Code Chapter 611, Pest Management"),
+        ("1131-2020", "u5", "To repeal City of Toronto Municipal Code Chapter 39, Debentures."),
+    ]
+    consolidated = {**CONSOLIDATED, "629": "2025-04-30"}
+    assert [(n, chs) for n, _, _, chs in replacement_candidates(listing, consolidated)] == [
+        ("1512-2025", ["629"]), ("1511-2025", ["497"])]

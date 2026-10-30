@@ -57,8 +57,9 @@ docs and UI copy.
 - **Limit** — a reply saying the demo won't answer right now (per-IP or global daily limit,
   burst, budget, question too long). A fact about the infrastructure, never counted as a
   refusal.
-- **Companion passage** — an amending by-law's chunk added to an answer because it amends a
-  § that was retrieved, not because it ranked itself. Numbered after the retrieved passages
+- **Companion passage** — an amending by-law's chunk (or a pending replacement's §) added
+  to an answer because it amends or replaces a § that was retrieved, not because it ranked
+  itself. Numbered after the retrieved passages
   and citeable like them.
 - **Chunk id** — a chunk's readable, deterministic name built from where it sits
   (`tmc:681-5:C-D`, `bl:470-2026:cl1`, `ie:2026.IE29.6:council`, `sr:286369:comments:2`).

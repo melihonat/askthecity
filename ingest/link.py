@@ -2,8 +2,10 @@
 
 CHUNKING.md, "Rules: amending by-laws". A by-law amends a chapter *since* its consolidation when
 its number is absent from the chapter's own bracketed notes and it took effect after the
-chapter's consolidated-as-of date (a consolidation includes what took effect that day). By-laws that amend no chapter that way, or whose every
-instruction touches a Schedule or Appendix, are dropped (to build/skipped.jsonl). Pure: no I/O.
+chapter's consolidated-as-of date (a consolidation includes what took effect that day). By-laws
+that amend no chapter that way, or whose every instruction touches a Schedule or Appendix, are
+dropped (to build/skipped.jsonl). A replacement chapter in force stands in for its chapter: its
+enactment notes and in-force date play the consolidation's part (ingest/replace.py). Pure: no I/O.
 """
 from __future__ import annotations
 
@@ -38,9 +40,12 @@ def link(documents: list[dict], chunks: list[dict]) -> tuple[list[dict], list[di
     """→ (documents, chunks, amendments, skipped). By-law chunks get their final `amends`,
     breadcrumb and sublabel; Code chunks of an amended § get `amended_since`."""
     chapters = {d["id"].removeprefix("tmc:"): d for d in documents if d["kind"] == "chapter"}
+    chapters |= {d["chapter"]: d for d in documents if d["kind"] == "replacement_bylaw" and d["in_force_now"]}
+    as_of = {ch: d["consolidated_as_of"] or d["in_force"] or d["enacted"] for ch, d in chapters.items()}
+    title = {ch: d.get("chapter_title") or d["title"] for ch, d in chapters.items()}
     sections: dict[str, set[str]] = defaultdict(set)
     for c in chunks:
-        if c["kind"] == "chapter" and c["section"]:
+        if c["id"].startswith("tmc:") and c["section"]:
             sections[c["chapter"]].add(c["section"])
     by_doc: dict[str, list[dict]] = defaultdict(list)
     for c in chunks:
@@ -60,7 +65,7 @@ def link(documents: list[dict], chunks: list[dict]) -> tuple[list[dict], list[di
         def live(ch: str) -> bool:
             chapter = chapters.get(ch)
             return bool(chapter) and number not in chapter["noted_bylaws"] and (
-                not chapter["consolidated_as_of"] or took_effect > chapter["consolidated_as_of"])
+                not as_of[ch] or took_effect > as_of[ch])
 
         named = [ch for ch in dict.fromkeys(TITLE_CHAPTER.findall(doc["short_title"])) if ch in chapters]
         if not any(live(ch) for ch in named):
@@ -101,7 +106,7 @@ def link(documents: list[dict], chunks: list[dict]) -> tuple[list[dict], list[di
             dates, in_force = f"enacted {doc['enacted']} · in force on enactment", f"in force {doc['enacted']}"
         for c, targets, chs in kept:
             where = ", ".join(map(_section, targets))
-            chapter_names = ", ".join(chapters[ch]["title"] for ch in chs)
+            chapter_names = ", ".join(title[ch] for ch in chs)
             c["amends"] = [{"chapter": s.split("-")[0], "section": s, "sub": sub} for s, sub in targets]
             c["breadcrumb"] = (f"[By-law {number} › {doc['short_title']}]\n"
                                f"[amends {chapter_names}{' ' + where if where else ''} · {dates}]")
@@ -116,7 +121,7 @@ def link(documents: list[dict], chunks: list[dict]) -> tuple[list[dict], list[di
                 since[s].add(number)
 
     for c in out_chunks:
-        if c["kind"] == "chapter" and c["section"] in since:
+        if c["id"].startswith("tmc:") and c["section"] in since:
             c["amended_since"] = sorted(since[c["section"]], key=bylaw_key)
             dated, _, _ = c["breadcrumb"].rpartition("]")
             c["breadcrumb"] = dated + " · amended since by " + \

@@ -31,8 +31,10 @@ is dated.
   schedules only are dropped, as are those the chapter's own notes or a later consolidation
   already include. On 2026-10-29 that left **51** of 151 fetched
   ([`CHUNKING.md`](CHUNKING.md#rules-amending-by-laws)).
-- A by-law's attachments (new schedules, maps, a whole new chapter set out in "Schedule A")
-  are not in the snapshot; its operative clauses are.
+- A by-law's attachments (new schedules, maps) are not in the snapshot; its operative
+  clauses are. The exception is a **replacement by-law**, whose whole new chapter in
+  "Schedule A" is the point: 1512-2025's new Ch 629 rides along as not yet law until
+  2027-05-01. 1511-2025's new Ch 497 is already the consolidated chapter.
 - Every Code chunk carries `consolidated_as_of` (the footer date). A citation to a § a later
   ingested by-law amends shows "amended since by By-law NNN-YYYY".
 - By-laws carry `in_force` where it differs from enactment (Ch 611: May 1, 2027), and
