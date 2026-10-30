@@ -1,5 +1,5 @@
-import { CONTEXT_PASSAGES, MAX_COMPANIONS, REFUSAL_THRESHOLD } from "./config";
-import { systemPrompt, userPrompt } from "./prompt";
+import { CONTEXT_PASSAGES, EMBEDDING, MAX_COMPANIONS, REFUSAL_THRESHOLD, RERANK_MODEL, RUNGS } from "./config";
+import { PROMPT_HASH, PROMPT_VERSION, systemPrompt, userPrompt } from "./prompt";
 import type {
   AskEvent,
   ChunkRow,
@@ -7,6 +7,7 @@ import type {
   DebugEvent,
   ModelOutput,
   PassageView,
+  Rung,
   RungConfig,
   SearchRow,
   Snapshot,
@@ -85,14 +86,11 @@ function byRerank(rows: SearchRow[], scores: number[]): SearchRow[] {
 
 /**
  * The one orchestration path: embed → search → rerank → companions → gate → generate → validate.
- * With rerank off the top 5 are by fused rank and the gate is off; a pin skips the gate.
+ * The rung's preset switches steps inside it. With rerank off the top 5 are by fused rank and
+ * the gate is off; a pin skips the gate.
  */
-export async function* ask(
-  question: string,
-  config: RungConfig,
-  deps: AskDeps,
-  opts: AskOptions = {},
-): AsyncGenerator<AskEvent> {
+export async function* ask(question: string, rung: Rung, deps: AskDeps, opts: AskOptions = {}): AsyncGenerator<AskEvent> {
+  const config = RUNGS[rung];
   const t0 = performance.now();
   const snapshot = await deps.snapshot();
   const embedding = await deps.embed(question);
@@ -130,6 +128,15 @@ export async function* ask(
       rerank_ms: Math.round(t2 - t1),
       generation_ms,
       total_ms: Math.round(performance.now() - t0),
+    },
+    rung,
+    config,
+    build: {
+      sha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
+      promptVersion: PROMPT_VERSION,
+      promptHash: PROMPT_HASH,
+      embedder: EMBEDDING.gatewayModel,
+      reranker: RERANK_MODEL,
     },
   });
 

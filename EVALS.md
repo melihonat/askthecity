@@ -15,6 +15,9 @@ shape and the `debug` event are in [`CONTRACT.md`](CONTRACT.md); terms are defin
 - Every question runs **3 times** per rung.
 - **A `limit` response or an HTTP error invalidates the run.** A 5xx is retried once, then
   the run aborts. A run with any unscored question is never committed.
+- One rung per invocation: `python -m evals run --rung shipped [--split dev] [--base-url …]`
+  writes `evals/runs/<date>-<rung>[-dev]/` and refuses to overwrite one. The scorer
+  (`evals/score.py`) is pure: run data, gold and the snapshot's chunk ids in, columns out.
 
 ## Gold
 
@@ -36,8 +39,8 @@ Each question in `evals/questions.yaml`:
 ```
 
 - A **pattern** is an exact chunk id or a prefix ending in `*` (`tmc:681-5:*` = any chunk of
-  § 681-5). The question's author picks the granularity; the scorer only does
-  exact-or-prefix matching.
+  § 681-5, including `tmc:681-5` itself when the § is one chunk). The question's author picks
+  the granularity; the scorer only does exact-or-prefix matching.
 - A **required group** is satisfied when any of its patterns matches.
 - `refuse` questions carry no `required`, `acceptable` or `key_facts`.
 - **Stale gold:** a required group whose patterns match zero chunks in the snapshot. The

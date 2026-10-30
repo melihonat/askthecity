@@ -39,52 +39,59 @@ const modelOutput = z.object({
   cited: z.array(z.number().int()),
 });
 
-export const deps: AskDeps = {
-  snapshot: getSnapshot,
+/**
+ * The app's dependencies. `tags` go on every AI Gateway call (embed, rerank, generate), so an
+ * eval run's spend can be read back from its `eval:<run-id>` tag.
+ */
+export function createDeps(tags: string[] = []): AskDeps {
+  const gateway: Record<string, { tags: string[] }> = tags.length ? { gateway: { tags } } : {};
+  return {
+    snapshot: getSnapshot,
 
-  async embed(question) {
-    const { embedding } = await embed({
-      model: EMBEDDING.gatewayModel,
-      value: question,
-      providerOptions: { voyage: { inputType: "query", outputDimension: EMBEDDING.dim } },
-    });
-    return embedding;
-  },
+    async embed(question) {
+      const { embedding } = await embed({
+        model: EMBEDDING.gatewayModel,
+        value: question,
+        providerOptions: { ...gateway, voyage: { inputType: "query", outputDimension: EMBEDDING.dim } },
+      });
+      return embedding;
+    },
 
-  async search(question, embedding, mode) {
-    const { data, error } = await db.rpc("search_chunks", {
-      query_text: question,
-      query_embedding: JSON.stringify(embedding),
-      mode,
-      match_count: CANDIDATES,
-    });
-    if (error) throw new Error(`search_chunks: ${error.message}`);
-    return data as SearchRow[];
-  },
+    async search(question, embedding, mode) {
+      const { data, error } = await db.rpc("search_chunks", {
+        query_text: question,
+        query_embedding: JSON.stringify(embedding),
+        mode,
+        match_count: CANDIDATES,
+      });
+      if (error) throw new Error(`search_chunks: ${error.message}`);
+      return data as SearchRow[];
+    },
 
-  async companions(sections) {
-    const { data, error } = await db.rpc("companion_chunks", { sections });
-    if (error) throw new Error(`companion_chunks: ${error.message}`);
-    return data as CompanionRow[];
-  },
+    async companions(sections) {
+      const { data, error } = await db.rpc("companion_chunks", { sections });
+      if (error) throw new Error(`companion_chunks: ${error.message}`);
+      return data as CompanionRow[];
+    },
 
-  async rerank(question, documents) {
-    const { ranking } = await rerankDocuments({ model: RERANK_MODEL, query: question, documents });
-    const scores = new Array<number>(documents.length).fill(0);
-    for (const r of ranking) scores[r.originalIndex] = r.score;
-    return scores;
-  },
+    async rerank(question, documents) {
+      const { ranking } = await rerankDocuments({ model: RERANK_MODEL, query: question, documents, providerOptions: gateway });
+      const scores = new Array<number>(documents.length).fill(0);
+      for (const r of ranking) scores[r.originalIndex] = r.score;
+      return scores;
+    },
 
-  async generate({ model, system, prompt }) {
-    const { output } = await generateText({
-      model,
-      system,
-      prompt,
-      maxOutputTokens: MAX_OUTPUT_TOKENS,
-      output: Output.object({ schema: modelOutput }),
-      // adaptive thinking would spend the whole output cap before the answer
-      providerOptions: { anthropic: { thinking: { type: "disabled" } } },
-    });
-    return output;
-  },
-};
+    async generate({ model, system, prompt }) {
+      const { output } = await generateText({
+        model,
+        system,
+        prompt,
+        maxOutputTokens: MAX_OUTPUT_TOKENS,
+        output: Output.object({ schema: modelOutput }),
+        // adaptive thinking would spend the whole output cap before the answer
+        providerOptions: { ...gateway, anthropic: { thinking: { type: "disabled" } } },
+      });
+      return output;
+    },
+  };
+}
