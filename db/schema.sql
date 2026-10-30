@@ -142,7 +142,26 @@ begin
 end
 $$;
 
+-- Companion passages (CONTRACT.md, "Citation"): the amending chunks that target the given §§.
+-- Only § → amendment; the caller picks, orders and caps them.
+create or replace function {schema}.companion_chunks(sections text[])
+returns table (
+  target_section text, id text, document_id text, family text, kind text, section text,
+  label text, sublabel text, href text, amended_since text[], body text
+)
+language sql stable
+set search_path = {schema}, pg_catalog
+as $$
+  select a.target_section, c.id, c.document_id, c.family, c.kind, c.section,
+         c.label, c.sublabel, c.href, c.amended_since, c.body
+  from amendments a join chunks c on c.id = a.amending_chunk_id
+  where a.target_section = any(sections)
+  order by a.target_section collate "C", c.id collate "C";
+$$;
+
 revoke execute on function {schema}.search_chunks(text, extensions.halfvec, text, int) from public, anon, authenticated;
+revoke execute on function {schema}.companion_chunks(text[]) from public, anon, authenticated;
 grant usage on schema {schema} to service_role;
 grant select on all tables in schema {schema} to service_role;
 grant execute on function {schema}.search_chunks(text, extensions.halfvec, text, int) to service_role;
+grant execute on function {schema}.companion_chunks(text[]) to service_role;

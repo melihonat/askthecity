@@ -51,8 +51,8 @@ export type RungConfig = {
   prompt: "default" | "quoted";
 };
 
-/** One row from the search_chunks RPC. */
-export type SearchRow = {
+/** The chunk fields a passage is built from. */
+export type ChunkRow = {
   id: string;
   document_id: string;
   family: Family;
@@ -63,10 +63,17 @@ export type SearchRow = {
   href: string;
   amended_since: string[];
   body: string;
+};
+
+/** One row from the search_chunks RPC. */
+export type SearchRow = ChunkRow & {
   rank: number;
   score: number; // fused RRF score: rank arithmetic, no absolute meaning
   pinned: boolean; // placed by the § number match; the gate skips on it
 };
+
+/** One row from the companion_chunks RPC: an amending chunk and the § it targets. */
+export type CompanionRow = ChunkRow & { target_section: string };
 
 export type Snapshot = {
   id: string;

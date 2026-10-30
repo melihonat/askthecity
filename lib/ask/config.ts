@@ -5,6 +5,7 @@ export const EMBEDDING = { gatewayModel: "voyage/voyage-4-large", corpusModel: "
 
 export const CANDIDATES = 20; // fused candidates from search_chunks, reranked to CONTEXT_PASSAGES
 export const CONTEXT_PASSAGES = 5; // the model sees [1]–[5]
+export const MAX_COMPANIONS = 3; // then up to 3 companion passages, [6]…
 export const MAX_OUTPUT_TOKENS = 400;
 
 export const RERANK_MODEL = "voyage/rerank-3";
@@ -14,11 +15,11 @@ export const RERANK_MODEL = "voyage/rerank-3";
 // A first probe: off-topic questions ~0.28-0.30, the lowest dev answer question 0.45.
 export const REFUSAL_THRESHOLD = 0.35;
 
-// Hybrid search with § pins, reranked and gated; no companions yet.
+// Hybrid search with § pins, reranked and gated, with companion passages.
 export const DEFAULT_CONFIG: RungConfig = {
   search: "hybrid",
   rerank: true,
-  companions: false,
+  companions: true,
   model: "anthropic/claude-haiku-5.5",
   prompt: "default",
 };

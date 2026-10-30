@@ -18,10 +18,14 @@ CHUNKS = [{"id": f"tmc:1-{i}"} for i in range(100)]
 
 @pytest.fixture
 def stats(monkeypatch):
-    monkeypatch.setattr(db, "PINS", {"1-2": ["tmc:1-2"]})
+    monkeypatch.setattr(db, "PINS", {"1-2": ["tmc:1-2"], "1-3": ["tmc:1-3:A", "tmc:1-3:B"]})
+    monkeypatch.setattr(db, "AMENDED_PINS", {"1-3": (["5-2026"], ["bl:5-2026:cl1"])})
     return {"snapshots": 1, "chunker_version": config.CHUNKER_VERSION, "chunks": 100,
             "without_embedding": 0, "replacement_char": 0, "replacement_ids": [],
-            "shas_with_chunks": {"a1", "b2"}, "pins": {"1-2": ["tmc:1-2"]}}
+            "shas_with_chunks": {"a1", "b2"},
+            "pins": {"1-2": ["tmc:1-2"], "1-3": ["tmc:1-3:A", "tmc:1-3:B"]},
+            "pin_amended_since": {"1-2": [[]], "1-3": [["5-2026"], ["5-2026"]]},
+            "pin_amendments": {"1-3": ["bl:5-2026:cl1"]}}
 
 
 def failures(stats):
@@ -57,5 +61,17 @@ def test_snapshot_row_and_chunker_version_are_checked(stats):
 
 
 def test_a_pin_returning_other_chunk_ids_fails(stats):
-    assert failures({**stats, "pins": {"1-2": ["tmc:1-2:A", "tmc:1-2:B"]}}) == [
+    assert failures({**stats, "pins": {**stats["pins"], "1-2": ["tmc:1-2:A", "tmc:1-2:B"]}}) == [
         "pin § 1-2: ['tmc:1-2:A', 'tmc:1-2:B'], expected ['tmc:1-2']"]
+
+
+def test_an_amended_pin_needs_amended_since_on_every_chunk_and_its_amendments(stats):
+    assert failures({**stats, "pin_amended_since": {"1-2": [[]], "1-3": [["5-2026"], []]}}) == [
+        "pin § 1-3: amended_since [['5-2026'], []], expected ['5-2026'] on each chunk"]
+    assert failures({**stats, "pin_amendments": {}}) == [
+        "pin § 1-3: amendments [], expected ['bl:5-2026:cl1']"]
+
+
+def test_a_pin_not_amended_must_not_carry_amendments(stats):
+    assert failures({**stats, "pin_amendments": {**stats["pin_amendments"], "1-2": ["bl:9-2026:cl1"]}}) == [
+        "pin § 1-2: amendments ['bl:9-2026:cl1'], expected []"]

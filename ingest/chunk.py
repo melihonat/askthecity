@@ -295,6 +295,17 @@ def range_id(first: str | None, last: str | None, terms: bool) -> str:
 
 # ── a Code chapter ───────────────────────────────────────────────────────────────────────
 
+def noted_bylaws(records: list[dict]) -> list[str]:
+    """Every by-law named in the chapter's bracketed notes ([Amended …], [Added …], [History: …]),
+    anywhere in the PDF, footnotes included. Notes wrap: "By-law 600-" / "2023]"."""
+    parts: list[str] = []
+    for r in records:
+        if r["kind"] == "line":
+            wrapped = parts and re.search(r"\w-$", parts[-1])
+            parts.append(r["text"] if wrapped else " " + r["text"])
+    return sorted({b for note in NOTE.findall("".join(parts)) for b in BYLAW.findall(note)})
+
+
 def chunk_code_chapter(records: list[dict], row: store.ManifestRow) -> tuple[dict, list[dict]] | None:
     """One chapter's extracted stream → (document, chunks), or None for a "Reserved" stub."""
     heights = {r["page"]: r["height"] for r in records if r["kind"] == "page"}
@@ -373,6 +384,7 @@ def chunk_code_chapter(records: list[dict], row: store.ManifestRow) -> tuple[dic
         "fetched_at": row.obtained_at[:10], "consolidated_as_of": consolidated,
         "enacted": None, "in_force": None,
         "item_id": None, "status_stamp": None, "decision_date": None, "bylaws": None,
+        "noted_bylaws": noted_bylaws(content),
     }
     dated = f"consolidated as of {consolidated}" if consolidated else "consolidation date not printed"
     sublabel = f"consolidated {consolidated}" if consolidated else "consolidation date not printed"
@@ -442,29 +454,42 @@ def _dump(rec: dict) -> str:
 
 
 def chunk() -> None:
+    from .bylaw import chunk_amending_bylaw
+    from .link import link
+
     documents, chunks, skipped = [], [], []
-    for row in sorted(store.read_manifest(), key=lambda r: r.ref):
-        if row.kind != "code_chapter":
+    for row in sorted(store.read_manifest(), key=lambda r: (r.kind, r.ref)):
+        if row.kind not in ("code_chapter", "amending_bylaw"):
             continue
         path = config.TEXT_DIR / f"{row.ref}.jsonl"
         records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
-        if (result := chunk_code_chapter(records, row)) is None:
+        if row.kind == "amending_bylaw":
+            doc, cs = chunk_amending_bylaw(records, row)
+        elif (result := chunk_code_chapter(records, row)) is None:
             skipped.append({"ref": row.ref, "reason": "reserved stub"})
             print(f"{row.ref}: reserved stub, skipped")
             continue
-        doc, cs = result
-        if not cs:
-            raise SystemExit(f"{row.ref}: no § found")
+        else:
+            doc, cs = result
+            if not cs:
+                raise SystemExit(f"{row.ref}: no § found")
         documents.append(doc)
         chunks += cs
         print(f"{row.ref}: {len(cs)} chunks, {sum(c['tokens'] for c in cs)} tokens")
 
+    documents, chunks, amendments, dropped = link(documents, chunks)
+    for s in dropped:
+        print(f"{s['ref']}: {s['reason']}, skipped")
+    skipped += dropped
+
     ids = [c["id"] for c in chunks]
     if dupes := sorted({i for i in ids if ids.count(i) > 1}):
         raise SystemExit(f"duplicate chunk ids: {dupes}")
-    print(f"{len(documents)} documents, {len(chunks)} chunks, {sum(c['tokens'] for c in chunks):,} tokens; "
-          f"{len(skipped)} skipped")
+    bylaws = sum(d["kind"] == "amending_bylaw" for d in documents)
+    print(f"{len(documents)} documents ({bylaws} amending by-laws), {len(chunks)} chunks, "
+          f"{sum(c['tokens'] for c in chunks):,} tokens; {len(amendments)} amendments; {len(skipped)} skipped")
     config.BUILD.mkdir(parents=True, exist_ok=True)
     config.DOCUMENTS.write_text("".join(_dump(d) + "\n" for d in documents), encoding="utf-8", newline="\n")
     config.CHUNKS.write_text("".join(_dump(c) + "\n" for c in chunks), encoding="utf-8", newline="\n")
+    config.AMENDMENTS.write_text("".join(_dump(a) + "\n" for a in amendments), encoding="utf-8", newline="\n")
     config.SKIPPED.write_text("".join(_dump(s) + "\n" for s in skipped), encoding="utf-8", newline="\n")

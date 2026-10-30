@@ -28,10 +28,13 @@ is dated.
 - **In:** every by-law enacted after a chapter's footer date whose title amends that
   chapter, found by scanning the yearly `law-lists/YYYY-laws.htm` titles for "Chapter NNN"
   (not the Recent Amendments column, which misses some, e.g. 470-2026). By-laws that amend
-  schedules only are dropped. That leaves **80** main-text amending by-laws
+  schedules only are dropped, as are those the chapter's own notes or a later consolidation
+  already include. On 2026-10-29 that left **51** of 151 fetched
   ([`CHUNKING.md`](CHUNKING.md#rules-amending-by-laws)).
-- Every Code chunk carries `consolidated_as_of` (the footer date). A citation to a chapter
-  with a later ingested by-law shows "amended since by By-law NNN-YYYY" with its link.
+- A by-law's attachments (new schedules, maps, a whole new chapter set out in "Schedule A")
+  are not in the snapshot; its operative clauses are.
+- Every Code chunk carries `consolidated_as_of` (the footer date). A citation to a § a later
+  ingested by-law amends shows "amended since by By-law NNN-YYYY".
 - By-laws carry `in_force` where it differs from enactment (Ch 611: May 1, 2027), and
   answers say so. How an amended § is answered is in [`CONTRACT.md`](CONTRACT.md).
 

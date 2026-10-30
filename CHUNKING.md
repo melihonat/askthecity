@@ -61,22 +61,48 @@ chapter, including the 21 without § bookmarks.
 Breadcrumb:
 
 ```
-[Toronto Municipal Code › Ch 681 Sewers › Article I › § 681-5 Pollution prevention planning (C–D)]
-[consolidated as of 2023-05-15 · amended since by By-law 470-2026]
+[Toronto Municipal Code › Ch 608 Parks › Article IV Games, Sports and Organized Activities › § 608-19 Model aircraft and rockets]
+[consolidated as of 2024-06-03 · amended since by By-law 1482-2025]
 ```
+
+`amended since` is per §: every chunk of a § some linked by-law targets.
 
 ## Rules: amending by-laws
 
-**Which:** a by-law in the 2019–2026 yearly lists whose title names Chapter N, enacted in or
-after N's consolidated-as-of year, and whose number is **absent from N's own `[Amended …]`
-notes**. Then drop titles naming a street or address, and drop by-laws whose numbered
-operative clauses all touch a Schedule or Appendix. At prototype time: 120 candidates, 40
-schedule-only, **80 in** (~287k tokens).
+**Which** (`fetch-bylaws`): a by-law in the 2019–2026 yearly lists whose title names a
+snapshot Chapter N ("Municipal Code … Chapter N"), numbered in or after N's consolidated-as-of
+year, and whose title names no street, address or ward (`respecting Beverly Glen Boulevard`,
+`municipally known as …`). Whole-chapter replacements and new chapters are left to the
+replacement rules below.
 
-**Chunks:** a by-law under the ceiling is one chunk; a bigger one splits by numbered
-operative clause. Each chunk records `amends: [{chapter, section}]` parsed from clause text
-("Subsection 681-4(J)" → `681`, `681-4 J`), plus `enacted`, and `in_force` when the by-law
-says it differs ("comes into force on January 1, 2027").
+**Linked** (`chunk`, `ingest/link.py`): a fetched by-law amends N *since* its consolidation
+only if its number is **absent from N's own bracketed notes** (`[Amended …]`, `[Added …]`,
+`[History: …]`, read across wrapped lines) and it **took effect after** N's consolidated-as-of
+date (the later of enactment and in-force; a consolidation includes what took effect that
+day). By-laws whose targeted instructions all name a Schedule or Appendix are dropped, as are
+the schedule-only clauses of the rest. Dropped by-laws go to `build/skipped.jsonl` with the
+reason. On 2026-10-29: 151 fetched, 89 already folded in, 10 schedule-only, 1 with no live
+clause, **51 in** (157 chunks, ~47k tokens), 201 `amendments` rows over 163 §§. The Code had
+been re-consolidated since the prototype count (80 in): Ch 681 now carries 470-2026, Ch 813
+carries 402-2026's tree rules.
+
+**Chunks:** one chunk per **operative clause** (`bl:1482-2025:cl1`), however short, so a
+clause's id is stable and a companion is no wider than the clause that amends the §. The
+in-force clause ("This by-law comes into force on …") is not a chunk; its date goes on every
+chunk. A clause over the ceiling splits at its lettered items (`A.`, `a.` or `(a)` at the
+indent of its first item; items quoted inside the new text sit deeper and stay put), packed up
+to the ceiling: `bl:1482-2025:cl1:O-Y`. The authority preamble, the recitals ("Whereas …"),
+the signature and anything after it (attachments: new schedules, maps, whole new chapters)
+are not chunked. Clauses some PDFs lay out as a one-text-cell-per-row table are read back as
+lines.
+
+Each chunk records `amends`, parsed from its **instruction paragraphs** only (those that
+amend, delete, add, insert, replace, repeal …; never the quoted words they insert): "Subsection
+681-4(J)" → `§ 681-4(J)`, "subsection § 629-38F" → `§ 629-38 F` (the letter is a subsection
+unless the snapshot has a § 629-38F), "§ 610-6.2.A." → `§ 610-6.2 A`. Only chapters the
+by-law names count, and only §§ the snapshot has. The document records `enacted` ("Enacted and
+passed on …") and `in_force` when the by-law says it differs ("comes into force on January 1,
+2027"; also retroactive dates).
 
 **Whole-chapter replacement** (1511-2025 → Ch 497, 1512-2025 → Ch 629): the by-law runs
 through the chapter splitter as that chapter. Its chunks carry the by-law as source and its
@@ -93,7 +119,8 @@ through the chapter splitter as that chapter. Its chunks carry the by-law as sou
 Breadcrumb:
 
 ```
-[By-law 470-2026 › amends Ch 681 Sewers § 681-4 J · enacted 2026-05-21 · in force on enactment]
+[By-law 1482-2025 › To amend City of Toronto Municipal Code Chapter 608 Parks.]
+[amends Ch 608 Parks § 608-8.1 B, § 608-19, … · enacted 2025-12-17 · in force 2026-03-02]
 ```
 
 ## Decisions: what enters

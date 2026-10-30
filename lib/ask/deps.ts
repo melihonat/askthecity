@@ -5,7 +5,7 @@ import { embed, generateText, Output, rerank as rerankDocuments } from "ai";
 import { z } from "zod";
 import type { AskDeps } from "./ask";
 import { CANDIDATES, CorpusMismatchError, EMBEDDING, MAX_OUTPUT_TOKENS, RERANK_MODEL, checkCorpus } from "./config";
-import type { SearchRow, Snapshot } from "./types";
+import type { CompanionRow, SearchRow, Snapshot } from "./types";
 
 const db = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
   auth: { persistSession: false },
@@ -60,6 +60,12 @@ export const deps: AskDeps = {
     });
     if (error) throw new Error(`search_chunks: ${error.message}`);
     return data as SearchRow[];
+  },
+
+  async companions(sections) {
+    const { data, error } = await db.rpc("companion_chunks", { sections });
+    if (error) throw new Error(`companion_chunks: ${error.message}`);
+    return data as CompanionRow[];
   },
 
   async rerank(question, documents) {
