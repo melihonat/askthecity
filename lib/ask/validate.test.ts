@@ -11,6 +11,7 @@ const passage = (n: number): PassageView => ({
   sublabel: "consolidated 2024-11-14",
   href: `https://example.test/591.pdf#page=${n}`,
   amendedSince: [],
+  notYetLaw: false,
   body: "…",
 });
 const PASSAGES = [1, 2, 3, 4, 5].map(passage);

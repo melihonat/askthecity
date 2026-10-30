@@ -15,7 +15,7 @@ from . import config
 @dataclass
 class ManifestRow:
     sha256: str
-    kind: str              # code_chapter | amending_bylaw | item_page | staff_report
+    kind: str              # code_chapter | amending_bylaw | replacement_bylaw | item_page | staff_report
     ref: str               # ch-591, bylaw-470-2026, 2026.IE29.6, backgroundfile-286369
     parent_ref: str
     source_url: str
@@ -48,6 +48,14 @@ def read_manifest() -> list[ManifestRow]:
         return []
     with config.MANIFEST.open(newline="", encoding="utf-8") as f:
         return [ManifestRow(**{**r, "bytes": int(r["bytes"])}) for r in csv.DictReader(f)]
+
+
+def snapshot_date() -> str:
+    """The day the first scripted fetch ran: what "today" means for in-force dates."""
+    fetched = [r.obtained_at[:10] for r in read_manifest() if r.obtained_by == "script"]
+    if not fetched:
+        raise SystemExit("the manifest has no scripted fetch: run fetch-rules first")
+    return min(fetched)
 
 
 def write_manifest(rows: list[ManifestRow]) -> None:

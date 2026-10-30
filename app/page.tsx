@@ -145,7 +145,10 @@ function Card({ p, dim }: { p: PassageView; dim?: boolean }) {
         {p.amendedSince.length > 0 && (
           <span className="badge amber">amended since by {p.amendedSince.map((n) => `By-law ${n}`).join(", ")}</span>
         )}
-        {p.companion && <span className="badge violet">amendment to a retrieved §</span>}
+        {p.notYetLaw && <span className="badge red">not yet law</span>}
+        {p.companion && (
+          <span className="badge violet">{p.notYetLaw ? "replacement for a retrieved §" : "amendment to a retrieved §"}</span>
+        )}
       </div>
       <div className="muted">
         {p.sublabel} ·{" "}

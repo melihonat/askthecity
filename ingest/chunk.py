@@ -341,8 +341,34 @@ def chunk_code_chapter(records: list[dict], row: store.ManifestRow) -> tuple[dic
     body = [r for r in content
             if band(r) == "body" and (r["kind"] == "table" or r["size"] >= MIN_BODY_SIZE)]
 
+    document = {
+        "id": f"tmc:{chapter}", "kind": "chapter", "family": "rules",
+        "title": f"Ch {chapter} {title}", "source_url": row.source_url, "sha256": row.sha256,
+        "fetched_at": row.obtained_at[:10], "consolidated_as_of": consolidated,
+        "enacted": None, "in_force": None,
+        "item_id": None, "status_stamp": None, "decision_date": None, "bylaws": None,
+        "chapter": chapter, "noted_bylaws": noted_bylaws(content),
+    }
+    dated = f"consolidated as of {consolidated}" if consolidated else "consolidation date not printed"
+    sublabel = f"consolidated {consolidated}" if consolidated else "consolidation date not printed"
+    chunks = chapter_chunks(parse_sections(body), chapter=chapter, title=title, document_id=document["id"],
+                            kind="chapter", id_prefix="tmc:", trail=["Toronto Municipal Code", f"Ch {chapter} {title}"],
+                            dated=dated, sublabel=sublabel, url=row.source_url)
+    return document, chunks
+
+
+def parse_sections(body: list[dict]) -> list[dict]:
+    """A chapter's body records (running headers, footers and small print gone) → one dict per §:
+    number, heading, article, first page and its lines."""
     def is_heading(r: dict):
         return r["kind"] == "line" and r["bold"] and r["x0"] < MARGIN and SECTION.match(r["text"])
+
+    def wraps(prev: dict, r: dict, heading: str) -> bool:
+        """r is the second line of a § heading that didn't end with a period."""
+        return (is_heading(prev) and prev["text"].rstrip()[-1:] not in ".]" and r["kind"] == "line"
+                and r["bold"] and r["x0"] < MARGIN and r["page"] == prev["page"]
+                and r["top"] - prev["bottom"] <= PARA_GAP and not SECTION.match(r["text"])
+                and not r["text"].startswith("[") and bool(heading))
 
     # The page-1 table of contents repeats every § heading; the body starts at the first repeat.
     seen, start = set(), 0
@@ -366,6 +392,9 @@ def chunk_code_chapter(records: list[dict], row: store.ManifestRow) -> tuple[dic
             continue
         if i < start:
             continue
+        if sections and not sections[-1]["lines"] and wraps(body[i - 1], r, sections[-1]["heading"]):
+            sections[-1]["heading"] += " " + r["text"].strip().rstrip(". ")   # "… parts of" / "buildings."
+            continue
         if m := is_heading(r):
             in_article_head = False
             # A note that starts on the heading line ("… Maps [Added 2021-04-") belongs to the body.
@@ -377,20 +406,15 @@ def chunk_code_chapter(records: list[dict], row: store.ManifestRow) -> tuple[dic
                              "page": r["page"], "lines": lines})
         elif sections and not in_article_head:
             sections[-1]["lines"].append(r)
+    return sections
 
-    document = {
-        "id": f"tmc:{chapter}", "kind": "chapter", "family": "rules",
-        "title": f"Ch {chapter} {title}", "source_url": row.source_url, "sha256": row.sha256,
-        "fetched_at": row.obtained_at[:10], "consolidated_as_of": consolidated,
-        "enacted": None, "in_force": None,
-        "item_id": None, "status_stamp": None, "decision_date": None, "bylaws": None,
-        "noted_bylaws": noted_bylaws(content),
-    }
-    dated = f"consolidated as of {consolidated}" if consolidated else "consolidation date not printed"
-    sublabel = f"consolidated {consolidated}" if consolidated else "consolidation date not printed"
 
+def chapter_chunks(sections: list[dict], *, chapter: str, title: str, document_id: str, kind: str,
+                   id_prefix: str, trail: list[str], dated: str, sublabel: str, url: str) -> list[dict]:
+    """§§ → chunks: one per §, split over the ceiling; schedules printed after the last § are
+    their own chunks. Shared by Code chapters and replacement chapters (ingest/replace.py)."""
     units = [{"section": s["section"], "heading": s["heading"], "article": s["article"],
-              "id": f"tmc:{s['section']}", "label": f"Ch {chapter} § {s['section']}",
+              "id": f"{id_prefix}{s['section']}", "label": f"Ch {chapter} § {s['section']}",
               "crumb": f"§ {s['section']} {s['heading']}", "blocks": to_blocks(s["lines"])} for s in sections]
 
     # Schedules and appendices printed after the last § are their own units, not that §'s text.
@@ -406,7 +430,7 @@ def chunk_code_chapter(records: list[dict], row: store.ManifestRow) -> tuple[dic
                 name = f"{m[1].title()} {m[2]}"
                 heading = b.text if len(b.text) <= 100 else b.text[:100].rsplit(" ", 1)[0] + " …"
                 schedules.append({"key": key, "section": None, "heading": heading, "article": None,
-                                  "id": f"tmc:{chapter}:{key}", "label": f"Ch {chapter} {name}",
+                                  "id": f"{id_prefix}{chapter}:{key}", "label": f"Ch {chapter} {name}",
                                   "crumb": heading, "blocks": []})
             schedules[-1]["blocks"].append(b)
 
@@ -429,24 +453,23 @@ def chunk_code_chapter(records: list[dict], row: store.ManifestRow) -> tuple[dic
                 cid += f":{key}"
             text = render(bs)
             pages = [b.page for b in bs]
-            trail = " › ".join(p for p in ("Toronto Municipal Code", f"Ch {chapter} {title}", u["article"],
-                                           u["crumb"] + (f" ({rng})" if rng else "")) if p)
+            trail_text = " › ".join(p for p in (*trail, u["article"], u["crumb"] + (f" ({rng})" if rng else "")) if p)
             amended_by = sorted({b for note in NOTE.findall(text) for b in BYLAW.findall(note)})
             chunks.append({
-                "id": cid, "document_id": document["id"],
-                "family": "rules", "kind": "chapter",
+                "id": cid, "document_id": document_id,
+                "family": "rules", "kind": kind,
                 "chapter": chapter, "article": u["article"],
                 "section": u["section"], "subsection_range": rng, "stage": None, "heading": u["heading"],
-                "breadcrumb": f"[{trail}]\n[{dated}]",
+                "breadcrumb": f"[{trail_text}]\n[{dated}]",
                 "body": text,
                 "label": u["label"] + (f" {rng}" if rng else ""),
                 "sublabel": sublabel,
-                "href": f"{row.source_url}#page={min(pages)}",
+                "href": f"{url}#page={min(pages)}",
                 "amended_by": amended_by, "amended_since": [],
                 "page_start": min(pages), "page_end": max(pages),
                 "tokens": tokens(text),
             })
-    return document, chunks
+    return chunks
 
 
 def _dump(rec: dict) -> str:
@@ -456,15 +479,19 @@ def _dump(rec: dict) -> str:
 def chunk() -> None:
     from .bylaw import chunk_amending_bylaw
     from .link import link
+    from .replace import chunk_replacement, link_replacements, supersede
 
+    today = store.snapshot_date()
     documents, chunks, skipped = [], [], []
     for row in sorted(store.read_manifest(), key=lambda r: (r.kind, r.ref)):
-        if row.kind not in ("code_chapter", "amending_bylaw"):
+        if row.kind not in ("code_chapter", "amending_bylaw", "replacement_bylaw"):
             continue
         path = config.TEXT_DIR / f"{row.ref}.jsonl"
         records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
         if row.kind == "amending_bylaw":
             doc, cs = chunk_amending_bylaw(records, row)
+        elif row.kind == "replacement_bylaw":
+            doc, cs = chunk_replacement(records, row, today)
         elif (result := chunk_code_chapter(records, row)) is None:
             skipped.append({"ref": row.ref, "reason": "reserved stub"})
             print(f"{row.ref}: reserved stub, skipped")
@@ -477,16 +504,19 @@ def chunk() -> None:
         chunks += cs
         print(f"{row.ref}: {len(cs)} chunks, {sum(c['tokens'] for c in cs)} tokens")
 
+    documents, chunks, replaced = supersede(documents, chunks)
     documents, chunks, amendments, dropped = link(documents, chunks)
-    for s in dropped:
+    amendments += link_replacements(documents, chunks)
+    for s in replaced + dropped:
         print(f"{s['ref']}: {s['reason']}, skipped")
-    skipped += dropped
+    skipped += replaced + dropped
 
     ids = [c["id"] for c in chunks]
     if dupes := sorted({i for i in ids if ids.count(i) > 1}):
         raise SystemExit(f"duplicate chunk ids: {dupes}")
     bylaws = sum(d["kind"] == "amending_bylaw" for d in documents)
-    print(f"{len(documents)} documents ({bylaws} amending by-laws), {len(chunks)} chunks, "
+    replacements = sum(d["kind"] == "replacement_bylaw" for d in documents)
+    print(f"{len(documents)} documents ({bylaws} amending, {replacements} replacement by-laws), {len(chunks)} chunks, "
           f"{sum(c['tokens'] for c in chunks):,} tokens; {len(amendments)} amendments; {len(skipped)} skipped")
     config.BUILD.mkdir(parents=True, exist_ok=True)
     config.DOCUMENTS.write_text("".join(_dump(d) + "\n" for d in documents), encoding="utf-8", newline="\n")

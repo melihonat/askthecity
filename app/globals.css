@@ -16,6 +16,7 @@ button { margin-top: .5rem; font: inherit; padding: .4rem 1rem; }
 .badge { display: inline-block; margin-left: .4rem; padding: 0 .4rem; border-radius: 4px; font-size: .75rem; }
 .badge.amber { background: #fef3c7; color: #92400e; }
 .badge.violet { background: #ede9fe; color: #5b21b6; }
+.badge.red { background: #fee2e2; color: #991b1b; }
 details summary { cursor: pointer; color: #666; font-size: .9rem; margin: .5rem 0; }
 .tag { display: inline-block; min-width: 1.4em; text-align: center; background: #333; color: #fff; border-radius: 4px; font-size: .8rem; }
 footer { margin-top: 3rem; }

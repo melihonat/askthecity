@@ -23,3 +23,6 @@ node_modules/
 .next/
 next-env.d.ts
 *.tsbuildinfo
+
+# Draft § maps the chunk stage writes for review (the reviewed map is committed)
+snapshot/review/*.draft.csv

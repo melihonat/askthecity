@@ -100,9 +100,10 @@ def items(blocks: list[Block]) -> list[tuple[str, list[Block]]]:
     return [(label, blocks[bounds[k]:bounds[k + 1]]) for k, (_, label) in enumerate(starts)]
 
 
-def chunk_amending_bylaw(records: list[dict], row: store.ManifestRow) -> tuple[dict, list[dict]]:
-    """One by-law's extracted stream → (document, chunks). Breadcrumbs and sublabels are drafts
-    the linker completes once it knows which chapters and §§ the by-law really amends."""
+def read_bylaw(records: list[dict], row: store.ManifestRow) -> dict:
+    """A by-law's extracted stream → its body lines (running headers and small print gone), number,
+    title, enacted and in-force dates, and where its operative clauses start and end ("Enacted and
+    passed on …"). Anything after that line is the signature and attachments."""
     lines = [r for r in flatten_layout_tables([r for r in records if r["kind"] != "page"])
              if not (r["page"] > 1 and r["top"] < HEADER_BAND)
              and (r["kind"] == "table" or r["size"] >= MIN_BODY_SIZE)]
@@ -132,7 +133,20 @@ def chunk_amending_bylaw(records: list[dict], row: store.ManifestRow) -> tuple[d
                       and r["x0"] < MARGIN and text_of(r).startswith("1. ")), None)
     if start is None:
         raise SystemExit(f"{row.ref}: no enacting line and no clause 1")
-    operative = lines[start:passed]
+
+    whole = render(to_blocks(lines[start:passed]))
+    in_force = next((iso_date(m[1]) for m in IN_FORCE.finditer(whole)), None)
+    return {"lines": lines, "start": start, "passed": passed, "number": number, "title": title,
+            "enacted": enacted, "in_force": in_force if in_force and in_force != enacted else None}
+
+
+def chunk_amending_bylaw(records: list[dict], row: store.ManifestRow) -> tuple[dict, list[dict]]:
+    """One by-law's extracted stream → (document, chunks). Breadcrumbs and sublabels are drafts
+    the linker completes once it knows which chapters and §§ the by-law really amends."""
+    bl = read_bylaw(records, row)
+    number, title, enacted, in_force = bl["number"], bl["title"], bl["enacted"], bl["in_force"]
+    operative = bl["lines"][bl["start"]:bl["passed"]]
+    text_of = lambda r: r.get("text", "")
 
     clauses: list[tuple[str, list[dict]]] = []
     for r in operative:
@@ -143,10 +157,6 @@ def chunk_amending_bylaw(records: list[dict], row: store.ManifestRow) -> tuple[d
             clauses[-1][1].append(r)
         else:
             clauses.append(("1", [r]))    # an unnumbered single-clause by-law
-
-    whole = render(to_blocks(operative))
-    in_force = next((iso_date(m[1]) for m in IN_FORCE.finditer(whole)), None)
-    in_force = in_force if in_force and in_force != enacted else None
 
     document = {
         "id": f"bl:{number}", "kind": "amending_bylaw", "family": "rules",

@@ -104,17 +104,42 @@ by-law names count, and only §§ the snapshot has. The document records `enacte
 passed on …") and `in_force` when the by-law says it differs ("comes into force on January 1,
 2027"; also retroactive dates).
 
-**Whole-chapter replacement** (1511-2025 → Ch 497, 1512-2025 → Ch 629): the by-law runs
-through the chapter splitter as that chapter. Its chunks carry the by-law as source and its
-`in_force` date. **It supersedes only once in force:**
+**Whole-chapter replacement** (`ingest/replace.py`; 1511-2025 → Ch 497, 1512-2025 → Ch 629):
+`fetch-bylaws` takes a title that repeals Chapter N and replaces it "with new Chapter N",
+numbered in or after N's consolidated-as-of year (a new chapter with no old one, 1513-2025 →
+Ch 611, is out). The new chapter set out in the by-law's **Schedule A** runs through the
+chapter splitter as Chapter N; the by-law's own clauses are not chunked. Its chunks carry the
+by-law as source (`kind = replacement_bylaw`, href to the by-law PDF) and its `in_force` date.
+**It supersedes only once in force:**
 
-- **In force on the snapshot date** (1511-2025, 2026-06-01): the stale consolidated PDF is
-  dropped and the replacement's §§ take `tmc:` ids.
-- **Not yet in force** (1512-2025, 2027-05-01): the consolidated chapter stays as the law.
-  The replacement's §§ get `bl:<n>:<§>` ids and are recorded in `amendments` against the
-  old § each one replaces (a hand-reviewed old → new § map; numbering changes, e.g.
-  629-38 → 629-4.25), so they arrive as companion passages. The answer reads "today X;
-  from <in_force>, Y".
+- **In force on the snapshot date**: the stale consolidated PDF is dropped and the
+  replacement's §§ take `tmc:` ids. Amending by-laws link to it as to its chapter, with its
+  in-force date as the consolidation date. If the City has already re-consolidated the
+  chapter with it (the number is in the chapter's notes, or the consolidation is dated on or
+  after its in-force date), the chapter stays and the by-law is dropped. That is 1511-2025
+  (in force 2026-06-01): Ch 497 was re-consolidated as of that day, so `fetch-bylaws` doesn't
+  even fetch it (2025 is before the consolidation year).
+- **Not yet in force** (1512-2025, 2027-05-01): the consolidated chapter stays the law. The
+  replacement's §§ get `bl:<n>:<§>` ids and are recorded in `amendments` against the old §
+  each one replaces, from the hand-reviewed old → new § map
+  ([`INGESTION.md`](INGESTION.md#hand-review-inputs); numbering changes, e.g. 629-38 →
+  629-4.25), so they arrive as companion passages. An old § the map says is `repealed` has
+  no companion; its sublabel says so instead. The answer reads "today X; from <in_force>, Y".
+
+Not yet in force, the new § and the old § it replaces:
+
+```
+[By-law 1512-2025 › new Ch 629 Property Standards › Article 4 Standards › § 629-4.25 Heating and cooling]
+[enacted 2025-12-17 · in force 2027-05-01, not yet law · replaces § 629-38]
+sublabel: By-law 1512-2025 · in force 2027-05-01, not yet law
+
+[Toronto Municipal Code › Ch 629 Property Standards › Article IV Standards › § 629-38 Heating and air conditioning]
+[consolidated as of 2025-04-30 · amended since by By-law 67-2026 · replaced by § 629-4.25 of By-law 1512-2025 from 2027-05-01]
+sublabel: consolidated 2025-04-30 · replaced 2027-05-01 by By-law 1512-2025   (or "repealed …")
+```
+
+A § heading that wraps onto a second bold line ("… other similar parts of" / "buildings and
+structures.") is joined back into one heading, in chapters and replacements alike.
 
 Breadcrumb:
 

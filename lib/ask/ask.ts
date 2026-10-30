@@ -36,6 +36,8 @@ export function toPassage(row: ChunkRow, n: number, companion = false): PassageV
     sublabel: row.sublabel,
     href: row.href,
     amendedSince: row.amended_since ?? [],
+    // a replacement in force takes `tmc:` ids and is the Code; one not yet in force keeps `bl:` ids
+    notYetLaw: row.kind === "replacement_bylaw" && !row.id.startsWith("tmc:"),
     body: row.body,
   };
 }
@@ -47,9 +49,10 @@ function bylawOrder(documentId: string): [number, number] {
 }
 
 /**
- * Companion passages (CONTRACT.md, "Citation"): for the passages' amended §§, the amending chunks
- * that target them, in passage order, newest by-law first, capped. Only § → amendment: a by-law
- * chunk among the passages pulls nothing in, and one already a passage is not repeated.
+ * Companion passages (CONTRACT.md, "Citation"): for the passages' Code §§, the chunks that target
+ * them (amending clauses, and the §§ of a replacement not yet in force), in passage order, newest
+ * by-law first, capped. Only § → amendment: a by-law chunk among the passages pulls nothing in,
+ * and one already a passage is not repeated.
  */
 export function pickCompanions(passages: PassageView[], rows: CompanionRow[], sectionOf: Map<string, string>): CompanionRow[] {
   const given = new Set(passages.map((p) => p.chunkId));
@@ -102,14 +105,13 @@ export async function* ask(
   const ranked = scores ? byRerank(rows, scores) : rows;
   const top = ranked.slice(0, CONTEXT_PASSAGES);
   const passages = top.map((r, i) => toPassage(r, i + 1));
-  // Amended Code §§ among the passages, by chunk: what their companions target.
-  const amended = new Map(
-    top.filter((r) => r.kind === "chapter" && r.section && r.amended_since?.length).map((r) => [r.id, r.section!]),
-  );
-  if (config.companions && amended.size) {
-    const found = await deps.companions([...new Set(amended.values())]);
+  // Code §§ among the passages, by chunk: what companions target. Not only amended ones: a § whose
+  // chapter has a replacement not yet in force carries no `amended_since`, but has companions.
+  const codeSections = new Map(top.filter((r) => r.id.startsWith("tmc:") && r.section).map((r) => [r.id, r.section!]));
+  if (config.companions && codeSections.size) {
+    const found = await deps.companions([...new Set(codeSections.values())]);
     const first = passages.length + 1; // numbered after the retrieved passages
-    passages.push(...pickCompanions(passages, found, amended).map((r, i) => toPassage(r, first + i, true)));
+    passages.push(...pickCompanions(passages, found, codeSections).map((r, i) => toPassage(r, first + i, true)));
   }
   yield { type: "passages", passages };
 

@@ -66,6 +66,9 @@ any stage re-runs alone.
   `extract` + `chunk` of the chapters; then `extract` and `chunk` run again with the by-laws.
   It skips by-laws already in `corpus/`. The `chunk` stage links them (which are already
   folded in, which amend schedules only) and lists the dropped ones in `build/skipped.jsonl`.
+  It also fetches replacement by-laws (manifest kind `replacement_bylaw`); `chunk` decides
+  whether each stands in for its chapter, rides along as not yet law, or is already
+  consolidated ([`CHUNKING.md`](CHUNKING.md#rules-amending-by-laws)).
 - **`restore`** pulls every manifest row from R2 into `corpus/`, verifying sha256. It
   replaces stages 1–4 on a new machine; nothing is re-fetched from the City.
 - **`all`** runs stages 3–8 in order and stops at the first failure (today 5–8: the
@@ -109,10 +112,14 @@ re-run.**
   downloaded.
 - **`section_map_<bylaw>.csv`** (`old_section, new_section, note`), checked by `chunk` for
   every replacement chapter whose `in_force` is after the snapshot date (today:
-  1512-2025 → Ch 629, in force 2027-05-01). Missing → the stage writes a draft paired by
-  heading similarity and exits. Coverage check: every new § maps to an old § or says `new`;
-  every old § maps to a new § or says `repealed`. A replacement already in force needs no
-  map.
+  1512-2025 → Ch 629, in force 2027-05-01). Missing or incomplete → the stage writes
+  `section_map_<bylaw>.draft.csv` (the valid reviewed rows, plus a row per unmapped § paired
+  by heading similarity, notes starting `draft:`) and exits. Coverage check: every new § maps
+  from an old § or says `new` in `old_section`; every old § maps to a new § or says
+  `repealed` in `new_section`; no row names a § that doesn't exist. One § may appear in
+  several rows (629-11 → 629-4.2 and 629-4.3). A replacement already in force needs no map.
+  The heading draft is only a start: for 1512-2025 it paired the heritage definitions with
+  the general ones and occupancy with heritage standards, so read the text.
 
 ## Embedding spend
 
@@ -135,11 +142,13 @@ re-run.**
    within ±10% of `build/chunks.jsonl`; every manifest row produced at least one chunk
    (except those `chunk` listed in `build/skipped.jsonl`, the Reserved stubs); no chunk
    without an embedding; no U+FFFD anywhere (a `windows-1252` decode went wrong).
-2. **Pins:** five fixed §§ (`§ 591-2.6`, `§ 591-1.1`, `§ 681-4`, `§ 608-19`, `§ 349-1`; a
-   Ch 497 § joins with the replacement by-laws) hold exactly the expected chunk ids
-   (`PINS` in `ingest/db.py`). `§ 608-19` is amended since its consolidation: each of its
-   chunks carries `amended_since` = `1482-2025` and `amendments` links exactly the expected
-   clause to it (`AMENDED_PINS`); the other pins carry neither.
+2. **Pins:** fixed §§ (`§ 591-2.6`, `§ 591-1.1`, `§ 681-4`, `§ 608-19`, `§ 349-1`,
+   `§ 497-2.2` from Ch 497's re-consolidation with 1511-2025, `§ 629-38` and its pending
+   replacement `§ 629-4.25`) hold exactly the expected chunk ids (`PINS` in
+   `ingest/db.py`). `§ 608-19` and `§ 629-38` are amended since their consolidation: each of
+   their chunks carries the expected `amended_since`, and `amendments` links exactly the
+   expected chunks to them (`AMENDED_PINS`; for `§ 629-38` that includes
+   `bl:1512-2025:629-4.25`); the other pins carry neither.
 3. **Dev split** (not wired yet; it arrives with the refusal-threshold calibration): the 10-question dev split ([`EVALS.md`](EVALS.md#refusal-threshold)) through `/api/ask` on a local `next dev` with
    `DB_SCHEMA=staging` and the eval header. It must score at least what the previous
    snapshot scored, or meet the refusal-threshold calibration bar on the first run.

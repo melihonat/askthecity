@@ -10,20 +10,22 @@ Python ingester writes and the TypeScript app reads. The models behind it are in
 - The model sees passages numbered `[1]`–`[5]` (the reranked top 5), then **companion
   passages** `[6]`… (at most 3), and writes inline `[n]` markers. Clients never see a bare
   `n`: each is resolved to a chunk before the response leaves the server.
-- **Companions:** for every top-5 Code § chunk with `amended_since`, the amending chunks
-  that target that § (via `amendments`, the `companion_chunks` RPC) are appended, capped at 3
-  per answer: in the order of the passages whose § they amend, newest by-law first, never
+- **Companions:** for every top-5 Code § chunk (a `tmc:` id with a §), the chunks that
+  target that § (via `amendments`, the `companion_chunks` RPC: amending clauses, and the §§ of
+  a replacement not yet in force) are appended, capped at 3 per answer: in the order of the passages whose § they amend, newest by-law first, never
   repeating a chunk already among the top 5. Only § → amendment; a by-law chunk that ranks on
   its own does not pull its target in. The "amended since" badge still renders on the §.
 - The model sees each passage's `sublabel` (its dates), an `amended_since` mark on an amended
   §, and an `amendment` mark on a companion. The prompt says the by-law wins where it differs
   from the §'s text, and to state an in-force date that differs from enactment (and "not yet
-  in force" past the snapshot date).
+  in force" past the snapshot date). A passage from a replacement not yet in force is marked
+  `not_yet_law` (and `replacement`, not `amendment`, as a companion); the prompt says the
+  current § is the law until then and asks for "Today, X [n]. From <date>, Y [m]."
 - Labels are built **once, at ingestion**, and stored on the chunk:
 
 | Chunk | `label` | `sublabel` | `href` |
 | --- | --- | --- | --- |
-| Code § | `Ch 681 § 681-5 C–D` | `consolidated 2023-05-15` | chapter PDF `#page=<page_start>` |
+| Code § | `Ch 681 § 681-5 C–D` | `consolidated 2023-05-15` (`· replaced 2027-05-01 by By-law 1512-2025`, or `· repealed …`, while a replacement is pending) | chapter PDF `#page=<page_start>` |
 | Amending by-law | `By-law 1482-2025 cl. 1 O–Y` | `amends § 608-8.1 B, § 608-16, § 608-19 +6 more · enacted 2025-12-17 · in force 2026-03-02` (`· in force 2026-05-21` alone when in force on enactment) | by-law PDF `#page=<page_start>` |
 | Replacement chapter | `Ch 497 § 497-2.1` | `By-law 1511-2025 · in force 2026-06-01` (or `· in force 2027-05-01, not yet law`) | by-law PDF `#page=<page_start>` |
 | Item page block | `Item 2026.IE29.6 · City Council decision` | date + status stamp | TMMIS item URL (no anchor) |
@@ -194,6 +196,7 @@ snapshot   -- exactly one row
 documents  -- one row per manifest file
   id text primary key,       -- 'tmc:681', 'bl:470-2026', 'ie:2026.IE29.6', 'sr:286369'
   kind text,                 -- chapter | amending_bylaw | replacement_bylaw | item_page | staff_report
+                             -- (a replacement in force keeps its kind; its chunks have tmc: ids)
   family text,               -- rules | decisions
   title text, source_url text, sha256 text, fetched_at date,
   consolidated_as_of date, enacted date, in_force date,              -- rules
@@ -213,7 +216,7 @@ chunks
   fts tsvector generated always as (to_tsvector('english', breadcrumb || ' ' || body)) stored,
   embedding halfvec(1024)
 
-amendments -- the join behind companion passages
+amendments -- the join behind companion passages: amending clause or pending replacement § → old §
   amending_chunk_id text references chunks,
   target_section text        -- btree index
 ```

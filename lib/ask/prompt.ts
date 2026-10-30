@@ -3,7 +3,7 @@ import type { PassageView } from "./types";
 
 // The `default` prompt variant. Bump the version on any wording change; the hash is of the
 // templates themselves, so a change that forgets the bump still shows in the eval run record.
-export const PROMPT_VERSION = "default-4";
+export const PROMPT_VERSION = "default-5";
 
 export function systemPrompt(snapshotDate: string): string {
   return `You answer questions about the City of Toronto's rules using only the numbered passages you are given. The passages are from a snapshot of City documents taken on ${snapshotDate}.
@@ -16,6 +16,7 @@ Rules:
 - End every factual sentence with the marker of the passage that backs it, like [2]. Use only numbers of passages you were given. List every number you used in "cited".
 - If the passages cover only part of the question, answer that part with markers, then end with one sentence without a marker naming what the documents don't cover. If that gap is all you could say, decline instead.
 - A passage marked amendment="…" is from a by-law that changed the section it names after the Code was last consolidated. Where it differs from that section's text, the by-law is the rule: say so, name the by-law, and cite both. A section passage marked amended_since="…" may be out of date.
+- A passage marked not_yet_law="…" is from a by-law that repeals and replaces a whole chapter, and it is not in force yet. Until its in-force date the current section is the law. Answer "Today, X [n]. From <in-force date>, Y [m]." A section whose source says "repealed <date> by By-law …" has no replacement: say that it stops applying on that date. Never present a not_yet_law passage as the current rule.
 - When a by-law's in-force date differs from its enactment date, state the in-force date. An in-force date on or before ${snapshotDate} means the change is already the law: answer with the amended rule, not the old text. An in-force date after ${snapshotDate} means the old text still applies until then: say so, then say what changes on that date.
 - Be brief: a few sentences, plain English.
 - On a decline, "text" says briefly why and "cited" is empty.
@@ -24,8 +25,13 @@ Rules:
 
 function attrs(p: PassageView): string {
   const amended = p.amendedSince.length ? ` amended_since="${p.amendedSince.map((n) => `By-law ${n}`).join(", ")}"` : "";
-  const companion = p.companion ? ` amendment="amends a section among these passages"` : "";
-  return `n="${p.n}" label="${p.label}" source="${p.sublabel}"${amended}${companion}`;
+  const companion = !p.companion
+    ? ""
+    : p.notYetLaw
+      ? ` replacement="replaces a section among these passages"`
+      : ` amendment="amends a section among these passages"`;
+  const pending = p.notYetLaw ? ` not_yet_law="replaces the chapter on its in-force date"` : "";
+  return `n="${p.n}" label="${p.label}" source="${p.sublabel}"${amended}${companion}${pending}`;
 }
 
 export function userPrompt(question: string, passages: PassageView[]): string {
@@ -38,7 +44,7 @@ export const PROMPT_HASH = createHash("sha256")
   .update("\0")
   .update(
     userPrompt("{question}", [
-      { n: 0, label: "{label}", sublabel: "{sublabel}", amendedSince: ["{n}"], companion: true, body: "{body}" } as PassageView,
+      { n: 0, label: "{label}", sublabel: "{sublabel}", amendedSince: ["{n}"], companion: true, notYetLaw: true, body: "{body}" } as PassageView,
     ]),
   )
   .digest("hex")

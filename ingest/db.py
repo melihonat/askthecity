@@ -44,8 +44,7 @@ def load() -> None:
     if missing := [c["id"] for c in chunks if c["id"] not in embeddings]:
         raise SystemExit(f"{len(missing)} chunks have no embedding (run `embed`): {missing[:5]}")
 
-    fetched = [r.obtained_at[:10] for r in store.read_manifest() if r.obtained_by == "script"]
-    snapshot_date = date.fromisoformat(min(fetched))
+    snapshot_date = date.fromisoformat(store.snapshot_date())
     digest = hashlib.sha256(config.CHUNKS.read_bytes() + config.EMBED_MODEL.encode()).hexdigest()[:8]
     snapshot = {
         "id": f"{snapshot_date.isoformat()}-{digest}",
@@ -90,11 +89,16 @@ PINS = {
     "681-4": ["tmc:681-4:A-I", "tmc:681-4:J", "tmc:681-4:Jp2", "tmc:681-4:K"],
     "608-19": ["tmc:608-19"],
     "349-1": ["tmc:349-1:animal", "tmc:349-1:guard-dog"],
+    "497-2.2": ["tmc:497-2.2"],                   # By-law 1511-2025's new Ch 497, consolidated by the City
+    "629-38": ["tmc:629-38"],                     # replaced by By-law 1512-2025 from 2027-05-01
+    "629-4.25": ["bl:1512-2025:629-4.25"],        # … by this §, not yet law
 }
 # The pins amended since their consolidation: the by-laws on every chunk's `amended_since`, and
-# the amending chunks `amendments` links to the §. Every other pin must have neither.
+# the amending chunks `amendments` links to the § (a pending replacement's § among them). Every
+# other pin must have neither.
 AMENDED_PINS = {
     "608-19": (["1482-2025"], ["bl:1482-2025:cl1:O-Y"]),
+    "629-38": (["67-2026"], ["bl:1512-2025:629-4.25", "bl:67-2026:cl1"]),
 }
 
 
