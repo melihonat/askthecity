@@ -1,13 +1,17 @@
 import { ask } from "@/lib/ask/ask";
-import { CorpusMismatchError, DEFAULT_CONFIG } from "@/lib/ask/config";
-import { deps } from "@/lib/ask/deps";
+import { CorpusMismatchError } from "@/lib/ask/config";
+import { createDeps } from "@/lib/ask/deps";
+import { resolveEval } from "@/lib/ask/eval";
 import type { AskEvent } from "@/lib/ask/types";
 
 export const maxDuration = 30;
 
 const MAX_QUESTION = 300;
 
-/** POST { question } → NDJSON: one `passages` event, then one `final` AskResponse. */
+/**
+ * POST { question, rung? } → NDJSON: one `passages` event, then one `final` AskResponse. Under the
+ * eval header, `rung` selects a preset and a `debug` event comes between the two.
+ */
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   // control characters out (CR/LF/tab become spaces)
@@ -16,6 +20,10 @@ export async function POST(req: Request) {
     .replace(/[\u0000-\u001f\u007f]/g, "")
     .trim();
   if (!question) return Response.json({ error: "question is required" }, { status: 400 });
+
+  const evalReq = resolveEval(req.headers, body ?? {}, process.env.EVAL_HEADER_SECRET);
+  if (!evalReq) return Response.json({ error: "unknown rung" }, { status: 400 });
+  const deps = createDeps(evalReq.tags);
 
   if (question.length > MAX_QUESTION) {
     return ndjson([{ type: "final", response: { kind: "limit", limit: "too_long" } }]);
@@ -30,7 +38,7 @@ export async function POST(req: Request) {
     return Response.json({ error: (e as Error).message }, { status });
   }
 
-  return ndjson(ask(question, DEFAULT_CONFIG, deps));
+  return ndjson(ask(question, evalReq.rung, deps, { debug: evalReq.eval }));
 }
 
 function ndjson(events: AsyncIterable<AskEvent> | AskEvent[]) {

@@ -43,6 +43,10 @@ and real latency, not cache hits) and the per-IP and global limits (the harness'
 bounded and would otherwise trip 30/IP). It also unlocks the `debug` event and rung presets
 ([`CONTRACT.md`](CONTRACT.md#the-debug-event-eval-header-only)). Never sent by the public UI.
 
+`x-eval-key: <EVAL_HEADER_SECRET>`, compared in constant time; with no secret configured
+nothing is unlocked. The harness also sends `x-eval-run: <run-id>`, and every Gateway call of
+that request (embed, rerank, generate) is tagged `eval:<run-id>`.
+
 ## Keep-alive and failure detection
 
 - **Two staggered daily Vercel crons** (e.g. 06:00 and 18:00 UTC) on `/api/keepalive`,

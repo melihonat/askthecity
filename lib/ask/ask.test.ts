@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { type AskDeps, ask } from "./ask";
-import { DEFAULT_CONFIG, REFUSAL_THRESHOLD } from "./config";
-import type { AskEvent, CompanionRow, ModelOutput, RungConfig, SearchRow } from "./types";
+import { REFUSAL_THRESHOLD, RUNGS } from "./config";
+import type { AskEvent, CompanionRow, ModelOutput, Rung, SearchRow } from "./types";
 
 const SCOPE = "Knows the Toronto Municipal Code…";
 
@@ -58,9 +58,9 @@ function fakeDeps(rows: SearchRow[], scores: number[], output: ModelOutput, comp
   } satisfies AskDeps;
 }
 
-async function run(deps: AskDeps, config: RungConfig = DEFAULT_CONFIG) {
+async function run(deps: AskDeps, rung: Rung = "shipped") {
   const events: AskEvent[] = [];
-  for await (const ev of ask("question?", config, deps, { debug: true })) events.push(ev);
+  for await (const ev of ask("question?", rung, deps, { debug: true })) events.push(ev);
   const final = events.find((e) => e.type === "final")!.response;
   const debug = events.find((e) => e.type === "debug")?.debug;
   const passages = events.find((e) => e.type === "passages")!.passages;
@@ -106,8 +106,8 @@ describe("ask", () => {
   });
 
   it("with rerank off, takes the top 5 by fused rank and never gates", async () => {
-    const deps = fakeDeps(ROWS, [], ANSWER);
-    const { final, debug, passages } = await run(deps, { ...DEFAULT_CONFIG, rerank: false });
+    const deps = fakeDeps(ROWS, ROWS.map(() => LOW), ANSWER);
+    const { final, debug, passages } = await run(deps, "hybrid");
     expect(deps.rerank).not.toHaveBeenCalled();
     expect(deps.generate).toHaveBeenCalledOnce();
     expect(passages.map((p) => p.chunkId)).toEqual(ROWS.slice(0, 5).map((r) => r.id));
@@ -124,10 +124,16 @@ describe("ask", () => {
     expect(debug?.declineText).toBe("That is set by the TTC board.");
   });
 
+  it("sends passages, then debug, then the final response", async () => {
+    const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+    const { events } = await run(deps);
+    expect(events.map((e) => e.type)).toEqual(["passages", "debug", "final"]);
+  });
+
   it("sends no debug event unless asked", async () => {
     const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
     const events: AskEvent[] = [];
-    for await (const ev of ask("question?", DEFAULT_CONFIG, deps)) events.push(ev);
+    for await (const ev of ask("question?", "shipped", deps)) events.push(ev);
     expect(events.map((e) => e.type)).toEqual(["passages", "final"]);
   });
 
@@ -232,7 +238,7 @@ describe("ask", () => {
     it("adds none when the rung turns companions off", async () => {
       const rows = [amendedRow("tmc:608-19", 1, ["1482-2025"]), ...ROWS.slice(1)];
       const deps = fakeDeps(rows, scores(rows.length), ANSWER, [companion("bl:1482-2025:cl1:O-Y", "608-19")]);
-      const { passages } = await run(deps, { ...DEFAULT_CONFIG, companions: false });
+      const { passages } = await run(deps, "rerank");
       expect(deps.companions).not.toHaveBeenCalled();
       expect(passages).toHaveLength(5);
     });
@@ -243,6 +249,39 @@ describe("ask", () => {
       const { final, passages } = await run(deps);
       expect(passages.map((p) => p.n)).toEqual([1, 2, 3]);
       expect(final.kind === "refusal" && final.nearest.map((p) => p.chunkId)).toEqual(["tmc:608-19", "tmc:591-b"]);
+    });
+  });
+
+  describe("rung presets", () => {
+    const amended = [amendedRow("tmc:608-19", 1, ["1482-2025"]), ...ROWS.slice(1)];
+    const found = [companion("bl:1482-2025:cl1:O-Y", "608-19")];
+    // the reranker lifts the last fused candidate to the top, so a reranked rung shows in the passages
+    const lifted = amended.map((_, i) => (i === amended.length - 1 ? HIGH + 0.1 : HIGH));
+
+    it.each([
+      ["dense", "vector", false, false],
+      ["hybrid", "hybrid", false, false],
+      ["rerank", "hybrid", true, false],
+      ["shipped", "hybrid", true, true],
+    ] as const)("%s: search %s, rerank %s, companions %s", async (rung, search, rerank, companions) => {
+      const deps = fakeDeps(amended, lifted, ANSWER, found);
+      const { passages, debug } = await run(deps, rung);
+      expect(deps.search).toHaveBeenCalledWith("question?", [0.1], search);
+      expect(deps.rerank).toHaveBeenCalledTimes(rerank ? 1 : 0);
+      expect(passages[0].chunkId).toBe(rerank ? "tmc:591-g" : "tmc:608-19");
+      expect(passages.some((p) => p.companion)).toBe(companions);
+      expect(deps.generate.mock.calls[0][0].model).toBe(RUNGS[rung].model);
+      expect(debug).toMatchObject({ rung, config: RUNGS[rung] });
+    });
+
+    it("records what produced the answer in debug", async () => {
+      const { debug } = await run(fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER));
+      expect(debug?.build).toMatchObject({
+        promptVersion: expect.any(String),
+        promptHash: expect.stringMatching(/^[0-9a-f]{12}$/),
+        embedder: "voyage/voyage-4-large",
+        reranker: "voyage/rerank-3",
+      });
     });
   });
 });

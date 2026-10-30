@@ -1,4 +1,4 @@
-import type { RungConfig, Snapshot } from "./types";
+import type { Rung, RungConfig, Snapshot } from "./types";
 
 // Must match the corpus (ingest/config.py); checked against the snapshot row at startup.
 export const EMBEDDING = { gatewayModel: "voyage/voyage-4-large", corpusModel: "voyage-4-large", dim: 1024 };
@@ -15,14 +15,20 @@ export const RERANK_MODEL = "voyage/rerank-3";
 // A first probe: off-topic questions ~0.28-0.30, the lowest dev answer question 0.45.
 export const REFUSAL_THRESHOLD = 0.35;
 
-// Hybrid search with § pins, reranked and gated, with companion passages.
-export const DEFAULT_CONFIG: RungConfig = {
-  search: "hybrid",
-  rerank: true,
-  companions: true,
-  model: "anthropic/claude-haiku-5.5",
-  prompt: "default",
+const MODEL = "anthropic/claude-haiku-5.5";
+
+// The main ladder (evals/LADDER.md): cumulative, one component per rung, ending at `shipped`.
+// A closed set of presets read by the one orchestration path; no free-form knobs.
+export const RUNGS: Record<Rung, RungConfig> = {
+  dense: { search: "vector", rerank: false, companions: false, model: MODEL, prompt: "default" },
+  hybrid: { search: "hybrid", rerank: false, companions: false, model: MODEL, prompt: "default" },
+  rerank: { search: "hybrid", rerank: true, companions: false, model: MODEL, prompt: "default" },
+  shipped: { search: "hybrid", rerank: true, companions: true, model: MODEL, prompt: "default" },
 };
+
+export function isRung(value: unknown): value is Rung {
+  return typeof value === "string" && Object.hasOwn(RUNGS, value);
+}
 
 export class CorpusMismatchError extends Error {}
 

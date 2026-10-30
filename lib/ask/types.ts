@@ -34,6 +34,9 @@ export type DebugEvent = {
   gateBypassed: boolean; // a pin fired, so the threshold was not applied
   declineText: string | null; // the model's text on decision = "decline"; never public
   timings: { retrieval_ms: number; rerank_ms: number; generation_ms: number | null; total_ms: number };
+  rung: Rung;
+  config: RungConfig; // resolved from the rung
+  build: { sha: string | null; promptVersion: string; promptHash: string; embedder: string; reranker: string };
 };
 
 export type AskEvent =
@@ -43,6 +46,9 @@ export type AskEvent =
 
 /** What the generator returns (structured output). */
 export type ModelOutput = { decision: "answer" | "decline"; text: string; cited: number[] };
+
+/** Named configurations for the eval table (evals/LADDER.md); only the eval header selects one. */
+export type Rung = "dense" | "hybrid" | "rerank" | "shipped";
 
 export type RungConfig = {
   search: "vector" | "hybrid"; // search_chunks mode arg

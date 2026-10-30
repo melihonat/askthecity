@@ -137,15 +137,22 @@ type DebugEvent = {
   gateBypassed: boolean;   // a pin fired, so the threshold was not applied
   declineText: string | null; // the model's text on decision = "decline"; never public
   timings: { retrieval_ms: number; rerank_ms: number; generation_ms: number | null; total_ms: number };
+  rung: Rung;
+  config: RungConfig;      // resolved from the rung
+  build: { sha: string | null; promptVersion: string; promptHash: string; embedder: string; reranker: string };
 };
 ```
+
+With the rerank off, `rerankScore` and `gateScore` are `null`. `build.sha` is the deployed
+commit (`VERCEL_GIT_COMMIT_SHA`), so `run.json` can tell which code it measured.
 
 ### Rungs (eval header only)
 
 The rungs themselves are in [`evals/LADDER.md`](evals/LADDER.md).
 
-A request carrying the eval header may name a `rung`. Without the header the field is
-ignored and every request is `shipped`.
+A request carrying the eval header may name a `rung` in the body (`{ question, rung }`); an
+unknown rung is a 400. Without the header the field is ignored and every request is
+`shipped`.
 
 ```ts
 type Rung = "dense" | "hybrid" | "rerank" | "shipped" | "side-sonnet" | "side-quoted"; // + shipped-2, shipped-3
@@ -163,8 +170,7 @@ type RungConfig = {
   one orchestration function reads the config; branches are flags inside the shipped path,
   never a second implementation.
 - `search_chunks` takes the mode as an argument: still one RPC.
-- The `debug` event adds `rung: Rung` and `config: RungConfig` (resolved), and `run.json`
-  records both.
+- The `debug` event carries `rung` and the resolved `config`, and `run.json` records both.
 
 ## Chunk ids
 
