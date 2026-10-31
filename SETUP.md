@@ -49,7 +49,9 @@ A new `EVAL_HEADER_SECRET` must also go into the burst firewall rule's exemption
 Vercel deploys `main` on push (Production) and every branch (Preview). For a production deploy:
 
 1. **Apply the app tables first** when [`db/app.sql`](db/app.sql) changed:
-   `psql "$DATABASE_URL" -f db/app.sql`. It is idempotent and never drops data; the deployed
+   `psql "$DATABASE_URL" -f db/app.sql`, or without `psql`, from the venv:
+   `python -c "from ingest import db; c = db.connect(); c.execute(db.APP_SQL.read_text(encoding='utf-8')); c.commit()"`.
+   It is idempotent and never drops data; the deployed
    app reads `answer_cache` and `use_quota` on every question, so code that needs a new table
    must not go live before it.
 2. Merge to `main` and wait for the production deployment to be Ready.
