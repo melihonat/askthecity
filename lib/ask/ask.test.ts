@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { type AskDeps, ask } from "./ask";
 import { REFUSAL_THRESHOLD, RUNGS } from "./config";
+import { GLOBAL_DAILY, IP_DAILY } from "./guardrails";
 import type { AskEvent, CompanionRow, ModelOutput, Rung, SearchRow } from "./types";
 
 const SCOPE = "Knows the Toronto Municipal Code…";
@@ -55,6 +56,7 @@ function fakeDeps(rows: SearchRow[], scores: number[], output: ModelOutput, comp
     companions: vi.fn(async (sections: string[]) => companions.filter((c) => sections.includes(c.target_section))),
     rerank: vi.fn(async () => scores),
     generate: vi.fn(async (_req: Parameters<AskDeps["generate"]>[0]) => output),
+    useQuota: vi.fn(async (_ipHash: string, _ipLimit: number) => ({ ip: 0, global: 0 })),
   } satisfies AskDeps;
 }
 
@@ -282,6 +284,69 @@ describe("ask", () => {
         embedder: "voyage/voyage-4-large",
         reranker: "voyage/rerank-3",
       });
+    });
+  });
+
+  describe("limits", () => {
+    async function events(deps: AskDeps, ipHash?: string) {
+      const out: AskEvent[] = [];
+      for await (const ev of ask("question?", "shipped", deps, { ipHash })) out.push(ev);
+      return out;
+    }
+    const limitOnly = (limit: string) => [{ type: "final", response: { kind: "limit", limit } }];
+    const upstream = (statusCode: number) => Object.assign(new Error(`HTTP ${statusCode}`), { statusCode });
+
+    it("meters a request by its IP hash against the per-IP limit", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      await events(deps, "hash-1");
+      expect(deps.useQuota).toHaveBeenCalledWith("hash-1", IP_DAILY);
+    });
+
+    it("sends no IP hash for the eval header, so nothing is metered", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      await events(deps);
+      expect(deps.useQuota).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [{ ip: IP_DAILY, global: 0 }, "ip_daily"],
+      [{ ip: 0, global: GLOBAL_DAILY }, "global_daily"],
+    ])("stops at %o with only the final %s event, before the search", async (usage, limit) => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      deps.useQuota.mockResolvedValue(usage);
+      expect(await events(deps, "hash-1")).toEqual(limitOnly(limit));
+      expect(deps.search).not.toHaveBeenCalled();
+      expect(deps.generate).not.toHaveBeenCalled();
+    });
+
+    it("maps an upstream 402 to budget, sending only the final event", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      deps.embed.mockRejectedValue(upstream(402));
+      expect(await events(deps, "hash-1")).toEqual(limitOnly("budget"));
+    });
+
+    it("maps a 429 behind the SDK's retry wrapper to burst", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      deps.rerank.mockRejectedValue(Object.assign(new Error("retries exhausted"), { lastError: upstream(429) }));
+      expect(await events(deps, "hash-1")).toEqual(limitOnly("burst"));
+    });
+
+    it("ends with a limit, not an error, when generation fails after the passages", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      deps.generate.mockRejectedValue(upstream(402));
+      const out = await events(deps, "hash-1");
+      expect(out.map((e) => e.type)).toEqual(["passages", "final"]);
+      expect(out[1]).toEqual(limitOnly("budget")[0]);
+    });
+
+    it.each([
+      ["the snapshot", "snapshot"],
+      ["the quota", "useQuota"],
+      ["the search", "search"],
+    ] as const)("maps any other failure (%s) to unavailable", async (_, dep) => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      deps[dep].mockRejectedValue(new Error("connection refused"));
+      expect(await events(deps, "hash-1")).toEqual(limitOnly("unavailable"));
     });
   });
 });

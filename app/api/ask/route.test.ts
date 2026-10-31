@@ -28,6 +28,7 @@ const fake = {
     companions: async () => [],
     rerank: async () => [0.9, 0.8],
     generate: async () => ({ decision: "answer" as const, text: "Until 7 p.m. [1].", cited: [1] }),
+    useQuota: vi.fn(async (_ipHash: string, _ipLimit: number) => ({ ip: 0, global: 0 })),
   } satisfies AskDeps,
 };
 
@@ -51,7 +52,9 @@ async function post(body: object, headers: Record<string, string> = {}) {
 describe("POST /api/ask", () => {
   beforeEach(() => {
     vi.stubEnv("EVAL_HEADER_SECRET", SECRET);
+    vi.stubEnv("IP_HASH_SALT", "pepper");
     fake.deps.search.mockClear();
+    fake.deps.useQuota.mockClear();
   });
 
   it("sends no debug event and ignores a rung without the eval header", async () => {
@@ -96,5 +99,40 @@ describe("POST /api/ask", () => {
       new Request("http://test/api/ask", { method: "POST", body: JSON.stringify({ question: "q?", rung: "best" }), headers: { [EVAL_HEADER]: SECRET } }),
     );
     expect(res.status).toBe(400);
+  });
+
+  describe("guardrails", () => {
+    const IP = "203.0.113.7";
+
+    it("meters a public request by a salted hash of the client IP, never the IP itself", async () => {
+      await post({ question: "When can they drill?" }, { "x-real-ip": IP, "x-forwarded-for": `${IP}, 10.0.0.1` });
+      const [hash] = fake.deps.useQuota.mock.calls[0];
+      expect(hash).toMatch(/^[0-9a-f]{64}$/);
+      expect(JSON.stringify(fake.deps.useQuota.mock.calls)).not.toContain(IP);
+    });
+
+    it("skips the daily limits under the eval header", async () => {
+      await post({ question: "When can they drill?" }, { [EVAL_HEADER]: SECRET, "x-real-ip": IP });
+      expect(fake.deps.useQuota).not.toHaveBeenCalled();
+    });
+
+    it("answers a question over 300 characters with only the too_long limit", async () => {
+      const { status, events } = await post({ question: "a".repeat(301) });
+      expect(status).toBe(200);
+      expect(events).toEqual([{ type: "final", response: { kind: "limit", limit: "too_long" } }]);
+      expect(fake.deps.search).not.toHaveBeenCalled();
+    });
+
+    it("strips control characters before the cap and the search", async () => {
+      await post({ question: "When\u0000 can\nthey drill?" });
+      expect(fake.deps.search).toHaveBeenCalledWith("When can they drill?", [0.1], "hybrid");
+    });
+
+    it("is unavailable, not a 500, without a salt", async () => {
+      vi.stubEnv("IP_HASH_SALT", "");
+      const { status, events } = await post({ question: "q?" });
+      expect(status).toBe(200);
+      expect(events).toEqual([{ type: "final", response: { kind: "limit", limit: "unavailable" } }]);
+    });
   });
 });

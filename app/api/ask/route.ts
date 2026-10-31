@@ -1,42 +1,47 @@
 import { ask } from "@/lib/ask/ask";
-import { CorpusMismatchError, MAX_QUESTION } from "@/lib/ask/config";
 import { createDeps } from "@/lib/ask/deps";
 import { resolveEval } from "@/lib/ask/eval";
-import type { AskEvent } from "@/lib/ask/types";
+import { checkInput, clean, ipHash } from "@/lib/ask/guardrails";
+import type { AskEvent, LimitKind } from "@/lib/ask/types";
 
 export const maxDuration = 30;
 
 /**
  * POST { question, rung? } → NDJSON: one `passages` event, then one `final` AskResponse. Under the
- * eval header, `rung` selects a preset and a `debug` event comes between the two.
+ * eval header, `rung` selects a preset and a `debug` event comes between the two. A limit is a
+ * `final` event too, never a 500.
  */
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
-  // control characters out (CR/LF/tab become spaces)
-  const question = String(body?.question ?? "")
-    .replace(/[\t\r\n]/g, " ")
-    .replace(/[\u0000-\u001f\u007f]/g, "")
-    .trim();
+  const question = clean(String(body?.question ?? ""));
   if (!question) return Response.json({ error: "question is required" }, { status: 400 });
 
   const evalReq = resolveEval(req.headers, body ?? {}, process.env.EVAL_HEADER_SECRET);
   if (!evalReq) return Response.json({ error: "unknown rung" }, { status: 400 });
-  const deps = createDeps(evalReq.tags);
 
-  if (question.length > MAX_QUESTION) {
-    return ndjson([{ type: "final", response: { kind: "limit", limit: "too_long" } }]);
+  if (checkInput(question) === "too_long") return ndjson([limit("too_long")]);
+
+  // The eval header skips the daily limits; everyone else is metered by a salted IP hash.
+  let hash: string | undefined;
+  if (!evalReq.eval) {
+    const salt = process.env.IP_HASH_SALT;
+    if (!salt) {
+      console.error("IP_HASH_SALT is not set");
+      return ndjson([limit("unavailable")]);
+    }
+    hash = ipHash(clientIp(req.headers), salt);
   }
 
-  // Fail fast, before streaming, if the corpus doesn't match the query embedding config.
-  try {
-    await deps.snapshot();
-  } catch (e) {
-    const status = e instanceof CorpusMismatchError ? 500 : 503;
-    console.error(e);
-    return Response.json({ error: (e as Error).message }, { status });
-  }
+  return ndjson(ask(question, evalReq.rung, createDeps(evalReq.tags), { debug: evalReq.eval, ipHash: hash }));
+}
 
-  return ndjson(ask(question, evalReq.rung, deps, { debug: evalReq.eval }));
+/** Vercel sets both headers; `x-real-ip` is the client as Vercel saw it. */
+function clientIp(headers: Headers): string {
+  return headers.get("x-real-ip") ?? headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+}
+
+function limit(kind: LimitKind): AskEvent {
+  return { type: "final", response: { kind: "limit", limit: kind } };
 }
 
 function ndjson(events: AsyncIterable<AskEvent> | AskEvent[]) {
@@ -46,8 +51,9 @@ function ndjson(events: AsyncIterable<AskEvent> | AskEvent[]) {
       try {
         for await (const ev of events) controller.enqueue(enc.encode(JSON.stringify(ev) + "\n"));
       } catch (e) {
+        // ask() turns its own failures into limits; this only catches a broken stream
         console.error(e);
-        controller.enqueue(enc.encode(JSON.stringify({ type: "error", message: "The demo hit an error." }) + "\n"));
+        controller.enqueue(enc.encode(JSON.stringify(limit("unavailable")) + "\n"));
       }
       controller.close();
     },

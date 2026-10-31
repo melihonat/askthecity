@@ -106,7 +106,7 @@ type AskResponse =
       scope: string;                // the scope sentence
       nearest: PassageView[] }      // top 2–3 that weren't good enough
   | { kind: "limit";
-      limit: "ip_daily" | "global_daily" | "burst" | "budget" | "too_long" };
+      limit: "ip_daily" | "global_daily" | "burst" | "budget" | "too_long" | "unavailable" };
 
 type PassageView = {
   n: number; chunkId: string; companion: boolean;

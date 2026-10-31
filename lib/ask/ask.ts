@@ -1,4 +1,5 @@
 import { CONTEXT_PASSAGES, EMBEDDING, MAX_COMPANIONS, REFUSAL_THRESHOLD, RERANK_MODEL, RUNGS } from "./config";
+import { failureLimit, IP_DAILY, usageLimit } from "./guardrails";
 import { PROMPT_HASH, PROMPT_VERSION, systemPrompt, userPrompt } from "./prompt";
 import type {
   AskEvent,
@@ -11,6 +12,7 @@ import type {
   RungConfig,
   SearchRow,
   Snapshot,
+  Usage,
 } from "./types";
 import { NEAREST, validate } from "./validate";
 
@@ -23,9 +25,15 @@ export type AskDeps = {
   /** One relevance score per document, in input order. */
   rerank(question: string, documents: string[]): Promise<number[]>;
   generate(req: { model: string; system: string; prompt: string }): Promise<ModelOutput>;
+  /**
+   * Counts one paid question against the IP's day and, while the IP is under `ipLimit`, the
+   * global day. Returns the counts from before it.
+   */
+  useQuota(ipHash: string, ipLimit: number): Promise<Usage>;
 };
 
-export type AskOptions = { debug?: boolean };
+/** `ipHash` meters the request against the daily limits; the eval header sends none. */
+export type AskOptions = { debug?: boolean; ipHash?: string };
 
 export function toPassage(row: ChunkRow, n: number, companion = false): PassageView {
   return {
@@ -87,13 +95,32 @@ function byRerank(rows: SearchRow[], scores: number[]): SearchRow[] {
 /**
  * The one orchestration path: embed → search → rerank → companions → gate → generate → validate.
  * The rung's preset switches steps inside it. With rerank off the top 5 are by fused rank and
- * the gate is off; a pin skips the gate.
+ * the gate is off; a pin skips the gate. A daily limit stops it before the search and is the only
+ * event. Any failure becomes a typed limit (upstream 402 → `budget`, 429 → `burst`), never a 500.
  */
 export async function* ask(question: string, rung: Rung, deps: AskDeps, opts: AskOptions = {}): AsyncGenerator<AskEvent> {
+  try {
+    yield* run(question, rung, deps, opts);
+  } catch (e) {
+    console.error(e);
+    yield { type: "final", response: { kind: "limit", limit: failureLimit(e) } };
+  }
+}
+
+async function* run(question: string, rung: Rung, deps: AskDeps, opts: AskOptions): AsyncGenerator<AskEvent> {
   const config = RUNGS[rung];
   const t0 = performance.now();
   const snapshot = await deps.snapshot();
-  const embedding = await deps.embed(question);
+  // The quota round trip runs beside the embedding, so it adds no latency.
+  const [usage, embedding] = await Promise.all([
+    opts.ipHash ? deps.useQuota(opts.ipHash, IP_DAILY) : null,
+    deps.embed(question),
+  ]);
+  const limit = usage && usageLimit(usage);
+  if (limit) {
+    yield { type: "final", response: { kind: "limit", limit } };
+    return;
+  }
   const rows = await deps.search(question, embedding, config.search);
   const t1 = performance.now();
 

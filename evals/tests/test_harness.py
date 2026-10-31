@@ -9,10 +9,10 @@ QUESTIONS = [{"id": f"q{i}", "question": f"question {i}?", "expect": "answer", "
              for i in range(1, 4)]
 
 
-def events(kind="answer"):
+def events(kind="answer", limit="global_daily"):
     passage = {"n": 1, "chunkId": "tmc:1-1:A", "label": "Ch 1 § 1-1", "href": "https://x/1.pdf", "body": "City text"}
     final = ({"kind": "answer", "text": "Yes [1].", "citations": [{"n": 1, "chunkId": "tmc:1-1:A"}], "passages": [passage]}
-             if kind == "answer" else {"kind": "limit", "limit": "global_daily"})
+             if kind == "answer" else {"kind": "limit", "limit": limit})
     if kind == "limit":
         return [{"type": "final", "response": final}]
     debug = {"candidates": [{"chunkId": "tmc:1-1:A"}], "pinned": [], "threshold": 0.35,
@@ -39,8 +39,9 @@ def test_runs_every_question_each_run_after_a_discarded_warm_up():
     assert {qid: len(calls) for qid, calls in data.items()} == {"q1": 3, "q2": 3, "q3": 3}
 
 
-def test_a_5xx_is_retried_once():
-    t = FakeTransport([(502, [])])
+@pytest.mark.parametrize("reply", [(502, []), (200, events("limit", "unavailable"))])
+def test_a_server_error_is_retried_once(reply):
+    t = FakeTransport([reply])
     assert call(t, "q?", "shipped")["response"]["kind"] == "answer"
     assert len(t.asked) == 2
 
@@ -48,6 +49,7 @@ def test_a_5xx_is_retried_once():
 @pytest.mark.parametrize("script", [
     [(502, []), (503, [])],
     [(500, []), (200, [{"type": "error", "message": "The demo hit an error."}])],
+    [(200, events("limit", "unavailable")), (200, events("limit", "unavailable"))],
 ])
 def test_a_second_server_error_aborts(script):
     with pytest.raises(RunInvalid, match="server error twice"):

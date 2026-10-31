@@ -6,7 +6,7 @@ import { MAX_QUESTION } from "@/lib/ask/config";
 import { splitGap } from "@/lib/ask/gap";
 import { segments } from "@/lib/ask/markers";
 import { EXAMPLES } from "@/lib/ask/scope";
-import type { AskEvent, AskResponse, PassageView } from "@/lib/ask/types";
+import type { AskEvent, AskResponse, LimitKind, PassageView } from "@/lib/ask/types";
 
 // Fixed per reason (CONTRACT.md, "Refusal rule"): no model-written text in a refusal.
 const REFUSAL = {
@@ -18,6 +18,22 @@ const REFUSAL = {
   },
 } as const;
 
+// UI.md, "Limit": a calm notice, never styled like a refusal.
+const LIMIT: Record<LimitKind, { headline: string; line: string }> = {
+  ip_daily: {
+    headline: "You've asked 30 questions today.",
+    line: "That's the per-visitor limit for this demo. It resets at midnight Toronto time.",
+  },
+  global_daily: {
+    headline: "The demo is resting until tomorrow.",
+    line: "It has answered its 500 questions for today. It resets at midnight Toronto time.",
+  },
+  budget: { headline: "The demo is resting until tomorrow.", line: "This month's model budget is used up." },
+  burst: { headline: "Too many questions at once.", line: "Wait a few seconds and try again." },
+  too_long: { headline: "That question is over 300 characters.", line: "Shorten it and ask again." },
+  unavailable: { headline: "The demo can't answer right now.", line: "A service it relies on didn't respond. Try again in a minute." },
+};
+
 /** Single-turn: each question replaces the last one and its evidence. */
 export function Ask() {
   const [question, setQuestion] = useState("");
@@ -25,7 +41,6 @@ export function Ask() {
   const [busy, setBusy] = useState(false);
   const [passages, setPassages] = useState<PassageView[] | null>(null);
   const [response, setResponse] = useState<AskResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState<number | null>(null); // the passage a marker points at
 
   async function submit(q = question) {
@@ -34,7 +49,6 @@ export function Ask() {
     setBusy(true);
     setPassages(null);
     setResponse(null);
-    setError(null);
     setActive(null);
     try {
       const res = await fetch("/api/ask", {
@@ -42,7 +56,8 @@ export function Ask() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ question: q }),
       });
-      if (!res.ok || !res.body) throw new Error((await res.json().catch(() => null))?.error ?? res.statusText);
+      // the firewall's burst rule answers 429 before the function runs
+      if (!res.ok || !res.body) return setResponse(limit(res.status === 429 ? "burst" : "unavailable"));
       const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
       let buf = "";
       for (;;) {
@@ -51,15 +66,14 @@ export function Ask() {
         buf += value;
         let i;
         while ((i = buf.indexOf("\n")) >= 0) {
-          const ev = JSON.parse(buf.slice(0, i)) as AskEvent | { type: "error"; message: string };
+          const ev = JSON.parse(buf.slice(0, i)) as AskEvent;
           buf = buf.slice(i + 1);
           if (ev.type === "passages") setPassages(ev.passages);
           else if (ev.type === "final") setResponse(ev.response);
-          else if (ev.type === "error") setError(ev.message);
         }
       }
-    } catch (e) {
-      setError((e as Error).message);
+    } catch {
+      setResponse(limit("unavailable"));
     } finally {
       setBusy(false);
     }
@@ -130,7 +144,6 @@ export function Ask() {
         {asked && <h2 className="asked">{asked}</h2>}
         {busy && passages && <p className="muted">Found {passages.length} passages. Writing an answer from them…</p>}
         {busy && <Skeleton lines={4} />}
-        {error && <p className="error">{error}</p>}
 
         {response?.kind === "answer" && (
           <p className="answer">
@@ -166,11 +179,21 @@ export function Ask() {
           </>
         )}
 
-        {response?.kind === "limit" && <p className="notice">That question is over 300 characters. Shorten it and ask again.</p>}
+        {response?.kind === "limit" && (
+          <div className="notice" role="status">
+            <p>
+              <strong>{LIMIT[response.limit].headline}</strong>
+            </p>
+            <p>{LIMIT[response.limit].line}</p>
+            <p>The example questions and the eval results still work.</p>
+          </div>
+        )}
       </section>
 
       <aside className="sources">
         {busy && !passages && [0, 1, 2].map((i) => <Skeleton key={i} lines={5} card />)}
+
+        {response?.kind === "limit" && <p className="muted">No search was run.</p>}
 
         {busy && passages && (
           <>
@@ -209,6 +232,10 @@ export function Ask() {
       </aside>
     </main>
   );
+}
+
+function limit(kind: LimitKind): AskResponse {
+  return { kind: "limit", limit: kind };
 }
 
 function Skeleton({ lines, card }: { lines: number; card?: boolean }) {

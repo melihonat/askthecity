@@ -10,6 +10,7 @@ import psycopg
 from . import config, store
 
 SCHEMA_SQL = config.ROOT / "db" / "schema.sql"
+APP_SQL = config.ROOT / "db" / "app.sql"          # usage_daily and the like: live schema only
 TABLES = ["snapshot", "documents", "chunks", "amendments"]   # parent → child
 CHUNK_COLUMNS = ["id", "document_id", "family", "kind", "section", "subsection_range", "stage",
                  "heading", "breadcrumb", "body", "label", "sublabel", "href", "amended_since",
@@ -27,6 +28,7 @@ def apply_schema(conn: psycopg.Connection) -> None:
     template = SCHEMA_SQL.read_text(encoding="utf-8")
     for schema in ("public", "staging"):
         conn.execute(template.replace("{schema}", schema))
+    conn.execute(APP_SQL.read_text(encoding="utf-8"))
 
 
 def _jsonl(path) -> list[dict]:

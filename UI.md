@@ -62,6 +62,10 @@ search was run.
 | `budget` | The demo is resting until tomorrow. | This month's model budget is used up. |
 | `burst` | Too many questions at once. | Wait a few seconds and try again. |
 | `too_long` | That question is over 300 characters. | Shorten it and ask again. |
+| `unavailable` | The demo can't answer right now. | A service it relies on didn't respond. Try again in a minute. |
+
+An HTTP 429 from the firewall's burst rule (no NDJSON body) renders as `burst`; any other
+failed request, or a dropped connection, as `unavailable`.
 
 ## `/evals`
 
