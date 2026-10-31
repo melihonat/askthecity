@@ -1,12 +1,10 @@
 import { ask } from "@/lib/ask/ask";
-import { CorpusMismatchError } from "@/lib/ask/config";
+import { CorpusMismatchError, MAX_QUESTION } from "@/lib/ask/config";
 import { createDeps } from "@/lib/ask/deps";
 import { resolveEval } from "@/lib/ask/eval";
 import type { AskEvent } from "@/lib/ask/types";
 
 export const maxDuration = 30;
-
-const MAX_QUESTION = 300;
 
 /**
  * POST { question, rung? } → NDJSON: one `passages` event, then one `final` AskResponse. Under the

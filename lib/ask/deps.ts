@@ -24,7 +24,7 @@ async function loadSnapshot(): Promise<Snapshot> {
 // Checked once per instance, starting at module load. A model or dimension mismatch stays
 // failed, so every request fails fast; any other error is retried on the next request.
 let snapshot: Promise<Snapshot> | null = null;
-function getSnapshot(): Promise<Snapshot> {
+export function getSnapshot(): Promise<Snapshot> {
   snapshot ??= loadSnapshot().catch((e) => {
     if (!(e instanceof CorpusMismatchError)) snapshot = null;
     throw e;
