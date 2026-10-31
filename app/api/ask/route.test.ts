@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AskDeps } from "@/lib/ask/ask";
+import { cacheKey } from "@/lib/ask/cache";
 import { EVAL_HEADER, EVAL_RUN_HEADER } from "@/lib/ask/eval";
-import type { AskEvent, SearchRow } from "@/lib/ask/types";
+import { EXAMPLES } from "@/lib/ask/scope";
+import type { AskEvent, AskResponse, SearchRow } from "@/lib/ask/types";
 
 const row = (id: string, rank: number): SearchRow => ({
   id,
@@ -29,6 +31,8 @@ const fake = {
     rerank: async () => [0.9, 0.8],
     generate: async () => ({ decision: "answer" as const, text: "Until 7 p.m. [1].", cited: [1] }),
     useQuota: vi.fn(async (_ipHash: string, _ipLimit: number) => ({ ip: 0, global: 0 })),
+    cached: vi.fn(async (_key: string): Promise<AskResponse | null> => null),
+    store: vi.fn(async (_key: string, _response: AskResponse) => {}),
   } satisfies AskDeps,
 };
 
@@ -55,6 +59,8 @@ describe("POST /api/ask", () => {
     vi.stubEnv("IP_HASH_SALT", "pepper");
     fake.deps.search.mockClear();
     fake.deps.useQuota.mockClear();
+    fake.deps.cached.mockClear();
+    fake.deps.store.mockClear();
   });
 
   it("sends no debug event and ignores a rung without the eval header", async () => {
@@ -133,6 +139,57 @@ describe("POST /api/ask", () => {
       const { status, events } = await post({ question: "q?" });
       expect(status).toBe(200);
       expect(events).toEqual([{ type: "final", response: { kind: "limit", limit: "unavailable" } }]);
+    });
+  });
+  describe("answer cache and examples", () => {
+    it("reads and fills the cache for a public request", async () => {
+      await post({ question: "When can they drill?" });
+      const key = cacheKey("When can they drill?", "s1");
+      expect(fake.deps.cached).toHaveBeenCalledWith(key);
+      expect(fake.deps.store).toHaveBeenCalledWith(key, expect.objectContaining({ kind: "answer" }));
+    });
+
+    it("skips the cache under the eval header", async () => {
+      await post({ question: "When can they drill?" }, { [EVAL_HEADER]: SECRET });
+      expect(fake.deps.cached).not.toHaveBeenCalled();
+      expect(fake.deps.store).not.toHaveBeenCalled();
+    });
+
+    it("never meters an example question, even on a miss", async () => {
+      await post({ question: EXAMPLES[0].question }, { "x-real-ip": "203.0.113.7" });
+      expect(fake.deps.useQuota).not.toHaveBeenCalled();
+      expect(fake.deps.search).toHaveBeenCalled();
+    });
+
+    it("serves all four chips from the cache with the budget gone and the IP over its limit", async () => {
+      const stored = new Map<string, AskResponse>(
+        EXAMPLES.map((ex, i): [string, AskResponse] => [
+          cacheKey(ex.question, "s1"),
+          ex.trick
+            ? { kind: "refusal", reason: "below_threshold", scope: "…", nearest: [] }
+            : { kind: "answer", text: `answer ${i} [1].`, citations: [{ n: 1, chunkId: "tmc:591-a" }], passages: [] },
+        ]),
+      );
+      const { embed, generate } = fake.deps;
+      const gone = async (): Promise<never> => {
+        throw Object.assign(new Error("HTTP 402"), { statusCode: 402 });
+      };
+      fake.deps.cached.mockImplementation(async (key) => stored.get(key) ?? null);
+      fake.deps.useQuota.mockResolvedValue({ ip: 999, global: 999 });
+      Object.assign(fake.deps, { embed: gone, generate: gone });
+      try {
+        for (const ex of EXAMPLES) {
+          const { events } = await post({ question: ex.question });
+          expect(events).toEqual([{ type: "final", response: stored.get(cacheKey(ex.question, "s1")) }]);
+        }
+        // any other question is stopped
+        const [other] = (await post({ question: "When can they drill?" })).events;
+        expect(other.type === "final" && other.response.kind).toBe("limit");
+      } finally {
+        Object.assign(fake.deps, { embed, generate });
+        fake.deps.cached.mockReset().mockResolvedValue(null);
+        fake.deps.useQuota.mockReset().mockResolvedValue({ ip: 0, global: 0 });
+      }
     });
   });
 });

@@ -43,3 +43,20 @@ The three app secrets are random (48 characters). To rotate one, generate a new 
 `.env` and Vercel env, then redeploy. A new `IP_HASH_SALT` resets the per-IP daily counts.
 A new `EVAL_HEADER_SECRET` must also go into the burst firewall rule's exemption
 ([`GUARDRAILS.md`](GUARDRAILS.md#the-burst-rule)).
+
+## Deploy
+
+Vercel deploys `main` on push (Production) and every branch (Preview). For a production deploy:
+
+1. **Apply the app tables first** when [`db/app.sql`](db/app.sql) changed:
+   `psql "$DATABASE_URL" -f db/app.sql`. It is idempotent and never drops data; the deployed
+   app reads `answer_cache` and `use_quota` on every question, so code that needs a new table
+   must not go live before it.
+2. Merge to `main` and wait for the production deployment to be Ready.
+3. **Pre-warm the example chips:** `npm run prewarm` (or `npm run prewarm -- <base-url>`;
+   it defaults to `https://ask-the-city.vercel.app`). It asks the four chips through the public
+   path, so their responses land in the answer cache and work at $0 and under every daily
+   limit. It exits non-zero if a chip ends in a limit or the trick question isn't refused.
+   Needed after any deploy that changes the cache key (model, prompt, threshold, `shipped`
+   preset) and after a re-ingestion (new snapshot id); harmless otherwise, since a warm chip
+   is a free hit.

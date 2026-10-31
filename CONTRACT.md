@@ -93,7 +93,7 @@ The scope sentence follows the line.
 
 Streamed as two events: `passages` as soon as reranking finishes (the sources panel fills
 while the model writes), then one final `AskResponse`. A refusal below the threshold sends
-no generation call; a limit sends only the final event.
+no generation call; a limit or an answer-cache hit sends only the final event.
 
 ```ts
 type AskResponse =

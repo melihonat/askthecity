@@ -45,3 +45,15 @@ $$;
 revoke execute on function public.use_quota(text, int) from public, anon, authenticated;
 grant select, insert, update, delete on public.usage_daily to service_role;
 grant execute on function public.use_quota(text, int) to service_role;
+
+-- The answer cache: exact match, no TTL. `key` is sha256(normalised question, snapshot id,
+-- config version) (lib/ask/cache.ts), so a new snapshot or config misses and old rows are just
+-- never read again. `response` is the AskResponse the API sent.
+create table if not exists public.answer_cache (
+  key        text primary key,
+  response   jsonb not null,
+  created_at timestamptz not null default now()
+);
+alter table public.answer_cache enable row level security;
+
+grant select, insert on public.answer_cache to service_role;

@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { type AskDeps, ask } from "./ask";
 import { REFUSAL_THRESHOLD, RUNGS } from "./config";
 import { GLOBAL_DAILY, IP_DAILY } from "./guardrails";
-import type { AskEvent, CompanionRow, ModelOutput, Rung, SearchRow } from "./types";
+import { cacheKey } from "./cache";
+import type { AskEvent, AskResponse, CompanionRow, ModelOutput, Rung, SearchRow } from "./types";
 
 const SCOPE = "Knows the Toronto Municipal Code…";
 
@@ -57,6 +58,8 @@ function fakeDeps(rows: SearchRow[], scores: number[], output: ModelOutput, comp
     rerank: vi.fn(async () => scores),
     generate: vi.fn(async (_req: Parameters<AskDeps["generate"]>[0]) => output),
     useQuota: vi.fn(async (_ipHash: string, _ipLimit: number) => ({ ip: 0, global: 0 })),
+    cached: vi.fn(async (_key: string): Promise<AskResponse | null> => null),
+    store: vi.fn(async (_key: string, _response: AskResponse) => {}),
   } satisfies AskDeps;
 }
 
@@ -347,6 +350,68 @@ describe("ask", () => {
       const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
       deps[dep].mockRejectedValue(new Error("connection refused"));
       expect(await events(deps, "hash-1")).toEqual(limitOnly("unavailable"));
+    });
+  });
+  describe("answer cache", () => {
+    async function events(deps: AskDeps, opts: { cache?: boolean; ipHash?: string } = {}) {
+      const out: AskEvent[] = [];
+      for await (const ev of ask("How late can my neighbour run a leaf blower?", "shipped", deps, opts)) out.push(ev);
+      return out;
+    }
+    const KEY = cacheKey("How late can my neighbour run a leaf blower?", "s1");
+    const STORED: AskResponse = { kind: "answer", text: "Until 7 p.m. [1].", citations: [{ n: 1, chunkId: "tmc:591-a" }], passages: [] };
+
+    it("serves a hit as the only event, skipping embed, search, generate and the limits", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      deps.cached.mockResolvedValue(STORED);
+      expect(await events(deps, { cache: true, ipHash: "hash-1" })).toEqual([{ type: "final", response: STORED }]);
+      expect(deps.cached).toHaveBeenCalledWith(KEY);
+      for (const dep of [deps.embed, deps.search, deps.rerank, deps.generate, deps.useQuota, deps.store]) expect(dep).not.toHaveBeenCalled();
+    });
+
+    it("serves a hit while a daily limit is active", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      deps.cached.mockResolvedValue(STORED);
+      deps.useQuota.mockResolvedValue({ ip: IP_DAILY, global: GLOBAL_DAILY });
+      expect(await events(deps, { cache: true, ipHash: "hash-1" })).toEqual([{ type: "final", response: STORED }]);
+    });
+
+    it("on a miss, runs the pipeline and stores the response it sends", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      const out = await events(deps, { cache: true, ipHash: "hash-1" });
+      const final = out.at(-1)!;
+      expect(final.type === "final" && final.response.kind).toBe("answer");
+      expect(deps.useQuota).toHaveBeenCalledOnce();
+      expect(deps.store).toHaveBeenCalledWith(KEY, final.type === "final" && final.response);
+    });
+
+    it("stores a gate refusal too", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => LOW), ANSWER);
+      await events(deps, { cache: true });
+      expect(deps.store).toHaveBeenCalledWith(KEY, expect.objectContaining({ kind: "refusal", reason: "below_threshold" }));
+    });
+
+    it("never stores a limit", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      deps.generate.mockRejectedValue(Object.assign(new Error("HTTP 402"), { statusCode: 402 }));
+      await events(deps, { cache: true });
+      deps.useQuota.mockResolvedValue({ ip: IP_DAILY, global: 0 });
+      await events(deps, { cache: true, ipHash: "hash-1" });
+      expect(deps.store).not.toHaveBeenCalled();
+    });
+
+    it("still sends the response when storing it fails", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      deps.store.mockRejectedValue(new Error("connection refused"));
+      const final = (await events(deps, { cache: true })).at(-1)!;
+      expect(final.type === "final" && final.response.kind).toBe("answer");
+    });
+
+    it("is neither read nor written without the cache option (the eval header)", async () => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      await events(deps);
+      expect(deps.cached).not.toHaveBeenCalled();
+      expect(deps.store).not.toHaveBeenCalled();
     });
   });
 });

@@ -63,13 +63,22 @@ $0, so a 3-minute visit still shows the headline behaviour.
 
 ## Answer cache
 
-- **Exact match only, in Postgres** (`answer_cache`). Key = hash of the normalised question
-  (lowercase, trimmed, whitespace collapsed) + snapshot id + config version (model ids,
-  prompt version, refusal threshold). Stores the full typed response. No TTL; a key change
-  invalidates.
+- **Exact match only, in Postgres** (`answer_cache`, [`db/app.sql`](db/app.sql)). Key =
+  sha256 of the normalised question (lowercase, trimmed, whitespace collapsed) + snapshot id +
+  config version (the `shipped` preset with its model id, embedder, reranker, prompt version
+  and hash, refusal threshold), in `lib/ask/cache.ts`. Stores the full typed response, answers
+  and refusals alike; never a limit. No TTL; a key change invalidates.
+- **Read first:** the lookup runs right after the snapshot, before the quota and the
+  embedding, so a hit costs nothing, isn't counted, and is served whatever limit is active.
+  A hit is the only event (no `passages` first). A failed write is logged; the response is
+  still sent.
+- **Example questions are never metered**, hit or miss: the route matches the chips by
+  normalised question. A burst 429 is the firewall's, before the function, so it still
+  applies to them.
 - **No semantic cache:** a near-miss serving someone else's answer is the quiet wrongness
   this demo exists to avoid.
-- Example questions are pre-warmed by a script after deploy.
+- Example questions are pre-warmed after every deploy that can change the key
+  ([`SETUP.md`](SETUP.md#deploy)).
 
 ## The eval header
 
