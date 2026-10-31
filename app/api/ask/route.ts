@@ -1,4 +1,5 @@
 import { ask } from "@/lib/ask/ask";
+import { isExample } from "@/lib/ask/cache";
 import { createDeps } from "@/lib/ask/deps";
 import { resolveEval } from "@/lib/ask/eval";
 import { checkInput, clean, ipHash } from "@/lib/ask/guardrails";
@@ -21,9 +22,10 @@ export async function POST(req: Request) {
 
   if (checkInput(question) === "too_long") return ndjson([limit("too_long")]);
 
-  // The eval header skips the daily limits; everyone else is metered by a salted IP hash.
+  // The eval header skips the cache and the daily limits. Everyone else reads the cache first and
+  // is metered by a salted IP hash, except on an example question.
   let hash: string | undefined;
-  if (!evalReq.eval) {
+  if (!evalReq.eval && !isExample(question)) {
     const salt = process.env.IP_HASH_SALT;
     if (!salt) {
       console.error("IP_HASH_SALT is not set");
@@ -32,7 +34,7 @@ export async function POST(req: Request) {
     hash = ipHash(clientIp(req.headers), salt);
   }
 
-  return ndjson(ask(question, evalReq.rung, createDeps(evalReq.tags), { debug: evalReq.eval, ipHash: hash }));
+  return ndjson(ask(question, evalReq.rung, createDeps(evalReq.tags), { debug: evalReq.eval, ipHash: hash, cache: !evalReq.eval }));
 }
 
 /** Vercel sets both headers; `x-real-ip` is the client as Vercel saw it. */

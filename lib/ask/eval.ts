@@ -3,7 +3,7 @@ import { isRung } from "./config";
 import type { Rung } from "./types";
 
 // The eval header (GUARDRAILS.md, "The eval header"): only the harness sends it. It unlocks the
-// `debug` event and rung presets, and will skip the answer cache and the rate limits.
+// `debug` event and rung presets, and skips the answer cache and the daily limits.
 export const EVAL_HEADER = "x-eval-key";
 // The harness's run id; every Gateway call of the request is tagged `eval:<run-id>`.
 export const EVAL_RUN_HEADER = "x-eval-run";

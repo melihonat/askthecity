@@ -1,8 +1,10 @@
+import { cacheKey } from "./cache";
 import { CONTEXT_PASSAGES, EMBEDDING, MAX_COMPANIONS, REFUSAL_THRESHOLD, RERANK_MODEL, RUNGS } from "./config";
 import { failureLimit, IP_DAILY, usageLimit } from "./guardrails";
 import { PROMPT_HASH, PROMPT_VERSION, systemPrompt, userPrompt } from "./prompt";
 import type {
   AskEvent,
+  AskResponse,
   ChunkRow,
   CompanionRow,
   DebugEvent,
@@ -30,10 +32,17 @@ export type AskDeps = {
    * global day. Returns the counts from before it.
    */
   useQuota(ipHash: string, ipLimit: number): Promise<Usage>;
+  /** The stored response for a cache key, or null. */
+  cached(key: string): Promise<AskResponse | null>;
+  /** Stores a response; a key already stored keeps its response. */
+  store(key: string, response: AskResponse): Promise<void>;
 };
 
-/** `ipHash` meters the request against the daily limits; the eval header sends none. */
-export type AskOptions = { debug?: boolean; ipHash?: string };
+/**
+ * `ipHash` meters the request against the daily limits; the eval header and example questions
+ * send none. `cache` reads and fills the answer cache; the eval header skips it.
+ */
+export type AskOptions = { debug?: boolean; ipHash?: string; cache?: boolean };
 
 export function toPassage(row: ChunkRow, n: number, companion = false): PassageView {
   return {
@@ -97,6 +106,7 @@ function byRerank(rows: SearchRow[], scores: number[]): SearchRow[] {
  * The rung's preset switches steps inside it. With rerank off the top 5 are by fused rank and
  * the gate is off; a pin skips the gate. A daily limit stops it before the search and is the only
  * event. Any failure becomes a typed limit (upstream 402 → `budget`, 429 → `burst`), never a 500.
+ * A cache hit comes first, before any limit or paid call, and is the only event.
  */
 export async function* ask(question: string, rung: Rung, deps: AskDeps, opts: AskOptions = {}): AsyncGenerator<AskEvent> {
   try {
@@ -111,6 +121,12 @@ async function* run(question: string, rung: Rung, deps: AskDeps, opts: AskOption
   const config = RUNGS[rung];
   const t0 = performance.now();
   const snapshot = await deps.snapshot();
+  const key = opts.cache ? cacheKey(question, snapshot.id) : null;
+  const hit = key && (await deps.cached(key));
+  if (hit) {
+    yield { type: "final", response: hit };
+    return;
+  }
   // The quota round trip runs beside the embedding, so it adds no latency.
   const [usage, embedding] = await Promise.all([
     opts.ipHash ? deps.useQuota(opts.ipHash, IP_DAILY) : null,
@@ -169,15 +185,14 @@ async function* run(question: string, rung: Rung, deps: AskDeps, opts: AskOption
 
   if (gateScore !== null && !gateBypassed && gateScore < REFUSAL_THRESHOLD) {
     if (opts.debug) yield { type: "debug", debug: debug(null, null) };
-    yield {
-      type: "final",
-      response: {
-        kind: "refusal",
-        reason: "below_threshold",
-        scope: snapshot.scope_sentence,
-        nearest: passages.filter((p) => !p.companion).slice(0, NEAREST),
-      },
+    const response: AskResponse = {
+      kind: "refusal",
+      reason: "below_threshold",
+      scope: snapshot.scope_sentence,
+      nearest: passages.filter((p) => !p.companion).slice(0, NEAREST),
     };
+    if (key) await store(deps, key, response);
+    yield { type: "final", response };
     return;
   }
 
@@ -191,5 +206,15 @@ async function* run(question: string, rung: Rung, deps: AskDeps, opts: AskOption
   const response = validate(output, passages, snapshot.scope_sentence);
 
   if (opts.debug) yield { type: "debug", debug: debug(output.decision === "decline" ? output.text : null, generation_ms) };
+  if (key) await store(deps, key, response);
   yield { type: "final", response };
+}
+
+/** A failed write costs only a future hit; the response is still good, so it is still sent. */
+async function store(deps: AskDeps, key: string, response: AskResponse): Promise<void> {
+  try {
+    await deps.store(key, response);
+  } catch (e) {
+    console.error(e);
+  }
 }
