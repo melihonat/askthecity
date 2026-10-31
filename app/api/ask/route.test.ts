@@ -69,6 +69,28 @@ describe("POST /api/ask", () => {
     expect(fake.tags).toEqual(["eval:r1"]);
   });
 
+  it("streams the passages before generation finishes", async () => {
+    let release!: () => void;
+    const held = new Promise<void>((r) => (release = r));
+    const generate = fake.deps.generate;
+    fake.deps.generate = async () => {
+      await held;
+      return generate();
+    };
+    try {
+      const res = await POST(new Request("http://test/api/ask", { method: "POST", body: JSON.stringify({ question: "q?" }) }));
+      const reader = res.body!.pipeThrough(new TextDecoderStream()).getReader();
+      const first = JSON.parse((await reader.read()).value!) as AskEvent;
+      expect(first.type).toBe("passages");
+      release();
+      let rest = "";
+      for (let r = await reader.read(); !r.done; r = await reader.read()) rest += r.value;
+      expect((JSON.parse(rest) as AskEvent).type).toBe("final");
+    } finally {
+      fake.deps.generate = generate;
+    }
+  });
+
   it("rejects an unknown rung under the eval header", async () => {
     const res = await POST(
       new Request("http://test/api/ask", { method: "POST", body: JSON.stringify({ question: "q?", rung: "best" }), headers: { [EVAL_HEADER]: SECRET } }),
