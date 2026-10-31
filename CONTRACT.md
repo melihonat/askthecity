@@ -28,11 +28,14 @@ Python ingester writes and the TypeScript app reads. The models behind it are in
 | Code § | `Ch 681 § 681-5 C–D` | `consolidated 2023-05-15` (`· replaced 2027-05-01 by By-law 1512-2025`, or `· repealed …`, while a replacement is pending) | chapter PDF `#page=<page_start>` |
 | Amending by-law | `By-law 1482-2025 cl. 1 O–Y` | `amends § 608-8.1 B, § 608-16, § 608-19 +6 more · enacted 2025-12-17 · in force 2026-03-02` (`· in force 2026-05-21` alone when in force on enactment) | by-law PDF `#page=<page_start>` |
 | Replacement chapter | `Ch 497 § 497-2.1` | `By-law 1511-2025 · in force 2026-06-01` (or `· in force 2027-05-01, not yet law`) | by-law PDF `#page=<page_start>` |
-| Item page block | `Item 2026.IE29.6 · City Council decision` | date + status stamp | TMMIS item URL (no anchor) |
+| Item page block | `Item 2026.IE29.6 · City Council decision` (or `IE Committee recommendation` / `IE Committee decision`; `(1/2)` when a stage splits) | stage date + status stamp: `2026-05-06 · Adopted with amendments by City Council 2026-05-21 · By-law 470-2026` | TMMIS item URL (no anchor) |
 | Staff report | `Staff report · 2026.IE29.6 › COMMENTS › Manganese` | status stamp | `bgrd/` PDF `#page=<page_start>` |
 
   The stage is always named in an item-page label, so a committee recommendation never
-  reads as Council's decision.
+  reads as Council's decision. A Decisions sublabel always ends with the status stamp, and an
+  undecided item's stamp ends with `; no decision`: `toPassage` reads that suffix for the
+  passage's `decided` flag (the `adopted` / `no decision` badge), and the prompt tells the
+  model what it means.
 
 ## Generation and validation
 

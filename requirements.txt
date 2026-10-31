@@ -1,4 +1,5 @@
 # Offline tooling (ingestion, evals). App dependencies are in package.json.
+beautifulsoup4>=4.12
 boto3>=1.35
 pdfplumber>=0.11
 psycopg[binary]>=3.2

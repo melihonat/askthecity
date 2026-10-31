@@ -56,6 +56,8 @@ export function toPassage(row: ChunkRow, n: number, companion = false): PassageV
     amendedSince: row.amended_since ?? [],
     // a replacement in force takes `tmc:` ids and is the Code; one not yet in force keeps `bl:` ids
     notYetLaw: row.kind === "replacement_bylaw" && !row.id.startsWith("tmc:"),
+    // a Decisions sublabel ends with the item's status stamp, which ends "; no decision" when undecided
+    decided: row.family === "decisions" ? !row.sublabel.endsWith("; no decision") : null,
     body: row.body,
   };
 }

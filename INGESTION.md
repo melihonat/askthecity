@@ -52,7 +52,7 @@ any stage re-runs alone.
 | --- | --- | --- | --- |
 | 1 | `fetch-rules` | toronto.ca → `corpus/`, R2, manifest rows | a download fails |
 | 1b | `fetch-bylaws` | yearly by-law lists + `build/documents.jsonl` → `corpus/`, R2, manifest rows | a download fails |
-| 2 | *save TMMIS* | agent runbook → `corpus/item_page/` | — (see below) |
+| 2 | *save TMMIS* | agent runbook + `receive-saves` → `corpus/item_page/`, R2, manifest rows | — (see below) |
 | 3 | `check-saves` | `snapshot/tmmis_items.txt` vs saved files | any id lacks a passing file |
 | 4 | `fetch-reports` | `bgrd/` links on saved pages → `corpus/`, R2, manifest | an unreviewed label appears |
 | 5 | `extract` | `corpus/` → `build/text/` | — |
@@ -71,8 +71,8 @@ any stage re-runs alone.
   consolidated ([`CHUNKING.md`](CHUNKING.md#rules-amending-by-laws)).
 - **`restore`** pulls every manifest row from R2 into `corpus/`, verifying sha256. It
   replaces stages 1–4 on a new machine; nothing is re-fetched from the City.
-- **`all`** runs stages 3–8 in order and stops at the first failure (today 5–8: the
-  Decisions stages don't exist yet).
+- **`all`** runs stages 3–8 in order and stops at the first failure (today 3 and 5–8:
+  `fetch-reports` doesn't exist yet).
 - **`swap` is never automatic.** The run is `all` → `smoke` → `swap`, by hand, and `swap`
   re-runs the `smoke` database checks itself and refuses if any fails.
 - **`chunker_version`** (in `ingest/config.py`, stored on the `snapshot` row) is bumped
@@ -84,20 +84,28 @@ any stage re-runs alone.
 ## Saving TMMIS item pages
 
 Scripts get an Akamai 403; the agent-driven preview browser loads the pages. So
-stage 2 is a runbook an agent session follows, `ingest/SAVE_TMMIS.md`, not pipeline code.
+stage 2 is a runbook an agent session follows, [`ingest/SAVE_TMMIS.md`](ingest/SAVE_TMMIS.md),
+not pipeline code. The only code is `receive-saves`, a localhost receiver that writes what
+the page posts through the snapshot store.
 
 1. Open the 8 IE24–IE31 meeting pages and write the 115 item ids to
    `snapshot/tmmis_items.txt`. Counts per meeting must match (15, 14, 19, 17, 14, 10, 14,
    12) or stop.
-2. For each id, open the item page and run `fetch(location.href)` **inside the page** to get
-   the exact bytes as served (the DOM would be already decoded, so its hash would mean
-   nothing). Write them to `corpus/item_page/<id>.html`; `obtained_by=agent_fetch`.
-3. A page that fails is saved by hand (Ctrl+S, "Webpage, HTML only");
+2. For each id, run `fetch()` on the item page **inside the page** to get the exact bytes as
+   served (the DOM would be already decoded, so its hash would mean nothing) and POST them
+   to `receive-saves`; `obtained_by=agent_fetch`.
+3. A page that fails is saved by hand (Ctrl+S, "Webpage, HTML only") and posted the same way;
    `obtained_by=browser_save`.
 
 `check-saves` passes a file when it decodes as `windows-1252`, has the item heading and the
-Tracking Status section, is over ~10 KB, and is not an Akamai "Access Denied" page. Any id
-on the expected list without a passing file is printed, and the stage exits non-zero.
+Tracking Status section, is over 10 KB, is not an Akamai "Access Denied" page, and was saved
+within 7 days of the snapshot date; the expected list must match the per-meeting counts. Any
+id without a passing file is printed with its reasons, and the stage exits non-zero. On a
+pass it rewrites `snapshot/SNAPSHOT.md`.
+
+The City pointed to the TMMIS open-data API for bulk item data; it sits behind the same
+Akamai wall, and the pages carry everything the chunker needs, so the snapshot saves the
+pages as served.
 
 ## Hand-review inputs
 
