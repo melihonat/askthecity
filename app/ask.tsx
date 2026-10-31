@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { parseBody } from "@/lib/ask/body";
 import { MAX_QUESTION } from "@/lib/ask/config";
 import { splitGap } from "@/lib/ask/gap";
+import { segments } from "@/lib/ask/markers";
 import { EXAMPLES } from "@/lib/ask/scope";
 import type { AskEvent, AskResponse, PassageView } from "@/lib/ask/types";
 
@@ -25,6 +26,7 @@ export function Ask() {
   const [passages, setPassages] = useState<PassageView[] | null>(null);
   const [response, setResponse] = useState<AskResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [active, setActive] = useState<number | null>(null); // the passage a marker points at
 
   async function submit(q = question) {
     if (!q.trim() || busy) return;
@@ -33,6 +35,7 @@ export function Ask() {
     setPassages(null);
     setResponse(null);
     setError(null);
+    setActive(null);
     try {
       const res = await fetch("/api/ask", {
         method: "POST",
@@ -68,6 +71,11 @@ export function Ask() {
       : [];
   const uncited = response?.kind === "answer" ? response.passages.filter((p) => !cited.includes(p)) : [];
   const answer = response?.kind === "answer" ? splitGap(response.text) : null;
+
+  function point(n: number) {
+    setActive(n);
+    document.getElementById(`passage-${n}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
 
   return (
     <main className="panes">
@@ -121,11 +129,29 @@ export function Ask() {
 
         {asked && <h2 className="asked">{asked}</h2>}
         {busy && passages && <p className="muted">Found {passages.length} passages. Writing an answer from them…</p>}
+        {busy && <Skeleton lines={4} />}
         {error && <p className="error">{error}</p>}
 
         {response?.kind === "answer" && (
           <p className="answer">
-            {answer!.body}
+            {segments(answer!.body).map((s, i) =>
+              s.kind === "text" ? (
+                s.text
+              ) : (
+                <button
+                  key={i}
+                  type="button"
+                  className={s.n === active ? "marker active" : "marker"}
+                  aria-label={`Passage ${s.n}`}
+                  onMouseEnter={() => point(s.n)}
+                  onMouseLeave={() => setActive(null)}
+                  onFocus={() => point(s.n)}
+                  onClick={() => point(s.n)}
+                >
+                  {s.n}
+                </button>
+              ),
+            )}
             {answer!.gap && <span className="gap"> {answer!.gap}</span>}
           </p>
         )}
@@ -144,11 +170,22 @@ export function Ask() {
       </section>
 
       <aside className="sources">
+        {busy && !passages && [0, 1, 2].map((i) => <Skeleton key={i} lines={5} card />)}
+
+        {busy && passages && (
+          <>
+            <h3>Passages found</h3>
+            {passages.map((p) => (
+              <Card key={p.n} p={p} />
+            ))}
+          </>
+        )}
+
         {response?.kind === "answer" && (
           <>
             <h3>Cited ({cited.length})</h3>
             {cited.map((p) => (
-              <Card key={p.n} p={p} />
+              <Card key={p.n} p={p} active={p.n === active} />
             ))}
             {uncited.length > 0 && (
               <details>
@@ -174,9 +211,30 @@ export function Ask() {
   );
 }
 
-function Card({ p, dim }: { p: PassageView; dim?: boolean }) {
+function Skeleton({ lines, card }: { lines: number; card?: boolean }) {
   return (
-    <article className={["card", p.companion && "companion", dim && "dim"].filter(Boolean).join(" ")}>
+    <div className={card ? "card skeleton" : "skeleton"} aria-hidden>
+      {Array.from({ length: lines }, (_, i) => (
+        <span key={i} />
+      ))}
+    </div>
+  );
+}
+
+function Card({ p, dim, active }: { p: PassageView; dim?: boolean; active?: boolean }) {
+  const body = useRef<HTMLDivElement>(null);
+  const [clamped, setClamped] = useState(false); // the body overflows its ~6 lines
+  const [open, setOpen] = useState(false);
+  useLayoutEffect(() => {
+    const el = body.current!;
+    setClamped(el.scrollHeight > el.clientHeight + 1);
+  }, [p.body]);
+
+  return (
+    <article
+      id={`passage-${p.n}`}
+      className={["card", p.companion && "companion", dim && "dim", active && "active"].filter(Boolean).join(" ")}
+    >
       <div>
         <span className="tag">{p.n}</span> <strong>{p.label}</strong>
         {p.amendedSince.length > 0 && (
@@ -193,7 +251,7 @@ function Card({ p, dim }: { p: PassageView; dim?: boolean }) {
           source ↗
         </a>
       </div>
-      <div className="body">
+      <div ref={body} className={open ? "body open" : "body"}>
         {parseBody(p.body).map((b, i) =>
           b.kind === "text" ? (
             <p key={i}>{b.text}</p>
@@ -219,6 +277,11 @@ function Card({ p, dim }: { p: PassageView; dim?: boolean }) {
           ),
         )}
       </div>
+      {clamped && !open && (
+        <button type="button" className="more" onClick={() => setOpen(true)}>
+          show full passage
+        </button>
+      )}
     </article>
   );
 }
