@@ -8,6 +8,8 @@ export const CONTEXT_PASSAGES = 5; // the model sees [1]–[5]
 export const MAX_COMPANIONS = 3; // then up to 3 companion passages, [6]…
 export const MAX_OUTPUT_TOKENS = 400;
 
+export const MAX_QUESTION = 300; // characters; longer is the `too_long` limit
+
 export const RERANK_MODEL = "voyage/rerank-3";
 
 // Provisional and permissive: catches clearly off-corpus questions only. Calibrated from the

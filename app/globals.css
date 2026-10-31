@@ -1,5 +1,29 @@
 body { font: 16px/1.5 system-ui, sans-serif; margin: 0; color: #1a1a1a; }
-main { max-width: 760px; margin: 0 auto; padding: 2rem 1rem; }
+header.site, .scope, main, footer { max-width: 1160px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
+header.site { display: flex; align-items: baseline; gap: 1.5rem; padding-top: 1rem; padding-bottom: .75rem; border-bottom: 1px solid #ddd; }
+header.site strong { font-size: 1.1rem; }
+header.site nav a { color: inherit; text-decoration: none; }
+header.site nav a[aria-current] { font-weight: 600; }
+header.site > .muted { margin-left: auto; }
+.scope { padding-top: .6rem; padding-bottom: .6rem; color: #444; font-size: .9rem; background: #f6f6f4; }
+.scope details { display: inline; }
+.scope details summary { display: inline; margin: 0; }
+.scope details p { margin: .4rem 0 0; }
+.panes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; padding-top: 1.5rem; padding-bottom: 1.5rem; align-items: start; }
+.sources { position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto; }
+.sources h3 { font-size: .95rem; margin: 0 0 .5rem; }
+@media (max-width: 859px) {
+  .panes { grid-template-columns: minmax(0, 1fr); }
+  .sources { position: static; max-height: none; overflow: visible; }
+}
+.row { display: flex; align-items: center; justify-content: space-between; }
+.counter { color: #666; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.counter.over { color: #b00020; font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.chip { margin: 0; padding: .3rem .7rem; border: 1px solid #ccc; border-radius: 999px; background: #fff; cursor: pointer; font-size: .9rem; text-align: left; }
+.chip:hover:not(:disabled) { border-color: #888; }
+.chip.trick { border-style: dashed; }
+.asked { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
 textarea { width: 100%; font: inherit; padding: .5rem; box-sizing: border-box; }
 button { margin-top: .5rem; font: inherit; padding: .4rem 1rem; }
 .answer { font-size: 1.15rem; }
@@ -19,5 +43,5 @@ button { margin-top: .5rem; font: inherit; padding: .4rem 1rem; }
 .badge.red { background: #fee2e2; color: #991b1b; }
 details summary { cursor: pointer; color: #666; font-size: .9rem; margin: .5rem 0; }
 .tag { display: inline-block; min-width: 1.4em; text-align: center; background: #333; color: #fff; border-radius: 4px; font-size: .8rem; }
-footer { margin-top: 3rem; }
+footer { padding-top: 1rem; padding-bottom: 2rem; border-top: 1px solid #ddd; }
 .gap { font-style: italic; color: #666; }
