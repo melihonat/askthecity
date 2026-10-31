@@ -18,7 +18,7 @@ export type PassageView = {
 export type Citation = { n: number; chunkId: string };
 
 export type RefusalReason = "below_threshold" | "model_declined" | "no_valid_citation";
-export type LimitKind = "ip_daily" | "global_daily" | "burst" | "budget" | "too_long";
+export type LimitKind = "ip_daily" | "global_daily" | "burst" | "budget" | "too_long" | "unavailable";
 
 export type AskResponse =
   | { kind: "answer"; text: string; citations: Citation[]; passages: PassageView[] }
@@ -81,6 +81,9 @@ export type SearchRow = ChunkRow & {
 
 /** One row from the companion_chunks RPC: an amending chunk and the § it targets. */
 export type CompanionRow = ChunkRow & { target_section: string };
+
+/** Paid questions already counted today, before this one (the use_quota RPC). */
+export type Usage = { ip: number; global: number };
 
 export type Snapshot = {
   id: string;

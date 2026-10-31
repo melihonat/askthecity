@@ -1,8 +1,9 @@
 """The eval harness (EVALS.md, "Harness"): calls the deployed /api/ask with the eval header, one rung
 at a time, and writes run.json and report.md. Retrieval logic lives only in the app.
 
-Sequential calls, a discarded warm-up, 3 runs per rung. A 5xx is retried once, then the run
-aborts; a `limit` response or any other HTTP error invalidates it. An invalid run writes nothing.
+Sequential calls, a discarded warm-up, 3 runs per rung. A 5xx or an `unavailable` limit (the app's
+form of a server error) is retried once, then the run aborts; any other `limit` response or HTTP
+error invalidates it. An invalid run writes nothing.
 """
 from __future__ import annotations
 
@@ -63,7 +64,9 @@ def call(transport: Transport, question: str, rung: str) -> dict:
         t0 = time.perf_counter()
         status, events = transport.post(question, rung)
         wall_ms = round((time.perf_counter() - t0) * 1000)
-        server_error = status >= 500 or any(e.get("type") == "error" for e in events)
+        server_error = status >= 500 or any(
+            e.get("type") == "error" or e.get("type") == "final" and e["response"].get("limit") == "unavailable"
+            for e in events)
         if not server_error:
             break
         if attempt == 2:

@@ -5,7 +5,7 @@ import { embed, generateText, Output, rerank as rerankDocuments } from "ai";
 import { z } from "zod";
 import type { AskDeps } from "./ask";
 import { CANDIDATES, CorpusMismatchError, EMBEDDING, MAX_OUTPUT_TOKENS, RERANK_MODEL, checkCorpus } from "./config";
-import type { CompanionRow, SearchRow, Snapshot } from "./types";
+import type { CompanionRow, SearchRow, Snapshot, Usage } from "./types";
 
 // Created on first use, not at import: `next build` imports this module to collect page data,
 // and preview builds have no Supabase env.
@@ -98,6 +98,12 @@ export function createDeps(tags: string[] = []): AskDeps {
         providerOptions: { ...gateway, anthropic: { thinking: { type: "disabled" } } },
       });
       return output;
+    },
+
+    async useQuota(ipHash, ipLimit) {
+      const { data, error } = await db().rpc("use_quota", { ip_key: ipHash, ip_limit: ipLimit }).single();
+      if (error) throw new Error(`use_quota: ${error.message}`);
+      return data as Usage;
     },
   };
 }

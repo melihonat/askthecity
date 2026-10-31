@@ -33,8 +33,8 @@ button { margin-top: .5rem; font: inherit; padding: .4rem 1rem; }
 .skeleton span:last-child { width: 60%; }
 @keyframes shimmer { to { background-position: -200% 0; } }
 .muted { color: #666; font-size: .9rem; }
-.error { color: #b00020; }
-.notice { background: #eaf2fd; padding: .75rem; border-radius: 6px; }
+.notice { background: #eaf2fd; color: #12345a; padding: .75rem 1rem; border-radius: 6px; margin-top: 1rem; }
+.notice p { margin: .35rem 0; }
 .card { border: 1px solid #ddd; border-radius: 6px; padding: .75rem; margin: .5rem 0; }
 .card.dim { opacity: .6; }
 .card { scroll-margin: .5rem; transition: box-shadow .15s, border-color .15s; }
