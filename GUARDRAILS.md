@@ -38,7 +38,8 @@ A Vercel WAF custom rule, configured in the dashboard (Firewall → Configure) o
   "name": "Burst limit /api/ask",
   "conditionGroup": [{ "conditions": [
     { "type": "path", "op": "eq", "value": "/api/ask" },
-    { "type": "method", "op": "eq", "value": "POST" }
+    { "type": "method", "op": "eq", "value": "POST" },
+    { "type": "header", "key": "x-eval-key", "op": "eq", "neg": true, "value": "<EVAL_HEADER_SECRET>" }
   ] }],
   "action": { "mitigate": { "action": "rate_limit",
     "rateLimit": { "algo": "fixed_window", "window": 60, "limit": 10, "keys": ["ip"], "action": "rate_limit" } } }
@@ -46,7 +47,9 @@ A Vercel WAF custom rule, configured in the dashboard (Firewall → Configure) o
 ```
 
 It answers 429 before the function runs, so the UI maps a 429 to the `burst` notice. Counters
-are per region; the app runs in one (`iad1`).
+are per region; the app runs in one (`iad1`). The harness (~30 calls a minute) is exempt by an
+exact match on the eval secret, so the secret also lives in the firewall config: **rotating
+`EVAL_HEADER_SECRET` means editing this rule too**, or the next ladder run is throttled.
 
 ## Degraded states
 

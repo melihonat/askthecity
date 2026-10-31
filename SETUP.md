@@ -41,3 +41,5 @@ Vercel env vars are `sensitive` and target Production and Preview; `.env` covers
 
 The three app secrets are random (48 characters). To rotate one, generate a new value, update
 `.env` and Vercel env, then redeploy. A new `IP_HASH_SALT` resets the per-IP daily counts.
+A new `EVAL_HEADER_SECRET` must also go into the burst firewall rule's exemption
+([`GUARDRAILS.md`](GUARDRAILS.md#the-burst-rule)).
