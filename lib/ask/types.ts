@@ -12,6 +12,7 @@ export type PassageView = {
   href: string;
   amendedSince: string[]; // by-law numbers, for the badge
   notYetLaw: boolean; // a § of a replacement chapter not in force on the snapshot date
+  decided: boolean | null; // Decisions: adopted, or false for "no decision"; null for the rules family
   body: string; // display text, markdown tables kept
 };
 

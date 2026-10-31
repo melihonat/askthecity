@@ -268,6 +268,8 @@ function Card({ p, dim, active }: { p: PassageView; dim?: boolean; active?: bool
           <span className="badge amber">amended since by {p.amendedSince.map((n) => `By-law ${n}`).join(", ")}</span>
         )}
         {p.notYetLaw && <span className="badge red">not yet law</span>}
+        {p.decided === true && <span className="badge green">adopted</span>}
+        {p.decided === false && <span className="badge amber">no decision</span>}
         {p.companion && (
           <span className="badge violet">{p.notYetLaw ? "replacement for a retrieved §" : "amendment to a retrieved §"}</span>
         )}

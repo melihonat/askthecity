@@ -162,15 +162,23 @@ Breadcrumb:
 - Under the ceiling: one chunk. Otherwise one chunk per `h4` block (Council Decision,
   Committee Recommendations / Committee Decision, Decision Advice, Origin + Summary, Motions
   + Votes), packed up to the ceiling. Blocks of different stages never share a chunk.
+- Ids: `ie:2026.IE29.6:council`, `ie:2026.IE29.6:committee`; a stage split over the ceiling
+  numbers its chunks (`ie:2025.IE24.13:committee:1`, `:2`, …). An h4 block with no text of
+  its own ("2a - Supplementary Report …") prefixes the next block's heading.
+- Labels name the stage: `City Council decision`, `IE Committee recommendation` (the card has
+  Committee Recommendations, so Council decided), or `IE Committee decision`.
 - **Every Decisions chunk carries the item's status stamp**, staff-report chunks included,
-  built from the Tracking Status and per-stage `Status:` lines. A referred or deferred item
-  then never reads as adopted.
+  built from the newest Tracking Status line and its `See also By-law` line. A referred or
+  deferred item then never reads as adopted. The stamp names who did what and when, then any
+  by-laws, and an undecided item's stamp **ends with `; no decision`** (deferred, referred,
+  received for information, ruled out of order). An unknown Tracking Status sentence, or an
+  item still awaiting Council, stops the stage.
 
 Breadcrumb:
 
 ```
 [IE Committee item 2025.IE26.14 · Electricity and Toronto's Climate Commitments › Committee Decision]
-[Status: Referred by IE Committee 2025-12-04 to the Executive Director, Environment, Climate and Forestry; no decision]
+[Status: Referred by IE Committee 2025-12-04; no decision]
 ```
 
 ## Decisions: staff reports

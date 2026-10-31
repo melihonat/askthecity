@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { type AskDeps, ask } from "./ask";
+import { type AskDeps, ask, toPassage } from "./ask";
 import { REFUSAL_THRESHOLD, RUNGS } from "./config";
 import { GLOBAL_DAILY, IP_DAILY } from "./guardrails";
 import { cacheKey } from "./cache";
@@ -73,6 +73,24 @@ async function run(deps: AskDeps, rung: Rung = "shipped") {
 }
 
 const ANSWER: ModelOutput = { decision: "answer", text: "Until 7 p.m. [1].", cited: [1] };
+
+describe("toPassage", () => {
+  const item = (sublabel: string): SearchRow => ({
+    ...row("ie:2026.IE29.6:council", 1),
+    document_id: "ie:2026.IE29.6",
+    family: "decisions",
+    kind: "item_page",
+    section: null,
+    sublabel,
+  });
+
+  it("marks a Decisions chunk adopted or no decision from its status stamp, and a rule neither", () => {
+    expect(toPassage(item("2026-05-21 · Adopted by City Council 2026-05-21 · By-law 470-2026"), 1).decided).toBe(true);
+    expect(toPassage(item("2025-12-04 · Referred by IE Committee 2025-12-04; no decision"), 1).decided).toBe(false);
+    expect(toPassage(item("2025-12-04 · Deferred by IE Committee 2025-12-04 · By-law 470-2026; no decision"), 1).decided).toBe(false);
+    expect(toPassage(ROWS[0], 1).decided).toBeNull();
+  });
+});
 
 describe("ask", () => {
   it("reranks the candidates to 5 passages, best score first", async () => {
