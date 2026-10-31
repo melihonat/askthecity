@@ -1,18 +1,24 @@
 import "server-only";
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { embed, generateText, Output, rerank as rerankDocuments } from "ai";
 import { z } from "zod";
 import type { AskDeps } from "./ask";
 import { CANDIDATES, CorpusMismatchError, EMBEDDING, MAX_OUTPUT_TOKENS, RERANK_MODEL, checkCorpus } from "./config";
 import type { CompanionRow, SearchRow, Snapshot } from "./types";
 
-const db = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-  auth: { persistSession: false },
-});
+// Created on first use, not at import: `next build` imports this module to collect page data,
+// and preview builds have no Supabase env.
+let client: SupabaseClient | null = null;
+function db(): SupabaseClient {
+  client ??= createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { persistSession: false },
+  });
+  return client;
+}
 
 async function loadSnapshot(): Promise<Snapshot> {
-  const { data, error } = await db
+  const { data, error } = await db()
     .from("snapshot")
     .select("id, snapshot_date, embed_model, embed_dim, scope_sentence")
     .single();
@@ -58,7 +64,7 @@ export function createDeps(tags: string[] = []): AskDeps {
     },
 
     async search(question, embedding, mode) {
-      const { data, error } = await db.rpc("search_chunks", {
+      const { data, error } = await db().rpc("search_chunks", {
         query_text: question,
         query_embedding: JSON.stringify(embedding),
         mode,
@@ -69,7 +75,7 @@ export function createDeps(tags: string[] = []): AskDeps {
     },
 
     async companions(sections) {
-      const { data, error } = await db.rpc("companion_chunks", { sections });
+      const { data, error } = await db().rpc("companion_chunks", { sections });
       if (error) throw new Error(`companion_chunks: ${error.message}`);
       return data as CompanionRow[];
     },
