@@ -480,22 +480,30 @@ def chunk() -> None:
     from .bylaw import chunk_amending_bylaw
     from .link import link
     from .replace import chunk_replacement, link_replacements, supersede
+    from .reports import chunk_staff_report
     from .tmmis import chunk_item_page
 
     today = store.snapshot_date()
     documents, chunks, skipped = [], [], []
+    items: dict[str, dict] = {}
+    # sorted by kind: item pages come before the staff reports that take their status stamp
     for row in sorted(store.read_manifest(), key=lambda r: (r.kind, r.ref)):
         if row.kind == "item_page":
             doc, cs = chunk_item_page(row.local_path.read_bytes().decode(row.encoding), row)
+            items[row.ref] = doc
             documents.append(doc)
             chunks += cs
             print(f"{row.ref}: {len(cs)} chunks, {sum(c['tokens'] for c in cs)} tokens")
             continue
-        if row.kind not in ("code_chapter", "amending_bylaw", "replacement_bylaw"):
+        if row.kind not in ("code_chapter", "amending_bylaw", "replacement_bylaw", "staff_report"):
             continue
         path = config.TEXT_DIR / f"{row.ref}.jsonl"
         records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
-        if row.kind == "amending_bylaw":
+        if row.kind == "staff_report":
+            if row.parent_ref not in items:
+                raise SystemExit(f"{row.ref}: parent item {row.parent_ref} has no saved page")
+            doc, cs = chunk_staff_report(records, row, items[row.parent_ref])
+        elif row.kind == "amending_bylaw":
             doc, cs = chunk_amending_bylaw(records, row)
         elif row.kind == "replacement_bylaw":
             doc, cs = chunk_replacement(records, row, today)
@@ -523,8 +531,10 @@ def chunk() -> None:
         raise SystemExit(f"duplicate chunk ids: {dupes}")
     bylaws = sum(d["kind"] == "amending_bylaw" for d in documents)
     replacements = sum(d["kind"] == "replacement_bylaw" for d in documents)
-    items = sum(d["kind"] == "item_page" for d in documents)
-    print(f"{len(documents)} documents ({bylaws} amending, {replacements} replacement by-laws, {items} item pages), "
+    pages = sum(d["kind"] == "item_page" for d in documents)
+    reports = sum(d["kind"] == "staff_report" for d in documents)
+    print(f"{len(documents)} documents ({bylaws} amending, {replacements} replacement by-laws, {pages} item pages, "
+          f"{reports} staff reports), "
           f"{len(chunks)} chunks, "
           f"{sum(c['tokens'] for c in chunks):,} tokens; {len(amendments)} amendments; {len(skipped)} skipped")
     config.BUILD.mkdir(parents=True, exist_ok=True)

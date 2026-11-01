@@ -152,10 +152,14 @@ Breadcrumb:
 
 - **Item page**, read as `windows-1252`. **Communications and Speakers blocks are stripped**
   (they name members of the public). Motions and Votes stay.
-- **Staff reports only**, chosen by the label the item page gives each `bgrd/` link:
-  in = `Report from …`, `Supplementary Report from …`; out = `Attachment …`, `Letter from
-  Councillor …`, anything under `/comm/`. **Any other label is flagged** for a hand decision
-  during the save step, not guessed.
+- **Staff reports only**, chosen by the label the item page gives each `bgrd/` link in its
+  Background Information: in = `Report from …`, `Supplementary Report from …`; out =
+  `Attachment(s) …`, `Letter from Councillor …`, anything under `/comm/`. **Any other label
+  is flagged** by `fetch-reports` for a hand decision in `snapshot/review/report_labels.csv`,
+  not guessed. The decisions so far: a report bundled with its attachments (`Report and
+  Attachment 1 from …`) and a lowercase `Supplementary report …` are in; a `Revised Report …`
+  is in and the original it replaces on the same item is out; presentations, letters from
+  Council or the Mayor, answers to Administrative Inquiries, notices and schedules are out.
 
 ## Decisions: item pages
 
@@ -183,9 +187,21 @@ Breadcrumb:
 
 ## Decisions: staff reports
 
-Split at the template's size-13 bold majors (SUMMARY, RECOMMENDATIONS, FINANCIAL IMPACT,
-DECISION HISTORY, COMMENTS); a section over the ceiling splits at its size-12 bold subheads.
-CONTACT, SIGNATURE and the ATTACHMENTS list are dropped. Tables as in the Code.
+Split at the template's size-13 bold all-caps majors (SUMMARY, RECOMMENDATIONS, FINANCIAL
+IMPACT, DECISION HISTORY, COMMENTS, and any other, e.g. EQUITY IMPACT STATEMENT): one chunk
+per major. A major over the ceiling packs its bold title-case subheads (size 12 or 13) up to
+the ceiling. A subhead stands alone; a bold line the paragraph runs on from ("Stage 1: An
+initial screening which …") is text. A subhead with no text before the next joins it
+(`Background › Objectives …`). The title block before SUMMARY, the footers and footnotes
+(under 11 pt), and CONTACT, SIGNATURE and ATTACHMENTS are dropped; attachments bundled into
+the PDF sit under ATTACHMENTS, so they go too. Tables as in the Code.
+
+- Ids: `sr:286369:summary`; a major split over the ceiling numbers its chunks
+  (`sr:286369:comments:1`, `:2`, …).
+- Label `Staff report · 2026.IE29.6 › COMMENTS › Review of Manganese Quality Limit in Sewers
+  By-law` (`(2/7)` when split), sublabel the item's status stamp, href the report PDF
+  `#page=<page_start>`. The prompt says a staff report is what staff recommended, not what
+  was decided.
 
 ```
 [Staff report for 2026.IE29.6 · Amending the Foundation Drainage Policy … › COMMENTS › Review of Manganese Quality Limit]

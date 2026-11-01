@@ -26,3 +26,4 @@ next-env.d.ts
 
 # Draft § maps the chunk stage writes for review (the reviewed map is committed)
 snapshot/review/*.draft.csv
+snapshot/review/*.pending.csv
