@@ -167,3 +167,11 @@ evals/
   breakdown in each direction, stale gold, and harness wall-clock p50 with where it ran
   from.
 - **`RESULTS.md`**: one row per rung. The app's eval page renders from the same data.
+- **`python -m evals results`** (`evals/results.py`) regenerates `RESULTS.md`, the README's
+  `headline` and `ladder` blocks (text outside the markers untouched) and
+  `app/evals/results.json`, which the static `/evals` page and the header's
+  `Evals · x/7` link read. It publishes the latest `split: test` run of each rung; dev runs
+  never appear. The judge/human audit is read from `evals/judge_agreement.json`
+  (`{"agree": n, "total": n}`) once committed, and the ship bar's contradicted check from
+  `answer_correct.contradicted` once the judge scores; until then `shipped` reads "not
+  judged yet" and isn't highlighted.

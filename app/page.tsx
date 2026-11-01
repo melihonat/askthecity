@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import { getSnapshot } from "@/lib/ask/deps";
 import { formatSnapshotDate, scopeLine } from "@/lib/ask/scope";
 import { Ask } from "./ask";
+import { SiteHeader } from "./site-header";
 
 export default async function AskPage() {
   await connection(); // the date comes from the live snapshot row, not the build
@@ -14,15 +15,7 @@ export default async function AskPage() {
 
   return (
     <>
-      <header className="site">
-        <strong>Ask the City</strong>
-        <nav>
-          <a href="/" aria-current="page">
-            Ask
-          </a>
-        </nav>
-        {date && <span className="muted">documents as of {date}</span>}
-      </header>
+      <SiteHeader current="ask" date={date} />
       {snapshot && (
         <div className="scope">
           {scopeLine(date!)}{" "}

@@ -55,3 +55,15 @@ details summary { cursor: pointer; color: #666; font-size: .9rem; margin: .5rem 
 .tag { display: inline-block; min-width: 1.4em; text-align: center; background: #333; color: #fff; border-radius: 4px; font-size: .8rem; }
 footer { padding-top: 1rem; padding-bottom: 2rem; border-top: 1px solid #ddd; }
 .gap { font-style: italic; color: #666; }
+header.site nav { display: flex; gap: 1rem; }
+.evals-page { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+table.evals { border-collapse: collapse; width: 100%; margin: 1rem 0; font-variant-numeric: tabular-nums; }
+table.evals caption { text-align: left; font-weight: 600; margin-bottom: .5rem; }
+table.evals th, table.evals td { padding: .5rem .6rem; border-bottom: 1px solid #e5e5e5; text-align: right; vertical-align: top; }
+table.evals thead th { font-weight: 600; font-size: .9rem; }
+table.evals thead th .muted, table.evals tbody th .muted { display: block; font-weight: normal; font-size: .8rem; }
+table.evals tbody th, table.evals thead th:first-child { text-align: left; font-weight: normal; max-width: 26rem; }
+table.evals tr.shipped { background: #f3f8ec; }
+table.evals tr.shipped code { font-weight: 700; }
+table.evals .bar { color: #2e6b12; font-size: .85rem; }
+@media (max-width: 859px) { table.evals { display: block; overflow-x: auto; } }

@@ -1,0 +1,41 @@
+{
+ "intro": null,
+ "headerLink": "Evals",
+ "columns": [
+  {
+   "key": "refusal_recall",
+   "label": "trick questions refused",
+   "n": "–"
+  },
+  {
+   "key": "false_refusals",
+   "label": "false refusals",
+   "n": "–"
+  },
+  {
+   "key": "hit@ctx",
+   "label": "hit@ctx",
+   "n": "–"
+  },
+  {
+   "key": "cite_precision",
+   "label": "cite precision",
+   "n": "–"
+  },
+  {
+   "key": "answer_correct",
+   "label": "answer correct",
+   "n": "–"
+  },
+  {
+   "key": "total_p50",
+   "label": "total p50",
+   "n": "–"
+  }
+ ],
+ "ladder": [],
+ "side": [],
+ "shipBar": null,
+ "agreement": null,
+ "underTable": "Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; the judge/human audit isn't committed yet."
+}
