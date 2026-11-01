@@ -90,6 +90,14 @@ def test_ship_bar_needs_a_judged_run_with_no_contradicted_fact():
         "refusal recall under 6 of 7", "total p50 not under 5 s"]
 
 
+def test_an_audit_of_another_judge_is_not_published(records):
+    shipped = results.select(records)["shipped"]
+    judge = {"model": "claude-sonnet-5", "prompt_hash": "abc"}
+    judged = [{**r, "header": {**r["header"], "judge": judge}} if r is shipped else r for r in records]
+    assert page_data(judged, {**AGREEMENT, "judge": judge})["agreement"] == AGREEMENT
+    assert page_data(judged, {**AGREEMENT, "judge": {**judge, "prompt_hash": "old"}})["agreement"] is None
+
+
 def test_no_test_runs_yet_renders_placeholders():
     data = page_data([])
     assert data["headerLink"] == "Evals" and data["ladder"] == [] and data["intro"] is None

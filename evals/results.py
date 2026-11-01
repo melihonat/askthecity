@@ -129,6 +129,8 @@ def page_data(records: list[dict], agreement: dict | None = None) -> dict:
     side = [runs[r] for r in SIDE if r in runs]
     shipped = runs.get("shipped")
     cols = lambda rec: rec["scores"]["columns"]  # noqa: E731
+    if agreement:
+        agreement = {"agree": agreement["agree"], "total": agreement["total"]} if audits(agreement, shipped) else None
 
     def row(rec: dict, base: dict | None, first: bool) -> dict:
         rung = rec["header"]["rung"]
@@ -152,6 +154,14 @@ def page_data(records: list[dict], agreement: dict | None = None) -> dict:
         "agreement": agreement,
     }
     return {**data, "underTable": under_table(agreement)}
+
+
+def audits(agreement: dict, shipped: dict | None) -> bool:
+    """An audit only vouches for the judge it audited: a changed judge model or prompt needs a fresh one."""
+    judge = shipped and shipped["header"].get("judge")
+    if not judge or "judge" not in agreement:
+        return True
+    return all(agreement["judge"].get(k) == judge.get(k) for k in ("model", "prompt_hash"))
 
 
 def under_table(a: dict | None) -> str:

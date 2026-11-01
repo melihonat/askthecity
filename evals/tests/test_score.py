@@ -160,3 +160,29 @@ def test_lists_off_gold_citations_refusal_reasons_and_pins(result):
 ])
 def test_approx_decision_uses_the_spread(new, previous, column, expected):
     assert compare(new, previous, column) == expected
+
+
+def judged(c, *verdicts):
+    return {**c, "judge": [{"fact": i, "verdict": v, "span": "", "span_found": True} for i, v in enumerate(verdicts, 1)]}
+
+
+def test_an_unjudged_run_has_no_answer_correct_column(result):
+    assert "answer_correct" not in result["columns"] and result["contradicted"] == []
+
+
+def test_any_contradicted_fact_zeroes_answer_correct():
+    # q1 (2 facts): run 1 both present → 1; run 2 one present, one contradicted → 0, not 0.5; run 3 one absent → 0.5.
+    # q2 is answered only in run 2, both present → 1. Stale q3 still counts (no chunk ids involved): absent → 0.
+    data = {**RUN_DATA,
+            "q1": [judged(RUN_DATA["q1"][0], "present", "present"), judged(RUN_DATA["q1"][1], "present", "contradicted"),
+                   judged(RUN_DATA["q1"][2], "present", "absent")],
+            "q2": [RUN_DATA["q2"][0], judged(RUN_DATA["q2"][1], "present", "present"), RUN_DATA["q2"][2]],
+            "q3": [judged(c, "absent") for c in RUN_DATA["q3"]]}
+    result = score(data, GOLD, SNAPSHOT)
+    c = col(result, "answer_correct")
+    assert [r["value"] for r in c["per_run"]] == pytest.approx([0.5, 1 / 3, 0.25])
+    assert [r["n"] for r in c["per_run"]] == [2, 3, 2]
+    assert c["value"] == pytest.approx((0.5 + 1 / 3 + 0.25) / 3)
+    assert c["spread"] == pytest.approx(0.25)
+    assert c["contradicted"] == 1
+    assert result["contradicted"] == [{"id": "q1", "run": 2, "fact": 2, "span": ""}]

@@ -84,11 +84,26 @@ No judge.
   already measure grounding).
 - Returns, per fact, `present | absent | contradicted` with the quoted span from the answer
   that justifies it.
-- Pinned model from a different tier than the generator (Sonnet 5 judging Haiku 5.5),
-  temperature 0, prompt versioned in the repo; its id and prompt hash go in every run.
+- Pinned model from a different tier than the generator (Sonnet 5, `claude-sonnet-5`,
+  judging Haiku 5.5), prompt versioned in the repo (`evals/judge_prompt.md`,
+  `PROMPT_VERSION` in `evals/judge.py`); its id, prompt version and prompt hash go in every
+  run, with its token cost on its own key.
+- **No temperature 0:** Sonnet 5 takes no sampling parameters. The judge runs with thinking
+  off and a fixed JSON schema instead; on the dev answers it gave the same verdict twice for
+  every fact. A quoted span that isn't in the answer word for word is flagged in
+  `report.md`, not fatal.
+- `python -m evals run` judges by default; `--skip-judge` leaves the column out (and the
+  ship bar reads "not judged yet").
 - **Human audit:** the user hand-scores the first full run; judge/human agreement is
   committed and shown under the table. Changing the judge model or prompt means a fresh
-  audit.
+  audit: the renderer drops an agreement whose judge differs from the published `shipped`
+  run's.
+  1. `python -m evals audit sheet evals/runs/<run> [--runs 1]` writes
+     `evals/judge_audit.csv`, one row per key fact of each judged answer, without the
+     judge's verdict.
+  2. Fill `human` with `present`, `absent` or `contradicted` (`p`/`a`/`c`).
+  3. `python -m evals audit agreement` writes `evals/judge_agreement.json` (agree, total,
+     the run, its judge, each disagreement); `python -m evals results` publishes it.
 
 ## Noise
 
@@ -149,6 +164,8 @@ evals/
   questions.yaml
   LADDER.md                  # pre-registered rungs, ship bar
   judge_prompt.md
+  judge_audit.csv            # the hand scores (python -m evals audit sheet)
+  judge_agreement.json       # judge vs hand scores (python -m evals audit agreement)
   RESULTS.md                 # generated from runs/*/run.json, never hand-edited
   runs/<date>-<rung>/
     run.json
@@ -171,7 +188,7 @@ evals/
   `headline` and `ladder` blocks (text outside the markers untouched) and
   `app/evals/results.json`, which the static `/evals` page and the header's
   `Evals · x/7` link read. It publishes the latest `split: test` run of each rung; dev runs
-  never appear. The judge/human audit is read from `evals/judge_agreement.json`
-  (`{"agree": n, "total": n}`) once committed, and the ship bar's contradicted check from
-  `answer_correct.contradicted` once the judge scores; until then `shipped` reads "not
-  judged yet" and isn't highlighted.
+  never appear. The judge/human audit is read from `evals/judge_agreement.json` once
+  committed (and only for the judge it audited), and the ship bar's contradicted check from
+  `answer_correct.contradicted`, the count of contradicted facts over every run; an
+  unjudged `shipped` reads "not judged yet" and isn't highlighted.
