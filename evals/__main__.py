@@ -1,8 +1,11 @@
-"""python -m evals run --rung <rung> [--split dev] — one rung against the deployed /api/ask."""
+"""python -m evals run --rung <rung> [--split dev] — one rung against the deployed /api/ask.
+python -m evals calibrate <dev run dir> — set the refusal threshold from a dev run."""
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from pathlib import Path
 
 
 def main() -> None:
@@ -15,7 +18,20 @@ def main() -> None:
     r.add_argument("--base-url", default="https://ask-the-city.vercel.app", help="the deployment to measure")
     r.add_argument("--runs", type=int, default=3)
     r.add_argument("--skip-preflight", action="store_true", help="don't check the remaining Gateway credit")
+    c = sub.add_parser("calibrate", help="threshold from a dev run: rewrite EVALS.md's table and lib/ask/config.ts")
+    c.add_argument("run_dir", type=Path, help="e.g. evals/runs/2026-10-31-shipped-dev")
     args = p.parse_args()
+
+    if args.command == "calibrate":
+        from .calibrate import CalibrationError, apply, calibrate
+        from .harness import load_gold
+        try:
+            result = calibrate(json.loads((args.run_dir / "run.json").read_text(encoding="utf-8")), load_gold("dev"))
+        except CalibrationError as e:
+            raise SystemExit(f"can't calibrate: {e}")
+        apply(result)
+        print(f"threshold {result['threshold']} (0.5 × {result['lowest']:.4f}); wrote EVALS.md and lib/ask/config.ts")
+        return
 
     from ingest.config import env
     from .harness import RunInvalid, run
