@@ -29,8 +29,8 @@ EVAL_HEADER = "x-eval-key"       # lib/ask/eval.ts
 EVAL_RUN_HEADER = "x-eval-run"
 GATEWAY = "https://ai-gateway.vercel.sh"
 COST_PER_CALL = 0.0011           # an answered Haiku question, STACK.md; refusals cost less
-# generation ≈ 5× Haiku's at the top of evals/LADDER.md's 3–5× range, so the preflight errs high
-RUNG_COST_PER_CALL = {"side-sonnet": 0.0034}
+# Sonnet 5.5 is 20× Haiku 5.5's per-token price: generation ≈ $0.011 plus the same rerank
+RUNG_COST_PER_CALL = {"side-sonnet": 0.012}
 RESERVE_USD = 3.0                # left for the public demo (evals/LADDER.md, "Spend preflight")
 TIMEOUT_S = 60
 

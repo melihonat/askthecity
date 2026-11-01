@@ -423,7 +423,7 @@ describe("ask", () => {
     });
 
     it("side-sonnet changes only the generator", () => {
-      expect(RUNGS["side-sonnet"]).toEqual({ ...RUNGS.shipped, model: "anthropic/claude-sonnet-5" });
+      expect(RUNGS["side-sonnet"]).toEqual({ ...RUNGS.shipped, model: "anthropic/claude-sonnet-5.5" });
     });
 
     it("side-quoted asks for quotes and keeps them in debug, out of the response", async () => {

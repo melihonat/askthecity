@@ -27,7 +27,7 @@ export const RUNGS: Record<Rung, RungConfig> = {
   hybrid: { search: "hybrid", rerank: false, companions: false, model: MODEL, prompt: "default" },
   rerank: { search: "hybrid", rerank: true, companions: false, model: MODEL, prompt: "default" },
   shipped: SHIPPED,
-  "side-sonnet": { ...SHIPPED, model: "anthropic/claude-sonnet-5" },
+  "side-sonnet": { ...SHIPPED, model: "anthropic/claude-sonnet-5.5" },
   "side-quoted": { ...SHIPPED, prompt: "quoted" },
 };
 

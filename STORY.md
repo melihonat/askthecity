@@ -120,7 +120,7 @@ Muted, one under each rung name.
 
 | Rung | Why line |
 | --- | --- |
-| `side-sonnet` | Sonnet 5 instead of Haiku 5.5, at ~3–5× the generation cost. |
+| `side-sonnet` | Sonnet 5.5 instead of Haiku 5.5, at ~20× the generation cost. |
 | `side-quoted` | Asks the model to quote the supporting sentence for every citation. |
 
 ### Header link
