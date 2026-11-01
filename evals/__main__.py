@@ -1,5 +1,6 @@
 """python -m evals run --rung <rung> [--split dev] — one rung against the deployed /api/ask.
 python -m evals audit sheet <run dir> | agreement — the judge/human audit.
+python -m evals gold-audit — the review sheet of citations outside gold.
 python -m evals calibrate <dev run dir> — set the refusal threshold from a dev run.
 python -m evals results — regenerate RESULTS.md, the README's blocks and /evals from the committed runs."""
 from __future__ import annotations
@@ -28,6 +29,7 @@ def main() -> None:
     a.add_argument("step", choices=["sheet", "agreement"])
     a.add_argument("run_dir", type=Path, nargs="?", help="sheet: the judged run to hand-score, e.g. evals/runs/2026-11-02-shipped")
     a.add_argument("--runs", default="1", help="sheet: which of its runs, e.g. 1 or 1,2,3")
+    sub.add_parser("gold-audit", help="write evals/gold_audit.csv: citations outside gold in every committed test run, for review")
     c = sub.add_parser("calibrate", help="threshold from a dev run: rewrite EVALS.md's table and lib/ask/config.ts")
     c.add_argument("run_dir", type=Path, help="e.g. evals/runs/2026-10-31-shipped-dev")
     sub.add_parser("results", help="from evals/runs: write evals/RESULTS.md, the README's generated blocks and the /evals data")
@@ -60,6 +62,16 @@ def main() -> None:
                       "Run `python -m evals results` to publish it.")
         except AuditError as e:
             raise SystemExit(f"audit: {e}")
+        return
+
+    if args.command == "gold-audit":
+        from .gold_audit import SHEET, GoldAuditError, write_sheet
+        from .harness import RUNS_DIR, load_gold
+        try:
+            n = write_sheet(RUNS_DIR, load_gold("test"))
+        except GoldAuditError as e:
+            raise SystemExit(f"gold audit: {e}")
+        print(f"wrote {n} off-gold citations to {SHEET}; fill `decision` with accept / reject")
         return
 
     if args.command == "calibrate":
