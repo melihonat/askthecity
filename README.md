@@ -28,6 +28,10 @@ Try: "How late can my neighbour run a leaf blower?" · "What does § 591-2.1 say
 | `hybrid`<br><sub>Adds keyword search and exact section-number matching, so "591-2.1" finds § 591-2.1.</sub> | 7 / 7 | 3.3 / 17 | 0.87 | **0.76** | ≈ 0.79 | **1.8 s** |
 | `rerank`<br><sub>A reranker scores every passage against the question; if none scores high enough, it refuses before the model writes anything.</sub> | 7 / 7 | **0 / 17** | **1.00** | ≈ 0.76 | **0.86** | 2.1 s |
 | `shipped`<br><sub>Brings in the by-laws that amended a cited section after the Code was last consolidated.</sub> | 7 / 7 | 0 / 17 | 1.00 | ≈ 0.80 | **0.93** | ≈ 2.2 s |
+| `shipped`<br><sub>The same shipped stack re-run on a0e67b2, beside the fix below it: the fix is compared against this row.</sub> | 7 / 7 | 0 / 17 | 1.00 | 0.79 | 0.87 | 2.2 s |
+| `shipped-2`<br><sub>Fix: the prompt cites only the passage that states each sentence, and leads with the rule in force when a by-law changed a section.</sub> | 7 / 7 | 0 / 17 | 1.00 | **0.85** | ≈ 0.90 | ≈ 2.0 s |
+
+The rows below the first shipped row were added after it missed the ship bar. A fix runs on its own later commit, with shipped re-run beside it on that commit, and is compared against that re-run. The rows above are left as they were.
 
 Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; on the first full run a human grader, blind to its verdicts, agreed with it on 32 of 34 facts (94%), and marked 1 fact contradicted that the judge passed, which the ship bar's contradicted check doesn't see. Cite precision counts a cited definition the app attached as correct; that rule was added after the first full run, when the citations outside gold turned out to be mostly definitions written after the gold was (0.69 → 0.78 for shipped), and applies to every row.
 
