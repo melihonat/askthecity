@@ -29,7 +29,7 @@ Try: "How late can my neighbour run a leaf blower?" · "What does § 591-2.1 say
 | `rerank`<br><sub>A reranker scores every passage against the question; if none scores high enough, it refuses before the model writes anything.</sub> | 7 / 7 | **0 / 17** | **1.00** | ≈ 0.76 | **0.86** | 2.1 s |
 | `shipped`<br><sub>Brings in the by-laws that amended a cited section after the Code was last consolidated.</sub> | 7 / 7 | 0 / 17 | 1.00 | ≈ 0.80 | **0.93** | ≈ 2.2 s |
 
-Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; the judge/human audit isn't committed yet. Cite precision counts a cited definition the app attached as correct; that rule was added after the first full run, when the citations outside gold turned out to be mostly definitions written after the gold was (0.69 → 0.78 for shipped), and applies to every row.
+Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; on the first full run a human grader, blind to its verdicts, agreed with it on 32 of 34 facts (94%), and marked 1 fact contradicted that the judge passed, which the ship bar's contradicted check doesn't see. Cite precision counts a cited definition the app attached as correct; that rule was added after the first full run, when the citations outside gold turned out to be mostly definitions written after the gold was (0.69 → 0.78 for shipped), and applies to every row.
 
 Alternatives tried against `shipped`, one change each.
 

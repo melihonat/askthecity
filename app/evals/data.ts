@@ -12,7 +12,7 @@ export type EvalsData = {
   ladder: Row[];
   side: Row[];
   shipBar: { rung: string; unmet: string[] } | null;
-  agreement: { agree: number; total: number } | null;
+  agreement: { agree: number; total: number; contradictionsMissed: number } | null;
   underTable: string;
 };
 
