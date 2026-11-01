@@ -379,6 +379,17 @@
     - An open fire or bonfire in a park needs a permit.
   split: dev
 
+- id: dev-leaf-blower
+  question: How late can my neighbour run a leaf blower?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:591-2.6:*" ]
+  key_facts:
+    - A power device can't be run from 7 p.m. until 8 a.m. the next day (9 a.m. on weekends and statutory holidays).
+  split: dev
+  notes: The first example chip. § 591-2.6 says "power device"; the definition naming leaf blowers is in § 591-1.1 (chunk tmc:591-1.1:living-area), outside the context. default-8 declines it.
+
 - id: dev-driverless-tickets
   question: Can the City ticket a driverless car?
   category: decisions
