@@ -271,7 +271,13 @@ function Card({ p, dim, active }: { p: PassageView; dim?: boolean; active?: bool
         {p.decided === true && <span className="badge green">adopted</span>}
         {p.decided === false && <span className="badge amber">no decision</span>}
         {p.companion && (
-          <span className="badge violet">{p.notYetLaw ? "replacement for a retrieved §" : "amendment to a retrieved §"}</span>
+          <span className="badge violet">
+            {p.defines.length
+              ? "definition for a retrieved §"
+              : p.notYetLaw
+                ? "replacement for a retrieved §"
+                : "amendment to a retrieved §"}
+          </span>
         )}
       </div>
       <div className="muted">

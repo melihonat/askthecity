@@ -168,18 +168,27 @@ def labelled_units(blocks: list[Block], level: int, prefix: str) -> tuple[int, l
     return starts[0][0], [(label, blocks[bounds[k]:bounds[k + 1]]) for k, (_, label) in enumerate(starts)]
 
 
-def term_units(blocks: list[Block]) -> list[tuple[str, list[Block]]]:
-    """Definitions: one unit per defined term; a term's indented list stays with it."""
+def term_starts(blocks: list[Block]) -> list[tuple[int, str]]:
+    """Definitions: where each defined term's `TERM - …` paragraph starts, at their shared indent."""
     matches = [(i, m[1], b.x0) for i, b in enumerate(blocks) if b.kind == "para" and (m := TERM.match(b.text))]
     if not matches:
         return []
     xs = [x for _, _, x in matches]
     x0 = max(sorted(set(xs)), key=xs.count)    # terms share an indent; nested items don't
     starts = [(i, term) for i, term, x in matches if abs(x - x0) < 3]
-    if len(starts) < 2:
-        return []
+    return starts if len(starts) >= 2 else []
+
+
+def term_units(blocks: list[Block]) -> list[tuple[str, list[Block]]]:
+    """Definitions: one unit per defined term; a term's indented list stays with it."""
+    starts = term_starts(blocks)
     bounds = [0] + [i for i, _ in starts[1:]] + [len(blocks)]
     return [(term, blocks[bounds[k]:bounds[k + 1]]) for k, (_, term) in enumerate(starts)]
+
+
+def term_pattern(term: str) -> re.Pattern:
+    """A defined term used in a body: whole words, any case, a plural allowed (lib/ask/ask.ts too)."""
+    return re.compile(rf"(?<![\w-]){re.escape(term)}(?:e?s)?(?![\w-])", re.I)
 
 
 Piece = tuple[str | None, str | None, list[Block]]     # first label, last label, blocks
@@ -440,6 +449,12 @@ def chapter_chunks(sections: list[dict], *, chapter: str, title: str, document_i
             continue    # empty: schedule stubs, repealed, reserved
         terms = bool(u["section"] and DEFINITIONS.search(u["heading"]))
         pieces = split_section(u["blocks"], terms)
+        # each term's own paragraphs (not the lead-in), found in its piece by block identity
+        starts = term_starts(u["blocks"]) if terms else []
+        ends = [i for i, _ in starts[1:]] + [len(u["blocks"])]
+        defined = {id(u["blocks"][i]): {"term": term, "label": u["label"], "body": render(u["blocks"][i:end]),
+                                        "href": f"{url}#page={u['blocks'][i].page}"}
+                   for (i, term), end in zip(starts, ends)}
         seen_ranges: dict[str, int] = {}
         for first, last, bs in pieces:
             rng = range_text(first, last, terms)
@@ -468,8 +483,25 @@ def chapter_chunks(sections: list[dict], *, chapter: str, title: str, document_i
                 "amended_by": amended_by, "amended_since": [],
                 "page_start": min(pages), "page_end": max(pages),
                 "tokens": tokens(text),
+                "defines": [defined[id(b)] for b in bs if id(b) in defined],
             })
     return chunks
+
+
+def definitions(chunks: list[dict]) -> list[dict]:
+    """The defined terms, taken off their definitions chunks (`defines`), each with `uses`: how
+    many of its document's other chunks use it. The app brings in the rarest term first."""
+    defs = [{"chunk_id": c["id"], "document_id": c["document_id"], **d}
+            for c in chunks for d in c.pop("defines", [])]
+    defining = {d["chunk_id"] for d in defs}
+    bodies: dict[str, list[str]] = {}
+    for c in chunks:
+        if c["id"] not in defining:
+            bodies.setdefault(c["document_id"], []).append(c["body"])
+    for d in defs:
+        pattern = term_pattern(d["term"])
+        d["uses"] = sum(bool(pattern.search(b)) for b in bodies.get(d["document_id"], []))
+    return defs
 
 
 def _dump(rec: dict) -> str:
@@ -526,6 +558,7 @@ def chunk() -> None:
         print(f"{s['ref']}: {s['reason']}, skipped")
     skipped += replaced + dropped
 
+    defs = definitions(chunks)
     ids = [c["id"] for c in chunks]
     if dupes := sorted({i for i in ids if ids.count(i) > 1}):
         raise SystemExit(f"duplicate chunk ids: {dupes}")
@@ -536,9 +569,11 @@ def chunk() -> None:
     print(f"{len(documents)} documents ({bylaws} amending, {replacements} replacement by-laws, {pages} item pages, "
           f"{reports} staff reports), "
           f"{len(chunks)} chunks, "
-          f"{sum(c['tokens'] for c in chunks):,} tokens; {len(amendments)} amendments; {len(skipped)} skipped")
+          f"{sum(c['tokens'] for c in chunks):,} tokens; {len(amendments)} amendments; "
+          f"{len(defs)} defined terms; {len(skipped)} skipped")
     config.BUILD.mkdir(parents=True, exist_ok=True)
     config.DOCUMENTS.write_text("".join(_dump(d) + "\n" for d in documents), encoding="utf-8", newline="\n")
     config.CHUNKS.write_text("".join(_dump(c) + "\n" for c in chunks), encoding="utf-8", newline="\n")
     config.AMENDMENTS.write_text("".join(_dump(a) + "\n" for a in amendments), encoding="utf-8", newline="\n")
+    config.DEFINITIONS.write_text("".join(_dump(d) + "\n" for d in defs), encoding="utf-8", newline="\n")
     config.SKIPPED.write_text("".join(_dump(s) + "\n" for s in skipped), encoding="utf-8", newline="\n")

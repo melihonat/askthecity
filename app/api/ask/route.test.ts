@@ -28,6 +28,7 @@ const fake = {
     embed: async () => [0.1],
     search: vi.fn(async () => [row("tmc:591-a", 1), row("tmc:591-b", 2)]),
     companions: async () => [],
+    definitions: async () => [],
     rerank: async () => [0.9, 0.8],
     generate: async () => ({ decision: "answer" as const, text: "Until 7 p.m. [1].", cited: [1] }),
     useQuota: vi.fn(async (_ipHash: string, _ipLimit: number) => ({ ip: 0, global: 0 })),

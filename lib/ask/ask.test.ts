@@ -3,7 +3,7 @@ import { type AskDeps, ask, toPassage } from "./ask";
 import { REFUSAL_THRESHOLD, RUNGS } from "./config";
 import { GLOBAL_DAILY, IP_DAILY } from "./guardrails";
 import { cacheKey } from "./cache";
-import type { AskEvent, AskResponse, CompanionRow, ModelOutput, Rung, SearchRow } from "./types";
+import type { AskEvent, AskResponse, CompanionRow, DefinitionRow, ModelOutput, Rung, SearchRow } from "./types";
 
 const SCOPE = "Knows the Toronto Municipal Code…";
 
@@ -43,7 +43,22 @@ const companion = (id: string, target: string): CompanionRow => ({
   body: `body of ${id}`,
 });
 
-function fakeDeps(rows: SearchRow[], scores: number[], output: ModelOutput, companions: CompanionRow[] = []) {
+const definition = (id: string, term: string, uses: number, document_id = "tmc:591"): DefinitionRow => ({
+  term,
+  uses,
+  id,
+  document_id,
+  family: "rules",
+  kind: "chapter",
+  section: id.split(":")[1],
+  label: `Ch 591 § ${id.split(":")[1]}`,
+  sublabel: "consolidated 2024-11-14",
+  href: "https://example.test/591.pdf#page=5",
+  amended_since: [],
+  body: `${term} - what ${term.toLowerCase()} means.`,
+});
+
+function fakeDeps(rows: SearchRow[], scores: number[], output: ModelOutput, companions: CompanionRow[] = [], definitions: DefinitionRow[] = []) {
   return {
     snapshot: vi.fn(async () => ({
       id: "s1",
@@ -55,6 +70,7 @@ function fakeDeps(rows: SearchRow[], scores: number[], output: ModelOutput, comp
     embed: vi.fn(async () => [0.1]),
     search: vi.fn(async () => rows),
     companions: vi.fn(async (sections: string[]) => companions.filter((c) => sections.includes(c.target_section))),
+    definitions: vi.fn(async (documents: string[]) => definitions.filter((d) => documents.includes(d.document_id))),
     rerank: vi.fn(async () => scores),
     generate: vi.fn(async (_req: Parameters<AskDeps["generate"]>[0]) => output),
     useQuota: vi.fn(async (_ipHash: string, _ipLimit: number) => ({ ip: 0, global: 0 })),
@@ -272,6 +288,101 @@ describe("ask", () => {
       const { final, passages } = await run(deps);
       expect(passages.map((p) => p.n)).toEqual([1, 2, 3]);
       expect(final.kind === "refusal" && final.nearest.map((p) => p.chunkId)).toEqual(["tmc:608-19", "tmc:591-b"]);
+    });
+  });
+
+  describe("definition companions", () => {
+    const scores = (n: number) => Array.from({ length: n }, () => HIGH);
+    const uses = (id: string, body: string, rank = 1): SearchRow => ({ ...row(id, rank), body });
+    const POWER_DEVICE = definition("tmc:591-1.1:living-area", "POWER DEVICE", 1);
+
+    it("brings the definition of a term a passage uses, cut to that term", async () => {
+      const rows = [uses("tmc:591-2.6", "A. No person shall emit sound from a power device from 7 p.m."), ...ROWS.slice(1)];
+      const defs = [POWER_DEVICE, definition("tmc:591-1.1:living-area", "LIVING AREA", 9)];
+      const deps = fakeDeps(rows, scores(rows.length), ANSWER, [], defs);
+      const { passages } = await run(deps);
+      expect(deps.definitions).toHaveBeenCalledWith(["tmc:591"]);
+      expect(passages[5]).toMatchObject({
+        n: 6,
+        chunkId: "tmc:591-1.1:living-area",
+        companion: true,
+        defines: ["POWER DEVICE"],
+        label: "Ch 591 § 591-1.1 POWER DEVICE",
+        body: "POWER DEVICE - what power device means.",
+      });
+      expect(passages.slice(0, 5).every((p) => p.defines.length === 0)).toBe(true);
+      expect(deps.generate.mock.calls[0][0].prompt).toContain(
+        '<passage n="6" label="Ch 591 § 591-1.1 POWER DEVICE" source="consolidated 2024-11-14" definition="defines POWER DEVICE for the passages above">',
+      );
+    });
+
+    it("never brings a term defined in another chapter", async () => {
+      const rows = [uses("tmc:591-2.6", "No sound from a power device."), ...ROWS.slice(1)];
+      const deps = fakeDeps(rows, scores(rows.length), ANSWER, [], [definition("tmc:545-1:operator", "POWER DEVICE", 1, "tmc:545")]);
+      const { passages } = await run(deps);
+      expect(passages).toHaveLength(5);
+    });
+
+    it("takes each passage's rarest term, and lets two terms share their definitions chunk", async () => {
+      const rows = [
+        uses("tmc:591-2.6", "No person shall use a power device.", 1),
+        uses("tmc:591-2.7", "No person shall make persistent noise.", 2),
+        ...ROWS.slice(2),
+      ];
+      const defs = [
+        definition("tmc:591-1.1:living-area", "PERSON", 40),
+        POWER_DEVICE,
+        definition("tmc:591-1.1:living-area", "PERSISTENT NOISE", 3),
+      ];
+      const { passages } = await run(fakeDeps(rows, scores(rows.length), ANSWER, [], defs));
+      expect(passages.filter((p) => p.companion).map((p) => [p.n, p.chunkId, p.defines, p.body])).toEqual([
+        [6, "tmc:591-1.1:living-area", ["POWER DEVICE", "PERSISTENT NOISE"],
+          "POWER DEVICE - what power device means.\n\nPERSISTENT NOISE - what persistent noise means."],
+      ]);
+    });
+
+    it("takes the companion slots amendments leave, after them", async () => {
+      const rows = [
+        amendedRow("tmc:608-19", 1, ["1482-2025"]),
+        uses("tmc:591-2.6", "No power device.", 2),
+        uses("tmc:591-2.7", "No persistent noise.", 3),
+        ...ROWS.slice(3),
+      ];
+      const amending = [companion("bl:1482-2025:cl1:O-Y", "608-19"), companion("bl:402-2026:cl3", "608-19")];
+      const defs = [POWER_DEVICE, definition("tmc:591-1.1:p", "PERSISTENT NOISE", 3)];
+      const { passages } = await run(fakeDeps(rows, scores(rows.length), ANSWER, amending, defs));
+      expect(passages.filter((p) => p.companion).map((p) => [p.n, p.chunkId])).toEqual([
+        [6, "bl:402-2026:cl3"],
+        [7, "bl:1482-2025:cl1:O-Y"],
+        [8, "tmc:591-1.1:living-area"],
+      ]);
+    });
+
+    it("skips a definitions chunk already among the passages, and one there brings no more", async () => {
+      const defsRow = uses("tmc:591-1.1:living-area", "POWER DEVICE - … PERSON …", 2);
+      const rows = [uses("tmc:591-2.6", "No power device.", 1), defsRow, ...ROWS.slice(2)];
+      const defs = [POWER_DEVICE, definition("tmc:591-1.1:a", "PERSON", 40)];
+      const { passages } = await run(fakeDeps(rows, scores(rows.length), ANSWER, [], defs));
+      expect(passages).toHaveLength(5);
+    });
+
+    it("matches whole words in any case, plurals too", async () => {
+      const at = async (body: string) => {
+        const rows = [uses("tmc:591-2.6", body), ...ROWS.slice(1)];
+        const { passages } = await run(fakeDeps(rows, scores(rows.length), ANSWER, [], [POWER_DEVICE]));
+        return passages.length;
+      };
+      expect(await at("Power Devices may not run.")).toBe(6);
+      expect(await at("A power-device-free zone.")).toBe(5);
+      expect(await at("A superpower device.")).toBe(5);
+    });
+
+    it("brings none when the rung turns companions off", async () => {
+      const rows = [uses("tmc:591-2.6", "No power device."), ...ROWS.slice(1)];
+      const deps = fakeDeps(rows, scores(rows.length), ANSWER, [], [POWER_DEVICE]);
+      const { passages } = await run(deps, "rerank");
+      expect(deps.definitions).not.toHaveBeenCalled();
+      expect(passages).toHaveLength(5);
     });
   });
 

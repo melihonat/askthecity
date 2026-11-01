@@ -64,11 +64,24 @@ create table if not exists {schema}.amendments (
 );
 create index if not exists amendments_target_idx on {schema}.amendments (target_section);
 
+-- A definitions chunk's defined terms (CHUNKING.md, rule 4), each cut to its own paragraphs.
+create table if not exists {schema}.definitions (
+  chunk_id    text not null references {schema}.chunks on delete cascade,
+  document_id text not null,
+  term        text not null,  -- as printed: 'POWER DEVICE'
+  label       text not null,  -- the §'s label, without the chunk's term range
+  href        text not null,  -- the term's page
+  body        text not null,  -- the term's paragraphs only
+  uses        int  not null   -- the document's other chunks that use the term
+);
+create index if not exists definitions_document_idx on {schema}.definitions (document_id);
+
 -- Server-only data: RLS on with no policies, so only the service role reads it.
 alter table {schema}.snapshot   enable row level security;
 alter table {schema}.documents  enable row level security;
 alter table {schema}.chunks     enable row level security;
 alter table {schema}.amendments enable row level security;
+alter table {schema}.definitions enable row level security;
 
 -- One round trip for all retrieval (STACK.md, "Retrieval"). `hybrid`: § numbers in the query
 -- pin their chunks to the top; the rest is RRF (k = 60, equal weights) over the lexical and
@@ -159,9 +172,28 @@ as $$
   order by a.target_section collate "C", c.id collate "C";
 $$;
 
+-- Definition companions (CONTRACT.md, "Citation"): every defined term of the given documents,
+-- its body and label cut to the term. The caller matches terms to passages, orders and caps them.
+create or replace function {schema}.definition_chunks(documents text[])
+returns table (
+  term text, uses int, id text, document_id text, family text, kind text, section text,
+  label text, sublabel text, href text, amended_since text[], body text
+)
+language sql stable
+set search_path = {schema}, pg_catalog
+as $$
+  select d.term, d.uses, c.id, c.document_id, c.family, c.kind, c.section,
+         d.label, c.sublabel, d.href, c.amended_since, d.body
+  from definitions d join chunks c on c.id = d.chunk_id
+  where d.document_id = any(documents)
+  order by c.id collate "C", d.term collate "C";
+$$;
+
 revoke execute on function {schema}.search_chunks(text, extensions.halfvec, text, int) from public, anon, authenticated;
 revoke execute on function {schema}.companion_chunks(text[]) from public, anon, authenticated;
+revoke execute on function {schema}.definition_chunks(text[]) from public, anon, authenticated;
 grant usage on schema {schema} to service_role;
 grant select on all tables in schema {schema} to service_role;
 grant execute on function {schema}.search_chunks(text, extensions.halfvec, text, int) to service_role;
 grant execute on function {schema}.companion_chunks(text[]) to service_role;
+grant execute on function {schema}.definition_chunks(text[]) to service_role;

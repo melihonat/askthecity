@@ -33,7 +33,8 @@ throwaway prototype variants. The response shape is in [`CONTRACT.md`](CONTRACT.
   - **"N more retrieved, not cited":** collapsed by default; expands to the same cards,
     dimmed.
 - **Badges:** `amended since by By-law …` (amber) on a § with `amendedSince`; `amendment to
-  a retrieved §` (violet) on a companion; `adopted` (green) or `no decision` (amber) from a
+  a retrieved §` (violet) on a companion (`definition for a retrieved §` on a definition
+  companion); `adopted` (green) or `no decision` (amber) from a
   Decisions chunk's status stamp; `not yet law` (red) on a replacement § not yet in force.
 
 ## Waiting
