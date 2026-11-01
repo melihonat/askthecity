@@ -1,5 +1,7 @@
 """The harness's run rules against a fake transport: sequential calls after a discarded warm-up, a 5xx
 retried once, and a `limit` or HTTP error invalidating the run with nothing written."""
+import json
+
 import pytest
 
 from evals import harness
@@ -15,7 +17,8 @@ def events(kind="answer", limit="global_daily"):
              if kind == "answer" else {"kind": "limit", "limit": limit})
     if kind == "limit":
         return [{"type": "final", "response": final}]
-    debug = {"candidates": [{"chunkId": "tmc:1-1:A"}], "pinned": [], "threshold": 0.35,
+    debug = {"candidates": [{"chunkId": "tmc:1-1:A"}], "pinned": [], "threshold": 0.35, "config": {"model": "llm"},
+             "build": {"sha": "abc", "embedder": "e", "reranker": "r", "promptVersion": "1", "promptHash": "h"},
              "timings": {"retrieval_ms": 1, "rerank_ms": 1, "generation_ms": 1, "total_ms": 3}}
     return [{"type": "passages", "passages": [passage]}, {"type": "debug", "debug": debug}, {"type": "final", "response": final}]
 
@@ -79,6 +82,42 @@ def test_a_limit_mid_run_invalidates_the_run_and_writes_nothing(tmp_path, monkey
         harness.run("shipped", "dev", "http://test", "secret", "key", skip_preflight=True, transport=t)
     assert len(t.asked) == 4
     assert not (tmp_path / "runs").exists()
+
+
+class FakeJudge:
+    usage = {"input_tokens": 1_000_000, "output_tokens": 100_000, "calls": 9}
+
+    def grade(self, question, key_facts, answer):
+        return [{"fact": 1, "verdict": "contradicted" if question == "question 2?" else "present", "span": "Yes", "span_found": True}]
+
+
+def fake_world(monkeypatch, tmp_path):
+    monkeypatch.setattr(harness, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(harness, "load_gold", lambda split: [{**q, "key_facts": ["F"]} for q in QUESTIONS])
+    monkeypatch.setattr(harness, "git_state", lambda: {"sha": "abc", "dirty": False})
+    monkeypatch.setattr(harness, "read_snapshot", lambda: ({"id": "s1"}, {"tmc:1-1:A"}))
+    monkeypatch.setattr(harness, "read_spend", lambda *_: {"usd": 0.01, "requests": 10})
+
+
+def test_a_judged_run_records_the_judge_and_scores_answer_correct(tmp_path, monkeypatch):
+    fake_world(monkeypatch, tmp_path)
+    out = harness.run("shipped", "dev", "http://test", "secret", "key", skip_preflight=True, transport=FakeTransport(), judge=FakeJudge())
+    record = json.loads((out / "run.json").read_text(encoding="utf-8"))
+    j = record["header"]["judge"]
+    assert j["model"] == "claude-sonnet-5" and j["prompt_hash"] and j["usd_estimate"] == 3.0   # $2 in + $1 out
+    assert record["scores"]["columns"]["answer_correct"]["value"] == pytest.approx(2 / 3)   # q2 contradicted
+    assert record["scores"]["columns"]["answer_correct"]["contradicted"] == 3
+    assert record["questions"][0]["runs"][0]["judge"][0]["verdict"] == "present"
+    report = (out / "report.md").read_text(encoding="utf-8")
+    assert "| answer_correct | 0.67 |" in report and "`q2` run 1 fact 1: “Yes”" in report
+
+
+def test_an_unjudged_run_says_so(tmp_path, monkeypatch):
+    fake_world(monkeypatch, tmp_path)
+    out = harness.run("shipped", "dev", "http://test", "secret", "key", skip_preflight=True, transport=FakeTransport())
+    record = json.loads((out / "run.json").read_text(encoding="utf-8"))
+    assert record["header"]["judge"] is None and "answer_correct" not in record["scores"]["columns"]
+    assert "Not judged" in (out / "report.md").read_text(encoding="utf-8")
 
 
 def test_strips_passage_bodies_but_keeps_ids_labels_and_hrefs():

@@ -17,6 +17,7 @@ from typing import Protocol
 import requests
 import yaml
 
+from . import judge as judge_
 from . import report
 from .score import score
 
@@ -31,6 +32,7 @@ GATEWAY = "https://ai-gateway.vercel.sh"
 COST_PER_CALL = 0.0011           # an answered Haiku question, STACK.md; refusals cost less
 # Sonnet 5.5 is 20× Haiku 5.5's per-token price: generation ≈ $0.011 plus the same rerank
 RUNG_COST_PER_CALL = {"side-sonnet": 0.012}
+JUDGE_USD_PER_MTOK = (2.0, 10.0)  # Sonnet 5 input, output; billed to the judge's own key
 RESERVE_USD = 3.0                # left for the public demo (evals/LADDER.md, "Spend preflight")
 TIMEOUT_S = 60
 
@@ -157,7 +159,17 @@ def read_spend(run_id: str, start: str, end: str, key: str) -> dict:
 
 # ── one rung, end to end ──────────────────────────────────────────────────────────────────────
 
-def header(*, run_id: str, rung: str, split: str, base_url: str, data: dict, git: dict, snapshot: dict, spend: dict, preflight_: dict | None) -> dict:
+def judge_header(judge: judge_.Judge | None) -> dict | None:
+    """The judge's model and prompt, and what it cost on its own key (estimated from token usage)."""
+    if judge is None:
+        return None
+    usage = getattr(judge, "usage", None)
+    usd = usage and round((usage["input_tokens"] * JUDGE_USD_PER_MTOK[0] + usage["output_tokens"] * JUDGE_USD_PER_MTOK[1]) / 1e6, 4)
+    return {**judge_.info(), "usage": usage, "usd_estimate": usd}
+
+
+def header(*, run_id: str, rung: str, split: str, base_url: str, data: dict, git: dict, snapshot: dict, spend: dict,
+           preflight_: dict | None, judge: dict | None = None) -> dict:
     debug = next(iter(data.values()))[0]["debug"]
     return {
         "run_id": run_id,
@@ -174,7 +186,7 @@ def header(*, run_id: str, rung: str, split: str, base_url: str, data: dict, git
         "reranker": debug["build"]["reranker"],
         "llm": debug["config"]["model"],
         "prompt": {"version": debug["build"]["promptVersion"], "hash": debug["build"]["promptHash"]},
-        "judge": None,  # answer correctness is a separate slice
+        "judge": judge,
         "threshold": debug["threshold"],
         "runs": len(next(iter(data.values()))),
         "preflight": preflight_,
@@ -188,7 +200,9 @@ def run_dir(rung: str, split: str, day: str, suffix: str = "") -> Path:
 
 
 def run(rung: str, split: str, base_url: str, secret: str, gateway_key: str, runs: int = 3,
-        skip_preflight: bool = False, transport: Transport | None = None, suffix: str = "") -> Path:
+        skip_preflight: bool = False, transport: Transport | None = None, suffix: str = "",
+        judge: judge_.Judge | None = None) -> Path:
+    """`judge` None leaves answer correct out of the run (`--skip-judge`)."""
     gold = load_gold(split)
     out = run_dir(rung, split, date.today().isoformat(), suffix)
     if out.exists():
@@ -202,9 +216,14 @@ def run(rung: str, split: str, base_url: str, secret: str, gateway_key: str, run
     print(f"{run_id}: {len(gold)} {split} questions × {runs} runs on `{rung}` against {base_url}")
 
     data = run_rung(gold, rung, transport or HttpTransport(base_url, secret, run_id), runs)
+    if judge is not None:
+        try:
+            judge_.judge_run(data, gold, judge)
+        except judge_.JudgeError as e:
+            raise RunInvalid(f"judge: {e}") from e
     scores = score(data, gold, chunk_ids)
     head = header(run_id=run_id, rung=rung, split=split, base_url=base_url, data=data, git=git, snapshot=snapshot,
-                  spend=read_spend(run_id, started, utc_day(), gateway_key), preflight_=pre)
+                  spend=read_spend(run_id, started, utc_day(), gateway_key), preflight_=pre, judge=judge_header(judge))
 
     out.mkdir(parents=True)
     record = {"header": head, "scores": scores,

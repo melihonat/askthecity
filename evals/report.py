@@ -5,7 +5,7 @@ import statistics
 
 COLUMNS = [
     ("recall@20", "share"), ("full@20", "share"), ("hit@ctx", "share"), ("full@ctx", "share"),
-    ("cite_precision", "ratio"), ("cite_full", "share"), ("coverage", "ratio"),
+    ("cite_precision", "ratio"), ("cite_full", "share"), ("coverage", "ratio"), ("answer_correct", "ratio"),
     ("refusal_recall", "share"), ("false_refusals", "share"),
     ("passages_p50", "ms"), ("total_p50", "ms"), ("total_p95", "ms"),
 ]
@@ -32,10 +32,15 @@ def render(head: dict, scores: dict, data: dict[str, list[dict]]) -> str:
 
     lines += ["| Column | Value | n | Spread |", "| --- | --- | --- | --- |"]
     for name, kind in COLUMNS:
+        if name not in cols:
+            continue
         c = cols[name]
         spread = "–" if c.get("spread") is None else _fmt(c["spread"], kind)
         lines.append(f"| {name} | {_fmt(c['value'], kind)} | {c['n']} | {spread} |")
-    lines += ["", "Answer correctness (judge) is not scored yet.", ""]
+    j = head.get("judge")
+    lines += ["", (f"Answer correct judged by `{j['model']}`, prompt v{j['prompt_version']} ({j['prompt_hash']})"
+                   + (f", ≈ ${j['usd_estimate']:.2f} on the judge's own key." if j.get("usd_estimate") is not None else ".")
+                   if j else "Not judged (`--skip-judge`): no answer correct column."), ""]
 
     spend = head["spend"]
     lines.append(f"Gateway spend (tag `eval:{head['run_id']}`): "
@@ -51,6 +56,13 @@ def render(head: dict, scores: dict, data: dict[str, list[dict]]) -> str:
                       [f"`{u['id']}`: " + " → ".join(u["outcomes"]) for u in scores["unstable"]])
     lines += _section("Citations outside required/acceptable (widen `acceptable` in a commit, or accept the miss)",
                       [f"`{o['id']}` run {o['run']}: `{o['chunkId']}`" for o in scores["off_gold"]])
+    if j:
+        lines += _section("Contradicted key facts (answer correct 0 for that answer)",
+                          [f"`{c['id']}` run {c['run']} fact {c['fact']}: “{c['span']}”" for c in scores.get("contradicted", [])])
+        lines += _section("Judge spans not found word for word in the answer (check the verdict)",
+                          [f"`{qid}` run {run} fact {v['fact']} ({v['verdict']}): “{v['span']}”"
+                           for qid, calls in data.items() for run, c in enumerate(calls, 1)
+                           for v in c.get("judge") or [] if not v["span_found"]])
     r = scores["refusals"]
     lines += _section("Refusal reasons", [
         "Answer questions refused: " + (", ".join(f"{k} × {v}" for k, v in r["false_refusals"].items()) or "none"),

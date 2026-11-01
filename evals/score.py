@@ -1,5 +1,6 @@
 """The scorer (EVALS.md, "Columns" and "Noise"). Pure: run data, gold and the snapshot's chunk ids in,
-columns and findings out. No I/O, no judge (answer correctness is scored elsewhere).
+columns and findings out. No I/O; answer correct reads the judge's verdicts already stored on each
+call (evals/judge.py) and is absent from an unjudged run.
 
 `run_data` maps a question id to its calls, one per run, each the events the app sent:
 `{"passages": [PassageView], "debug": DebugEvent, "response": AskResponse}`.
@@ -90,6 +91,35 @@ def _generation_columns(gold: list[dict], calls: dict[str, dict], scored: set[st
     }
 
 
+def _correct(verdicts: list[dict]) -> float:
+    """Key facts judged present ÷ key facts, 0 if any is contradicted."""
+    if any(v["verdict"] == "contradicted" for v in verdicts):
+        return 0.0
+    return sum(v["verdict"] == "present" for v in verdicts) / len(verdicts)
+
+
+def judged(run_data: dict[str, list[dict]], gold: list[dict]) -> dict:
+    """The answer correct column from the judge's verdicts on each call, and the contradicted facts by
+    name. Empty when the run wasn't judged. Over every answered `answer` question: correctness needs
+    no chunk ids, so stale gold doesn't drop a question here."""
+    if not any("judge" in c for calls in run_data.values() for c in calls):
+        return {"columns": {}, "contradicted": []}
+    answer_qs = [q for q in gold if q["expect"] == "answer" and q["id"] in run_data]
+    runs = min(len(calls) for calls in run_data.values())
+    per_run = []
+    for i in range(runs):
+        values = [_correct(c["judge"]) for q in answer_qs if (c := run_data[q["id"]][i])["response"]["kind"] == "answer"]
+        per_run.append(_column(values))
+    values = [r["value"] for r in per_run if r["value"] is not None]
+    contradicted = [{"id": q["id"], "run": run, "fact": v["fact"], "span": v["span"]}
+                    for q in answer_qs for run, c in enumerate(run_data[q["id"]][:runs], 1)
+                    for v in c.get("judge") or [] if v["verdict"] == "contradicted"]
+    column = {"value": statistics.fmean(values) if values else None, "n": min(r["n"] for r in per_run),
+              "spread": (max(values) - min(values)) if values else None, "per_run": per_run,
+              "contradicted": len(contradicted)}
+    return {"columns": {"answer_correct": column}, "contradicted": contradicted}
+
+
 def _latencies(calls) -> tuple[list[int], list[int]]:
     """Server passages time (retrieval + rerank) of every call; server total of answered calls only
     (a gate refusal skips generation and would flatter a rung that refuses more)."""
@@ -158,9 +188,11 @@ def score(run_data: dict[str, list[dict]], gold: list[dict], snapshot_chunk_ids)
 
     outcomes = {qid: [_outcome(c["response"]) for c in calls] for qid, calls in run_data.items()}
     unstable = sorted(qid for qid, seen in outcomes.items() if len(set(seen)) > 1)
+    judge = judged(run_data, gold)
 
     return {
-        "columns": columns,
+        "columns": {**columns, **judge["columns"]},
+        "contradicted": judge["contradicted"],
         "stale": [{"id": qid, "groups": groups} for qid, groups in stale.items()],
         "retrieval_mismatch": retrieval_mismatch,
         "unstable": [{"id": qid, "outcomes": outcomes[qid]} for qid in unstable],
