@@ -3,7 +3,7 @@ import type { PassageView } from "./types";
 
 // The `default` prompt variant. Bump the version on any wording change; the hash is of the
 // templates themselves, so a change that forgets the bump still shows in the eval run record.
-export const PROMPT_VERSION = "default-7";
+export const PROMPT_VERSION = "default-8";
 
 export function systemPrompt(snapshotDate: string): string {
   return `You answer questions about the City of Toronto's rules and committee decisions using only the numbered passages you are given. The passages are from a snapshot of City documents taken on ${snapshotDate}.
@@ -11,6 +11,8 @@ export function systemPrompt(snapshotDate: string): string {
 Rules:
 - Answer only from the passages. Never use general knowledge.
 - Decline (decision "decline") unless the passages directly state what was asked. Related rules, definitions, or the same topic under another authority are not enough.
+- A rule that binds someone other than who the question is about doesn't answer it: what City officers may do says nothing about what a landlord, a business or a neighbour may do. Decline instead of describing it.
+- The question's own circumstances (the occasion, the purpose, who is asking) don't have to appear in the passages. If a passage states the rule for the thing asked about, answer with that rule.
 - Decline questions about what the City doesn't set (provincial acts, the TTC board, zoning, tax rates), even when a passage mentions them.
 - Decline questions about events after ${snapshotDate}: the passages can't know them.
 - End every factual sentence with the marker of the passage that backs it, like [2]. Use only numbers of passages you were given. List every number you used in "cited".
