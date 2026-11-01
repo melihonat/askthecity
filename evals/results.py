@@ -170,7 +170,10 @@ def under_table(a: dict | None) -> str:
               + (f"on the first full run it agreed with my hand grading on {a['agree']} of {a['total']} facts "
                  f"({a['agree'] / a['total']:.0%})." if a else "the judge/human audit isn't committed yet."))
     return ("Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than "
-            "its own run-to-run spread; ≈ marks changes inside it. " + graded)
+            "its own run-to-run spread; ≈ marks changes inside it. " + graded
+            + " Cite precision counts a cited definition the app attached as correct; that rule was added after "
+              "the first full run, when the citations outside gold turned out to be mostly definitions written "
+              "after the gold was (0.69 → 0.78 for shipped), and applies to every row.")
 
 
 # ── markdown ──────────────────────────────────────────────────────────────────────────────────

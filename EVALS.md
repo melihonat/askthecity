@@ -60,7 +60,7 @@ its **n scored**.
 | **full@20** | Share with every required group satisfied among the 20. |
 | **hit@ctx** | At least one required group satisfied in the **context**: the reranked top 5 plus companion passages (≤ 8). |
 | **full@ctx** | Every required group satisfied in the context. |
-| **cite precision** | Per answer, cited chunks matching `required` or `acceptable` ÷ cited chunks; mean over answered `answer` questions. One right, one wrong = 0.5. |
+| **cite precision** | Per answer, cited chunks matching `required` or `acceptable`, or a **definition companion** of that answer, ÷ cited chunks; mean over answered `answer` questions. One right, one wrong = 0.5. |
 | **cite full** | Share of answered `answer` questions where every required group is matched by a citation (`acceptable` doesn't count). |
 | **coverage** | Per answer, counted sentences with ≥ 1 valid `[n]` ÷ counted sentences; mean over answers. |
 | **answer correct** | Per answer, key facts judged `present` ÷ key facts, **0 if any is `contradicted`**; mean over answered `answer` questions. |
@@ -68,6 +68,12 @@ its **n scored**.
 | **false refusals** | Of `answer` questions, the share refused. |
 | **passages p50** | Server `retrieval_ms + rerank_ms`, all calls. |
 | **total p50 / p95** | Server `total_ms`, answered calls only (a `below_threshold` refusal skips generation and would flatter a rung that refuses more). |
+
+**Definition companions in cite precision** (added 2026-11-01, after the first full ladder
+run, applied to every rung): gold was written before definition companions existed, so a
+citation of a definition the app attached to that answer counts as acceptable. It satisfies
+no required group, so cite full is unchanged. The run that prompted it scored `shipped` at
+0.69 cite precision without the rule and 0.78 with it; no other gold was widened.
 
 The reranker's contribution is the gap between recall@20 and hit@ctx; the companions'
 contribution shows in full@ctx and cite full.

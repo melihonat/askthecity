@@ -4,7 +4,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { embed, generateText, Output, rerank as rerankDocuments } from "ai";
 import { z } from "zod";
 import type { AskDeps } from "./ask";
-import { CANDIDATES, CorpusMismatchError, EMBEDDING, MAX_OUTPUT_TOKENS, RERANK_MODEL, checkCorpus } from "./config";
+import { CANDIDATES, CorpusMismatchError, EMBEDDING, RERANK_MODEL, checkCorpus } from "./config";
 import type { AskResponse, CompanionRow, DefinitionRow, SearchRow, Snapshot, Usage } from "./types";
 
 // Created on first use, not at import: `next build` imports this module to collect page data,
@@ -103,13 +103,12 @@ export function createDeps(tags: string[] = []): AskDeps {
       return scores;
     },
 
-    async generate({ model, system, prompt, quotes }) {
+    async generate({ model, system, prompt, quotes, maxOutputTokens }) {
       const { output } = await generateText({
         model,
         system,
         prompt,
-        // the quotes get their own room, so quoting can't cut the answer short
-        maxOutputTokens: quotes ? 2 * MAX_OUTPUT_TOKENS : MAX_OUTPUT_TOKENS,
+        maxOutputTokens,
         output: Output.object({ schema: quotes ? quotedOutput : modelOutput }),
         // adaptive thinking would spend the whole output cap before the answer
         providerOptions: { ...gateway, anthropic: { thinking: { type: "disabled" } } },

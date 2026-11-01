@@ -1,5 +1,5 @@
 import { cacheKey } from "./cache";
-import { CONTEXT_PASSAGES, EMBEDDING, MAX_COMPANIONS, REFUSAL_THRESHOLD, RERANK_MODEL, RUNGS } from "./config";
+import { CONTEXT_PASSAGES, EMBEDDING, MAX_COMPANIONS, MAX_OUTPUT_TOKENS, REFUSAL_THRESHOLD, RERANK_MODEL, RUNGS } from "./config";
 import { failureLimit, IP_DAILY, usageLimit } from "./guardrails";
 import { PROMPTS, systemPrompt, userPrompt } from "./prompt";
 import type {
@@ -30,7 +30,7 @@ export type AskDeps = {
   /** One relevance score per document, in input order. */
   rerank(question: string, documents: string[]): Promise<number[]>;
   /** `quotes` asks the structured output for a supporting sentence per citation too. */
-  generate(req: { model: string; system: string; prompt: string; quotes: boolean }): Promise<ModelOutput>;
+  generate(req: { model: string; system: string; prompt: string; quotes: boolean; maxOutputTokens: number }): Promise<ModelOutput>;
   /**
    * Counts one paid question against the IP's day and, while the IP is under `ipLimit`, the
    * global day. Returns the counts from before it.
@@ -253,6 +253,7 @@ async function* run(question: string, rung: Rung, deps: AskDeps, opts: AskOption
     system: systemPrompt(snapshot.snapshot_date, config.prompt),
     prompt: userPrompt(question, passages),
     quotes: config.prompt === "quoted",
+    maxOutputTokens: config.maxOutputTokens ?? MAX_OUTPUT_TOKENS,
   });
   const generation_ms = Math.round(performance.now() - t3);
   const response = validate(output, passages, snapshot.scope_sentence);

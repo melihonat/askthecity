@@ -27,8 +27,10 @@ export const RUNGS: Record<Rung, RungConfig> = {
   hybrid: { search: "hybrid", rerank: false, companions: false, model: MODEL, prompt: "default" },
   rerank: { search: "hybrid", rerank: true, companions: false, model: MODEL, prompt: "default" },
   shipped: SHIPPED,
-  "side-sonnet": { ...SHIPPED, model: "anthropic/claude-sonnet-5.5" },
-  "side-quoted": { ...SHIPPED, prompt: "quoted" },
+  // Sonnet 5.5 can't turn thinking off, so its thinking shares the cap; 400 cut long answers mid-JSON
+  "side-sonnet": { ...SHIPPED, model: "anthropic/claude-sonnet-5.5", maxOutputTokens: 1600 },
+  // the quotes get their own room, so quoting can't cut the answer short
+  "side-quoted": { ...SHIPPED, prompt: "quoted", maxOutputTokens: 1200 },
 };
 
 export function isRung(value: unknown): value is Rung {
