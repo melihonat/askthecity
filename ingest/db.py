@@ -11,10 +11,11 @@ from . import config, store
 
 SCHEMA_SQL = config.ROOT / "db" / "schema.sql"
 APP_SQL = config.ROOT / "db" / "app.sql"          # usage_daily and the like: live schema only
-TABLES = ["snapshot", "documents", "chunks", "amendments"]   # parent → child
+TABLES = ["snapshot", "documents", "chunks", "amendments", "definitions"]   # parent → child
 CHUNK_COLUMNS = ["id", "document_id", "family", "kind", "section", "subsection_range", "stage",
                  "heading", "breadcrumb", "body", "label", "sublabel", "href", "amended_since",
                  "page_start", "page_end", "tokens", "embedding"]
+DEFINITION_COLUMNS = ["chunk_id", "document_id", "term", "label", "href", "body", "uses"]
 DOCUMENT_COLUMNS = ["id", "kind", "family", "title", "source_url", "sha256", "fetched_at",
                     "consolidated_as_of", "enacted", "in_force", "item_id", "status_stamp",
                     "decision_date", "bylaws"]
@@ -37,6 +38,7 @@ def _jsonl(path) -> list[dict]:
 
 def load() -> None:
     documents, chunks, amendments = _jsonl(config.DOCUMENTS), _jsonl(config.CHUNKS), _jsonl(config.AMENDMENTS)
+    definitions = _jsonl(config.DEFINITIONS)
     embeddings = {e["chunk_id"]: e for e in _jsonl(config.EMBEDDINGS)}
 
     models = {(e["model"], e["dim"]) for e in embeddings.values()}
@@ -78,8 +80,12 @@ def load() -> None:
             cur.executemany(
                 "insert into staging.amendments (amending_chunk_id, target_section) values (%s, %s)",
                 [[a["amending_chunk_id"], a["target_section"]] for a in amendments])
+            cur.executemany(
+                f"insert into staging.definitions ({', '.join(DEFINITION_COLUMNS)}) "
+                f"values ({', '.join('%s' for _ in DEFINITION_COLUMNS)})",
+                [[d[k] for k in DEFINITION_COLUMNS] for d in definitions])
     print(f"staging: snapshot {snapshot['id']}, {len(documents)} documents, {len(chunks)} chunks, "
-          f"{len(amendments)} amendments")
+          f"{len(amendments)} amendments, {len(definitions)} defined terms")
 
 
 REPLACEMENT_CHAR = chr(0xFFFD)   # a windows-1252 decode gone wrong
@@ -101,6 +107,11 @@ PINS = {
 AMENDED_PINS = {
     "608-19": (["1482-2025"], ["bl:1482-2025:cl1:O-Y"]),
     "629-38": (["67-2026"], ["bl:1512-2025:629-4.25", "bl:67-2026:cl1"]),
+}
+# Fixed term lookups in Ch 591: the definitions chunk each term must be recorded on, and only it.
+DEFINITION_PINS = {
+    "POWER DEVICE": ["tmc:591-1.1:living-area"],  # brings the leaf blower to § 591-2.6
+    "AMPLIFIED SOUND": ["tmc:591-1.1:ambient-sound-level"],
 }
 
 
@@ -128,6 +139,9 @@ def smoke_failures(stats: dict, chunks: list[dict], manifest: list[store.Manifes
             fail.append(f"pin § {section}: amended_since {got}, expected {since} on each chunk")
         if (got := stats["pin_amendments"].get(section, [])) != sorted(companions):
             fail.append(f"pin § {section}: amendments {got}, expected {companions}")
+    for term, ids in DEFINITION_PINS.items():
+        if (got := stats["definition_pins"].get(term, [])) != sorted(ids):
+            fail.append(f"definition {term!r}: {got}, expected {ids}")
     return fail
 
 
@@ -149,6 +163,11 @@ def staging_stats(conn: psycopg.Connection) -> dict:
             "select target_section, amending_chunk_id from staging.amendments where target_section = any(%s)",
             (list(PINS),)):
         amendments.setdefault(section, []).append(cid)
+    definition_pins: dict[str, list[str]] = {}
+    for term, cid in conn.execute(
+            "select term, chunk_id from staging.definitions where document_id = 'tmc:591' and term = any(%s)",
+            (list(DEFINITION_PINS),)):
+        definition_pins.setdefault(term, []).append(cid)
     return {
         "snapshots": one("select count(*) from staging.snapshot"),
         "chunker_version": one("select min(chunker_version) from staging.snapshot"),
@@ -160,6 +179,7 @@ def staging_stats(conn: psycopg.Connection) -> dict:
         "pins": pins,
         "pin_amended_since": since,
         "pin_amendments": {s: sorted(ids) for s, ids in amendments.items()},
+        "definition_pins": {t: sorted(ids) for t, ids in definition_pins.items()},
     }
 
 

@@ -20,12 +20,14 @@ CHUNKS = [{"id": f"tmc:1-{i}"} for i in range(100)]
 def stats(monkeypatch):
     monkeypatch.setattr(db, "PINS", {"1-2": ["tmc:1-2"], "1-3": ["tmc:1-3:A", "tmc:1-3:B"]})
     monkeypatch.setattr(db, "AMENDED_PINS", {"1-3": (["5-2026"], ["bl:5-2026:cl1"])})
+    monkeypatch.setattr(db, "DEFINITION_PINS", {"WIDGET": ["tmc:1-1:widget"]})
     return {"snapshots": 1, "chunker_version": config.CHUNKER_VERSION, "chunks": 100,
             "without_embedding": 0, "replacement_char": 0, "replacement_ids": [],
             "shas_with_chunks": {"a1", "b2"},
             "pins": {"1-2": ["tmc:1-2"], "1-3": ["tmc:1-3:A", "tmc:1-3:B"]},
             "pin_amended_since": {"1-2": [[]], "1-3": [["5-2026"], ["5-2026"]]},
-            "pin_amendments": {"1-3": ["bl:5-2026:cl1"]}}
+            "pin_amendments": {"1-3": ["bl:5-2026:cl1"]},
+            "definition_pins": {"WIDGET": ["tmc:1-1:widget"]}}
 
 
 def failures(stats):
@@ -75,3 +77,9 @@ def test_an_amended_pin_needs_amended_since_on_every_chunk_and_its_amendments(st
 def test_a_pin_not_amended_must_not_carry_amendments(stats):
     assert failures({**stats, "pin_amendments": {**stats["pin_amendments"], "1-2": ["bl:9-2026:cl1"]}}) == [
         "pin § 1-2: amendments ['bl:9-2026:cl1'], expected []"]
+
+
+def test_a_definition_pin_must_be_recorded_on_its_chunk(stats):
+    assert failures({**stats, "definition_pins": {}}) == ["definition 'WIDGET': [], expected ['tmc:1-1:widget']"]
+    assert failures({**stats, "definition_pins": {"WIDGET": ["tmc:1-1:gadget"]}}) == [
+        "definition 'WIDGET': ['tmc:1-1:gadget'], expected ['tmc:1-1:widget']"]

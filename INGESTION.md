@@ -56,7 +56,7 @@ any stage re-runs alone.
 | 3 | `check-saves` | `snapshot/tmmis_items.txt` vs saved files | any id lacks a passing file |
 | 4 | `fetch-reports` | `bgrd/` links on saved pages → `corpus/`, R2, manifest | an unreviewed label appears |
 | 5 | `extract` | `corpus/` → `build/text/` | — |
-| 6 | `chunk` | `build/text/` + `snapshot/review/` → `build/chunks.jsonl`, `build/amendments.jsonl` | a § map is missing or incomplete |
+| 6 | `chunk` | `build/text/` + `snapshot/review/` → `build/chunks.jsonl`, `build/amendments.jsonl`, `build/definitions.jsonl` | a § map is missing or incomplete |
 | 7 | `embed` | chunks → `build/embeddings` | spend estimate not confirmed |
 | 8 | `load` | → `staging` schema in Postgres | — |
 | 9 | `smoke` | `staging` | any check fails |
@@ -160,7 +160,9 @@ re-run.**
    `ingest/db.py`). `§ 608-19` and `§ 629-38` are amended since their consolidation: each of
    their chunks carries the expected `amended_since`, and `amendments` links exactly the
    expected chunks to them (`AMENDED_PINS`; for `§ 629-38` that includes
-   `bl:1512-2025:629-4.25`); the other pins carry neither.
+   `bl:1512-2025:629-4.25`); the other pins carry neither. Ch 591's `POWER DEVICE` and
+   `AMPLIFIED SOUND` are recorded in `definitions` on their definitions chunk only
+   (`DEFINITION_PINS`).
 3. **Dev split** (not wired yet; it arrives with the refusal-threshold calibration): the 10-question dev split ([`EVALS.md`](EVALS.md#refusal-threshold)) through `/api/ask` on a local `next dev` with
    `DB_SCHEMA=staging` and the eval header. It must score at least what the previous
    snapshot scored, or meet the refusal-threshold calibration bar on the first run.

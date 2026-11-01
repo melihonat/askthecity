@@ -216,6 +216,44 @@ def test_definitions_split_into_runs_of_whole_terms(ceiling):
     assert chunks[1]["label"] == "Ch 999 § 999-1.1 DEVICE – POINT OF RECEPTION"
 
 
+def test_definitions_chunks_record_their_terms_cut_to_each_terms_paragraphs(ceiling):
+    ceiling(37)
+    records = section("§ 999-1.1. Definitions.", paras(2, 106, [
+        ("As used in this chapter, the following terms shall have the meanings indicated:", 72),
+        ("APPLIANCE - A widget used in a dwelling unit for domestic purposes.", 72),
+        ("DEVICE - Any widget or gadget.", 72),
+        ("POINT OF RECEPTION - Any location where sound is received, including:", 72),
+        ("(1) an outdoor area; or", 108),
+        ("(2) an indoor area.", 108),
+        ("WIDGET - A self-propelled device.", 72),
+    ]))
+    _, chunks = chunk_code_chapter(records, ROW)
+
+    assert [[d["term"] for d in c["defines"]] for c in chunks] == [
+        ["APPLIANCE"], ["DEVICE", "POINT OF RECEPTION"], ["WIDGET"]]
+    appliance, reception = chunks[0]["defines"][0], chunks[1]["defines"][1]
+    assert appliance["body"] == "APPLIANCE - A widget used in a dwelling unit for domestic purposes."  # no lead-in
+    assert reception["body"].endswith("(1) an outdoor area; or\n\n(2) an indoor area.")
+    assert appliance["label"] == "Ch 999 § 999-1.1"
+    assert appliance["href"] == "https://example.test/999.pdf#page=2"
+
+
+def test_definitions_count_the_documents_other_chunks_that_use_each_term():
+    def chunk(cid, doc, body, defines=()):
+        return {"id": cid, "document_id": doc, "body": body, "defines": [{"term": t, "body": t} for t in defines]}
+    chunks = [
+        chunk("tmc:999-1.1", "tmc:999", "…", ["WIDGET", "POWER DEVICE"]),
+        chunk("tmc:999-2", "tmc:999", "No widget, and no power devices, after 7 p.m."),
+        chunk("tmc:999-3", "tmc:999", "A Widget may be repaired; a widgetry may not."),
+        chunk("tmc:998-1", "tmc:998", "A widget made elsewhere."),       # another chapter
+    ]
+    defs = chunker.definitions(chunks)
+
+    assert [(d["chunk_id"], d["term"], d["uses"]) for d in defs] == [
+        ("tmc:999-1.1", "WIDGET", 2), ("tmc:999-1.1", "POWER DEVICE", 1)]
+    assert all("defines" not in c for c in chunks)
+
+
 def test_table_split_across_chunks_repeats_its_header_row(ceiling):
     ceiling(60)
     rows = [["Parameter", "Limit"]] + [[f"Metal {i}", f"0.{i}"] for i in range(1, 13)]

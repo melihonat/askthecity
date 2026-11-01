@@ -15,12 +15,22 @@ Python ingester writes and the TypeScript app reads. The models behind it are in
   a replacement not yet in force) are appended, capped at 3 per answer: in the order of the passages whose § they amend, newest by-law first, never
   repeating a chunk already among the top 5. Only § → amendment; a by-law chunk that ranks on
   its own does not pull its target in. The "amended since" badge still renders on the §.
+- **Definition companions** take the slots amendments leave, after them: for every top-5
+  chapter § (rules, with a §), in passage order, the rarest term its body uses (whole
+  words, any case, plural allowed; fewest `uses`) that its own document defines
+  (`definitions`, the `definition_chunks` RPC). The definitions chunk comes cut to that
+  term's paragraphs, labelled with it (`Ch 591 § 591-1.1 POWER DEVICE`), with `defines`
+  set; a second term from the same chunk joins that passage instead of taking a slot. A
+  definitions chunk already among the top 5 is skipped, and one there brings no more.
+  Companions never feed the gate.
 - The model sees each passage's `sublabel` (its dates), an `amended_since` mark on an amended
   §, and an `amendment` mark on a companion. The prompt says the by-law wins where it differs
   from the §'s text, and to state an in-force date that differs from enactment (and "not yet
   in force" past the snapshot date). A passage from a replacement not yet in force is marked
   `not_yet_law` (and `replacement`, not `amendment`, as a companion); the prompt says the
   current § is the law until then and asks for "Today, X [n]. From <date>, Y [m]."
+  A definition companion is marked `definition` (naming its terms); the prompt says a rule
+  for a term covers everything its definition includes, citing both.
 - Labels are built **once, at ingestion**, and stored on the chunk:
 
 | Chunk | `label` | `sublabel` | `href` |
@@ -116,6 +126,7 @@ type PassageView = {
   family: "rules" | "decisions";
   label: string; sublabel: string; href: string;
   amendedSince: string[];           // by-law numbers, for the badge
+  defines: string[];                // a definition companion's terms; else empty
   body: string;                     // display text, markdown tables kept
 };
 
@@ -228,10 +239,19 @@ chunks
 amendments -- the join behind companion passages: amending clause or pending replacement § → old §
   amending_chunk_id text references chunks,
   target_section text        -- btree index
+
+definitions -- the join behind definition companions: a defined term → its definitions chunk
+  chunk_id text references chunks, document_id text,   -- btree index on document_id
+  term text, label text, href text,   -- the § label without the term range; the term's page
+  body text,                 -- the term's paragraphs only
+  uses int                   -- the document's other chunks that use the term
 ```
 
 `companion_chunks(sections text[])` returns the amending chunks targeting those §§ (with the
 § each targets), the passage fields only; the app orders and caps them.
+`definition_chunks(documents text[])` returns every defined term of those documents with
+its chunk's passage fields, label, href and body cut to the term; the app matches terms to
+passages, orders and caps them.
 
 - No `sections` table: a § is a column on its chunks; §-level matching uses the id prefix.
 - `usage_daily` and `answer_cache` ([`GUARDRAILS.md`](GUARDRAILS.md)) live alongside and are never touched by

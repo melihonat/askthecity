@@ -41,7 +41,10 @@ chapter, including the 21 without § bookmarks.
    label counts only if it continues its sequence, and the level whose sequence starts
    first wins (a `1.` list can sit inside a `(8)`). **Definitions** sections split into
    runs of whole defined terms (`TERM - …` paragraphs at a shared indent); the range names
-   the first and last term. With no structure left, whole paragraphs are packed (`C(3),
+   the first and last term. Every definitions chunk, split or not, records its terms in
+   `definitions`: each cut to its own paragraphs (an indented list included, the lead-in
+   not), with `uses`, how many of the chapter's other chunks use it. They come back as
+   definition companions. With no structure left, whole paragraphs are packed (`C(3),
    part 2`), and a single paragraph over the ceiling splits at sentences, then words.
 5. **A heading never separates from its body**; a subsection's lead-in line stays with its
    first item, and a table's title or lead-in moves with the table.

@@ -13,6 +13,7 @@ export type PassageView = {
   amendedSince: string[]; // by-law numbers, for the badge
   notYetLaw: boolean; // a § of a replacement chapter not in force on the snapshot date
   decided: boolean | null; // Decisions: adopted, or false for "no decision"; null for the rules family
+  defines: string[]; // a definition companion: the terms its body is cut to; else empty
   body: string; // display text, markdown tables kept
 };
 
@@ -82,6 +83,9 @@ export type SearchRow = ChunkRow & {
 
 /** One row from the companion_chunks RPC: an amending chunk and the § it targets. */
 export type CompanionRow = ChunkRow & { target_section: string };
+
+/** One row from the definition_chunks RPC: a defined term, its definitions chunk cut to it. */
+export type DefinitionRow = ChunkRow & { term: string; uses: number };
 
 /** Paid questions already counted today, before this one (the use_quota RPC). */
 export type Usage = { ip: number; global: number };

@@ -5,7 +5,7 @@ import { embed, generateText, Output, rerank as rerankDocuments } from "ai";
 import { z } from "zod";
 import type { AskDeps } from "./ask";
 import { CANDIDATES, CorpusMismatchError, EMBEDDING, MAX_OUTPUT_TOKENS, RERANK_MODEL, checkCorpus } from "./config";
-import type { AskResponse, CompanionRow, SearchRow, Snapshot, Usage } from "./types";
+import type { AskResponse, CompanionRow, DefinitionRow, SearchRow, Snapshot, Usage } from "./types";
 
 // Created on first use, not at import: `next build` imports this module to collect page data,
 // and preview builds have no Supabase env.
@@ -78,6 +78,12 @@ export function createDeps(tags: string[] = []): AskDeps {
       const { data, error } = await db().rpc("companion_chunks", { sections });
       if (error) throw new Error(`companion_chunks: ${error.message}`);
       return data as CompanionRow[];
+    },
+
+    async definitions(documents) {
+      const { data, error } = await db().rpc("definition_chunks", { documents });
+      if (error) throw new Error(`definition_chunks: ${error.message}`);
+      return data as DefinitionRow[];
     },
 
     async rerank(question, documents) {

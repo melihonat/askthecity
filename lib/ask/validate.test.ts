@@ -13,6 +13,7 @@ const passage = (n: number): PassageView => ({
   amendedSince: [],
   notYetLaw: false,
   decided: null,
+  defines: [],
   body: "…",
 });
 const PASSAGES = [1, 2, 3, 4, 5].map(passage);
