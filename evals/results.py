@@ -130,7 +130,9 @@ def page_data(records: list[dict], agreement: dict | None = None) -> dict:
     shipped = runs.get("shipped")
     cols = lambda rec: rec["scores"]["columns"]  # noqa: E731
     if agreement:
-        agreement = {"agree": agreement["agree"], "total": agreement["total"]} if audits(agreement, shipped) else None
+        missed = sum(d["human"] == "contradicted" != d["judge"] for d in agreement.get("disagreements", []))
+        agreement = ({"agree": agreement["agree"], "total": agreement["total"], "contradictionsMissed": missed}
+                     if audits(agreement, shipped) else None)
 
     def row(rec: dict, base: dict | None, first: bool) -> dict:
         rung = rec["header"]["rung"]
@@ -166,9 +168,12 @@ def audits(agreement: dict, shipped: dict | None) -> bool:
 
 def under_table(a: dict | None) -> str:
     """The spread rule and the judge/human agreement line, shown under the main ladder."""
+    missed = (a or {}).get("contradictionsMissed", 0)
     graded = ("Answers were graded by Sonnet 5 against key facts written with the questions; "
-              + (f"on the first full run it agreed with my hand grading on {a['agree']} of {a['total']} facts "
-                 f"({a['agree'] / a['total']:.0%})." if a else "the judge/human audit isn't committed yet."))
+              + (f"on the first full run a human grader, blind to its verdicts, agreed with it on {a['agree']} of "
+                 f"{a['total']} facts ({a['agree'] / a['total']:.0%})" if a else "the judge/human audit isn't committed yet")
+              + (f", and marked {missed} {'fact' if missed == 1 else 'facts'} contradicted that the judge passed, "
+                 "which the ship bar's contradicted check doesn't see." if missed else "."))
     return ("Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than "
             "its own run-to-run spread; ≈ marks changes inside it. " + graded
             + " Cite precision counts a cited definition the app attached as correct; that rule was added after "

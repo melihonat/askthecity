@@ -1,0 +1,32 @@
+{
+ "agree": 32,
+ "total": 34,
+ "run": "2026-11-01-shipped-131142",
+ "judge": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "191341a6dcf3",
+  "usage": {
+   "input_tokens": 51867,
+   "output_tokens": 5247,
+   "calls": 51
+  },
+  "usd_estimate": 0.1562
+ },
+ "disagreements": [
+  {
+   "id": "amended-summer-cooling",
+   "run": 1,
+   "fact": 3,
+   "human": "contradicted",
+   "judge": "present"
+  },
+  {
+   "id": "decisions-laneway-snow",
+   "run": 1,
+   "fact": 1,
+   "human": "absent",
+   "judge": "present"
+  }
+ ]
+}

@@ -28,7 +28,10 @@ Hand-written text between.
 
 Hand-written text below.
 """
-AGREEMENT = {"agree": 47, "total": 52}
+AGREEMENT = {"agree": 47, "total": 52, "disagreements": [
+    {"id": "q1", "run": 1, "fact": 1, "human": "contradicted", "judge": "present"},
+    {"id": "q2", "run": 1, "fact": 2, "human": "absent", "judge": "present"}]}
+PUBLISHED = {"agree": 47, "total": 52, "contradictionsMissed": 1}
 
 
 def golden(name: str, actual: str) -> None:
@@ -94,7 +97,7 @@ def test_an_audit_of_another_judge_is_not_published(records):
     shipped = results.select(records)["shipped"]
     judge = {"model": "claude-sonnet-5", "prompt_hash": "abc"}
     judged = [{**r, "header": {**r["header"], "judge": judge}} if r is shipped else r for r in records]
-    assert page_data(judged, {**AGREEMENT, "judge": judge})["agreement"] == AGREEMENT
+    assert page_data(judged, {**AGREEMENT, "judge": judge})["agreement"] == PUBLISHED
     assert page_data(judged, {**AGREEMENT, "judge": {**judge, "prompt_hash": "old"}})["agreement"] is None
 
 
