@@ -12,11 +12,12 @@ def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8", line_buffering=True)
     p = argparse.ArgumentParser(prog="python -m evals")
     sub = p.add_subparsers(dest="command", required=True)
-    r = sub.add_parser("run", help="run one rung, write evals/runs/<date>-<rung>[-dev]/run.json and report.md")
+    r = sub.add_parser("run", help="run one rung, write evals/runs/<date>-<rung>[-dev][-<suffix>]/run.json and report.md")
     r.add_argument("--rung", required=True, choices=["dense", "hybrid", "rerank", "shipped"])
     r.add_argument("--split", default="test", choices=["test", "dev"])
     r.add_argument("--base-url", default="https://ask-the-city.vercel.app", help="the deployment to measure")
     r.add_argument("--runs", type=int, default=3)
+    r.add_argument("--suffix", default="", help="names a second run of the rung on the same day, e.g. 2")
     r.add_argument("--skip-preflight", action="store_true", help="don't check the remaining Gateway credit")
     c = sub.add_parser("calibrate", help="threshold from a dev run: rewrite EVALS.md's table and lib/ask/config.ts")
     c.add_argument("run_dir", type=Path, help="e.g. evals/runs/2026-10-31-shipped-dev")
@@ -38,7 +39,7 @@ def main() -> None:
 
     try:
         out = run(args.rung, args.split, args.base_url, env("EVAL_HEADER_SECRET"), env("AI_GATEWAY_API_KEY"),
-                  runs=args.runs, skip_preflight=args.skip_preflight)
+                  runs=args.runs, skip_preflight=args.skip_preflight, suffix=args.suffix)
     except RunInvalid as e:
         raise SystemExit(f"run invalid, nothing written: {e}")
     print(f"wrote {out}")

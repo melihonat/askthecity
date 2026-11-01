@@ -180,11 +180,15 @@ def header(*, run_id: str, rung: str, split: str, base_url: str, data: dict, git
     }
 
 
+def run_dir(rung: str, split: str, day: str, suffix: str = "") -> Path:
+    """`<date>-<rung>[-dev][-<suffix>]`; the suffix names a second run of a rung on the same day."""
+    return RUNS_DIR / (f"{day}-{rung}" + ("" if split == "test" else f"-{split}") + (f"-{suffix}" if suffix else ""))
+
+
 def run(rung: str, split: str, base_url: str, secret: str, gateway_key: str, runs: int = 3,
-        skip_preflight: bool = False, transport: Transport | None = None) -> Path:
+        skip_preflight: bool = False, transport: Transport | None = None, suffix: str = "") -> Path:
     gold = load_gold(split)
-    today = date.today().isoformat()
-    out = RUNS_DIR / (f"{today}-{rung}" + ("" if split == "test" else f"-{split}"))
+    out = run_dir(rung, split, date.today().isoformat(), suffix)
     if out.exists():
         raise SystemExit(f"{out.relative_to(ROOT)} exists; a committed run is never overwritten")
     run_id = f"{out.name}-{datetime.now().strftime('%H%M%S')}"

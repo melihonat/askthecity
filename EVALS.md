@@ -16,7 +16,8 @@ shape and the `debug` event are in [`CONTRACT.md`](CONTRACT.md); terms are defin
 - **A `limit` response or an HTTP error invalidates the run.** A 5xx is retried once, then
   the run aborts. A run with any unscored question is never committed.
 - One rung per invocation: `python -m evals run --rung shipped [--split dev] [--base-url …]`
-  writes `evals/runs/<date>-<rung>[-dev]/` and refuses to overwrite one. The scorer
+  writes `evals/runs/<date>-<rung>[-dev]/` and refuses to overwrite one; `--suffix 2`
+  names a second run of the rung on the same day (`…-dev-2/`). The scorer
   (`evals/score.py`) is pure: run data, gold and the snapshot's chunk ids in, columns out.
 
 ## Gold

@@ -89,3 +89,9 @@ def test_strips_passage_bodies_but_keeps_ids_labels_and_hrefs():
         assert p["chunkId"] == "tmc:1-1:A" and p["href"] and p["label"]
     assert stripped["response"]["text"] == "Yes [1]."
     assert c["passages"][0]["body"] == "City text"  # the scorer's copy is untouched
+
+
+def test_run_dir_names_a_second_run_on_the_same_day_by_suffix():
+    assert harness.run_dir("shipped", "test", "2026-11-01").name == "2026-11-01-shipped"
+    assert harness.run_dir("shipped", "dev", "2026-11-01").name == "2026-11-01-shipped-dev"
+    assert harness.run_dir("shipped", "dev", "2026-11-01", "2").name == "2026-11-01-shipped-dev-2"
