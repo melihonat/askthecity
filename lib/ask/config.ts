@@ -27,6 +27,8 @@ export const RUNGS: Record<Rung, RungConfig> = {
   hybrid: { search: "hybrid", rerank: false, companions: false, model: MODEL, prompt: "default" },
   rerank: { search: "hybrid", rerank: true, companions: false, model: MODEL, prompt: "default" },
   shipped: SHIPPED,
+  // the fix rung under `shipped` (LADDER.md, "Ship bar"): cite precision and the rule in force
+  "shipped-2": { ...SHIPPED, prompt: "fix" },
   // Sonnet 5.5 can't turn thinking off, so its thinking shares the cap; 400 cut long answers mid-JSON
   "side-sonnet": { ...SHIPPED, model: "anthropic/claude-sonnet-5.5", maxOutputTokens: 1600 },
   // the quotes get their own room, so quoting can't cut the answer short

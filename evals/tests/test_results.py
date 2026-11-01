@@ -108,6 +108,72 @@ def test_no_test_runs_yet_renders_placeholders():
     assert "| **shipped** | **–** | **–** | **–** |" in readme(README_IN, [], data)
 
 
+def _run(base: dict, rung: str | None = None, sha: str | None = None, date: str | None = None, **cols) -> dict:
+    """`base` with new column values; a new rung, SHA or date also makes it a new run."""
+    columns = {k: {**v, **({"value": cols[k]} if k in cols else {})} for k, v in base["scores"]["columns"].items()}
+    header = base["header"]
+    if rung or sha or date:
+        rung, date = rung or header["rung"], date or header["date"]
+        header = {**header, "rung": rung, "git": {"sha": sha or header["git"]["sha"], "dirty": False}, "date": date,
+                  "run_id": f"{date[:10]}-{rung}-130000"}
+    return {"header": header, "scores": {"columns": columns}}
+
+
+@pytest.fixture
+def fixed(records):
+    """The ladder's `shipped` misses the bar on cite precision; `shipped-2` and a `shipped` re-run beside it
+    on a later commit, where `shipped-2` passes."""
+    ladder_shipped = results.select(records)["shipped"]
+    missed = [_run(r, cite_precision=0.80) if r is ladder_shipped else r
+              for r in records]
+    rerun = _run(ladder_shipped, "shipped", "2222222bbbb", "2026-11-03T10:00:00+00:00", cite_precision=0.79)
+    fix = _run(ladder_shipped, "shipped-2", "2222222bbbb", "2026-11-03T10:30:00+00:00", cite_precision=0.92)
+    return missed + [rerun, fix]
+
+
+def test_a_fix_rung_is_appended_under_shipped_beside_its_rerun(fixed):
+    data = page_data(fixed)
+    rows = data["ladder"]
+    assert [r["rung"] for r in rows] == ["dense", "hybrid", "rerank", "shipped", "shipped", "shipped-2"]
+    assert rows[3]["run"] == "2026-11-02-shipped-120000"  # the ladder row is never replaced by the re-run
+    assert rows[4]["run"] == "2026-11-03-shipped-130000" and "2222222" in rows[4]["why"]
+    assert rows[5]["why"].startswith(results.WHY["shipped-2"].rstrip("."))
+    cite = [c["key"] for c in data["columns"]].index("cite_precision")
+    assert rows[5]["cells"][cite]["mark"] == "gain"  # 0.79 → 0.92, against the re-run, not the ladder row
+    assert rows[4]["cells"][cite]["mark"] is None  # the re-run is a baseline, not a step up the ladder
+
+
+def test_the_ship_bar_and_highlight_move_to_the_last_fix_rung(fixed):
+    data = page_data(fixed)
+    assert data["shipBar"] == {"rung": "shipped-2", "unmet": []}
+    assert [(r["rung"], r["run"]) for r in data["ladder"] if r["highlight"]] == [("shipped-2", "2026-11-03-shipped-2-130000")]
+    md = results_md(fixed, data)
+    assert "`shipped`: misses: cite precision under 0.9." in md and "`shipped-2`: passes." in md
+
+
+def test_a_fix_pair_on_its_own_sha_is_not_a_sha_warning(fixed, records):
+    md = results_md(fixed, page_data(fixed))
+    assert "more than one git SHA" not in md
+    assert "fix rungs on `2222222`" in md
+    stray = [_run(r, sha="3333333cccc") if r["header"]["rung"] == "dense" else r
+             for r in fixed]
+    assert "more than one git SHA" in results_md(stray, page_data(stray))
+
+
+def test_a_fix_rung_without_a_rerun_on_its_sha_says_so(fixed):
+    alone = [r for r in fixed if r["header"]["run_id"] != "2026-11-03-shipped-130000"]
+    data = page_data(alone)
+    assert [r["rung"] for r in data["ladder"]][-2:] == ["shipped", "shipped-2"]
+    assert "no `shipped` re-run on its SHA" in results_md(alone, data)
+
+
+def test_fix_rung_goldens(fixed):
+    data = page_data(fixed, AGREEMENT)
+    golden("fix/RESULTS.md", results_md(fixed, data))
+    golden("fix/README.md", readme(README_IN, fixed, data))
+    golden("fix/results.json", json.dumps(data, ensure_ascii=False, indent=1) + "\n")
+
+
 def test_missing_markers_raise(records):
     with pytest.raises(ResultsError):
         readme("# no markers\n", records, page_data(records))

@@ -76,3 +76,12 @@ the ladder.
 
 The table is done when every rung above has a committed 3-run result and the last
 `shipped*` rung passes the bar.
+
+### Fix rungs
+
+| Rung | Change | Why |
+| --- | --- | --- |
+| `shipped-2` | Prompt `fix`: cite only the passage that states each sentence (at most two, plus their amendments and definitions), and lead with the rule in force; passages carry a computed `in_force` / `out_of_date` mark | `shipped` on `e818f4d`: cite precision 0.80, and an answer that called a deleted § the current rule |
+
+- `shipped` keeps the `default` prompt, so the re-run beside `shipped-2` is the stack the
+  ladder measured. The public app switches to the fix only once `shipped-2` passes.

@@ -13,6 +13,7 @@ export type EvalsData = {
   side: Row[];
   shipBar: { rung: string; unmet: string[] } | null;
   agreement: { agree: number; total: number; contradictionsMissed: number } | null;
+  fixNote: string | null; // under the ladder once a fix rung (LADDER.md, "Ship bar") is appended
   underTable: string;
 };
 
