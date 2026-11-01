@@ -32,8 +32,9 @@ docs and UI copy.
   chapter and the stale consolidated PDF is dropped; until then the old chapter is the law
   and the replacement's §§ ride along as companion passages.
 - **Staff report** — a `bgrd/` file whose item-page label reads "Report from …" or
-  "Supplementary Report from …". Not every `bgrd/` file is one: attachments and councillor
-  letters live there too and are not in the snapshot.
+  "Supplementary Report from …", or that a hand review in `snapshot/review/report_labels.csv`
+  let in. Not every `bgrd/` file is one: attachments, presentations and councillor letters
+  live there too and are not in the snapshot.
 - **Status stamp** — the line every Decisions chunk carries saying where its item ended up
   (adopted, amended, referred, deferred; by whom, when). Keeps a referred item from reading
   as adopted.

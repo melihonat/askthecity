@@ -71,8 +71,7 @@ any stage re-runs alone.
   consolidated ([`CHUNKING.md`](CHUNKING.md#rules-amending-by-laws)).
 - **`restore`** pulls every manifest row from R2 into `corpus/`, verifying sha256. It
   replaces stages 1–4 on a new machine; nothing is re-fetched from the City.
-- **`all`** runs stages 3–8 in order and stops at the first failure (today 3 and 5–8:
-  `fetch-reports` doesn't exist yet).
+- **`all`** runs stages 3–8 in order and stops at the first failure.
 - **`swap` is never automatic.** The run is `all` → `smoke` → `swap`, by hand, and `swap`
   re-runs the `smoke` database checks itself and refuses if any fails.
 - **`chunker_version`** (in `ingest/config.py`, stored on the `snapshot` row) is bumped
@@ -114,10 +113,15 @@ hard stop at the stage that first needs it: **the stage drafts, stops, you edit,
 re-run.**
 
 - **`report_labels.csv`** (`label, decision, note`), checked by `fetch-reports` before any
-  download. Allowlisted and blocklisted labels ([`CHUNKING.md`](CHUNKING.md#decisions-what-enters))
-  pass silently; any other label not already in the file goes to
-  `report_labels.pending.csv` and the stage exits. Files decided `out` are never
-  downloaded.
+  download. The label is the item page's text for the link, date included. Allowlisted and
+  blocklisted labels ([`CHUNKING.md`](CHUNKING.md#decisions-what-enters)) pass silently;
+  any other label not already in the file goes to `report_labels.pending.csv` (with the
+  item and URL it was first seen on) and the stage exits; move the decided rows across and
+  re-run. A row in the file wins over the rules, which is how an original report a
+  `Revised Report …` supersedes on the same item is kept `out`. Files decided `out` are
+  never downloaded, and a staff report no longer `in` loses its manifest row. Only the
+  Background Information blocks are read; a `bgrd/` link inside a Summary or a motion is
+  not a background file.
 - **`section_map_<bylaw>.csv`** (`old_section, new_section, note`), checked by `chunk` for
   every replacement chapter whose `in_force` is after the snapshot date (today:
   1512-2025 → Ch 629, in force 2027-05-01). Missing or incomplete → the stage writes

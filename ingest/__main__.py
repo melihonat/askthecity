@@ -15,6 +15,7 @@ def main() -> None:
     rs = sub.add_parser("receive-saves", help="localhost receiver the SAVE_TMMIS.md runbook posts item pages to")
     rs.add_argument("--port", type=int, default=8765)
     sub.add_parser("check-saves", help="saved item pages vs snapshot/tmmis_items.txt; fails on any missing or bad page")
+    sub.add_parser("fetch-reports", help="staff reports the label gate lets in → corpus/, R2, manifest; stops on an unreviewed label")
     sub.add_parser("restore", help="R2 → corpus/, verifying sha256")
     sub.add_parser("extract", help="corpus/ → build/text/")
     sub.add_parser("chunk", help="build/text/ → build/chunks.jsonl")
@@ -23,7 +24,7 @@ def main() -> None:
     sub.add_parser("load", help="build/ → staging schema")
     sub.add_parser("smoke", help="check staging: counts, embeddings, U+FFFD, pins")
     sub.add_parser("swap", help="staging → live, one transaction; refuses if smoke fails")
-    al = sub.add_parser("all", help="check-saves → extract → chunk → embed → load, stopping at the first failure")
+    al = sub.add_parser("all", help="check-saves → fetch-reports → extract → chunk → embed → load, stopping at the first failure")
     al.add_argument("--yes", action="store_true", help="skip the spend confirmation")
     args = p.parse_args()
 
@@ -39,6 +40,9 @@ def main() -> None:
     elif args.stage == "check-saves":
         from .tmmis import check_saves
         check_saves()
+    elif args.stage == "fetch-reports":
+        from .reports import fetch_reports
+        fetch_reports()
     elif args.stage == "restore":
         from .store import restore
         restore()
@@ -65,8 +69,10 @@ def main() -> None:
         from .db import load
         from .embed import embed
         from .extract import extract
+        from .reports import fetch_reports
         from .tmmis import check_saves
         check_saves()
+        fetch_reports()
         extract()
         chunk()
         embed(yes=args.yes)

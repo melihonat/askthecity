@@ -33,7 +33,7 @@ EMBED_MODEL = "voyage-4-large"
 EMBED_DIM = 1024
 EMBED_PRICE_PER_MTOK = 0.12         # list price, USD; real spend is $0 inside Voyage's free tokens
 
-CHUNKER_VERSION = "rules-2+decisions-1"   # bump whenever chunk output changes for the same input
+CHUNKER_VERSION = "rules-2+decisions-2"   # bump whenever chunk output changes for the same input
 
 SCOPE_SENTENCE = (
     "Knows the Toronto Municipal Code, including by-laws that have amended it since, and the "
