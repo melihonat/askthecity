@@ -21,15 +21,22 @@ PAGE_JSON = ROOT / "app" / "evals" / "results.json"
 AGREEMENT_JSON = ROOT / "evals" / "judge_agreement.json"
 
 LADDER = ["dense", "hybrid", "rerank", "shipped"]
+# fix rungs (LADDER.md, "Ship bar"): appended under `shipped`, each beside a `shipped` re-run on its SHA
+FIX = ["shipped-2", "shipped-3"]
 SIDE = ["side-sonnet", "side-quoted"]
 WHY = {
     "dense": "Vector search only: embed the question, take the 5 closest passages.",
     "hybrid": 'Adds keyword search and exact section-number matching, so "591-2.1" finds § 591-2.1.',
     "rerank": "A reranker scores every passage against the question; if none scores high enough, it refuses before the model writes anything.",
     "shipped": "Brings in the by-laws that amended a cited section after the Code was last consolidated.",
+    "shipped-2": "Fix: the prompt cites only the passage that states each sentence, and leads with the rule in force when a by-law changed a section.",
     "side-sonnet": "Sonnet 5.5 instead of Haiku 5.5, at ~20× the generation cost.",
     "side-quoted": "Asks the model to quote the supporting sentence for every citation.",
 }
+RERUN_WHY = "The same shipped stack re-run on {sha}, beside the fix below it: the fix is compared against this row."
+FIX_NOTE = ("The rows below the first shipped row were added after it missed the ship bar. A fix runs on its own "
+            "later commit, with shipped re-run beside it on that commit, and is compared against that re-run. The "
+            "rows above are left as they were.")
 NO_GAIN = " — no measurable gain."
 
 # (key in run.json, heading, format): "count" shows a share as x / n questions
@@ -60,12 +67,38 @@ class ResultsError(Exception):
 
 # ── selecting runs ────────────────────────────────────────────────────────────────────────────
 
+def _tests(records: list[dict]) -> list[dict]:
+    return sorted((r for r in records if r["header"]["split"] == "test"), key=lambda r: r["header"]["date"])
+
+
+def _sha(rec: dict) -> str:
+    return rec["header"]["git"]["sha"]
+
+
+def fixes(records: list[dict]) -> list[tuple[dict, dict | None]]:
+    """Each fix rung's latest test run, with the `shipped` re-run on its SHA (None if there isn't one)."""
+    latest = {r["header"]["rung"]: r for r in _tests(records) if r["header"]["rung"] in FIX}
+    shipped = [r for r in _tests(records) if r["header"]["rung"] == "shipped"]
+    return [(latest[f], next((s for s in reversed(shipped) if _sha(s) == _sha(latest[f])), None))
+            for f in FIX if f in latest]
+
+
 def select(records: list[dict]) -> dict[str, dict]:
-    """The latest test-split run of each rung."""
+    """The latest test-split run of each ladder and side rung. A `shipped` run on a fix rung's SHA is that
+    fix rung's comparison, never the ladder's `shipped` row: rows are appended, not edited."""
+    fix_shas = {_sha(f) for f, _ in fixes(records)}
     latest: dict[str, dict] = {}
-    for r in sorted((r for r in records if r["header"]["split"] == "test"), key=lambda r: r["header"]["date"]):
-        latest[r["header"]["rung"]] = r
+    for r in _tests(records):
+        rung = r["header"]["rung"]
+        if rung not in FIX and not (rung == "shipped" and _sha(r) in fix_shas):
+            latest[rung] = r
     return latest
+
+
+def final_shipped(records: list[dict]) -> dict | None:
+    """The last `shipped*` rung: the one the ship bar is about (LADDER.md: the table is done when it passes)."""
+    pairs = fixes(records)
+    return pairs[-1][0] if pairs else select(records).get("shipped")
 
 
 def ship_bar(cols: dict) -> list[str]:
@@ -128,32 +161,42 @@ def page_data(records: list[dict], agreement: dict | None = None) -> dict:
     ladder = [runs[r] for r in LADDER if r in runs]
     side = [runs[r] for r in SIDE if r in runs]
     shipped = runs.get("shipped")
+    final = final_shipped(records)
     cols = lambda rec: rec["scores"]["columns"]  # noqa: E731
     if agreement:
         missed = sum(d["human"] == "contradicted" != d["judge"] for d in agreement.get("disagreements", []))
         agreement = ({"agree": agreement["agree"], "total": agreement["total"], "contradictionsMissed": missed}
                      if audits(agreement, shipped) else None)
 
-    def row(rec: dict, base: dict | None, first: bool) -> dict:
+    def row(rec: dict, base: dict | None, first: bool, why: str | None = None) -> dict:
         rung = rec["header"]["rung"]
         cells = [_cell(cols(rec).get(k), base and cols(base).get(k), k, kind) for k, _, kind in PAGE_COLUMNS]
-        why = WHY[rung]
+        why = why or WHY[rung]
         if not first and not any(c["mark"] == "gain" for c in cells):
             why = why.rstrip(".") + NO_GAIN
-        return {"rung": rung, "why": why, "highlight": rung == "shipped" and not ship_bar(cols(rec)),
+        return {"rung": rung, "why": why, "highlight": rec is final and not ship_bar(cols(rec)),
                 "run": rec["header"]["run_id"], "cells": cells}
 
-    trick = cols(shipped)["refusal_recall"] if shipped else None
+    fix_recs, fix_rows = [], []
+    for fix, rerun in fixes(records):
+        if rerun:
+            fix_recs.append(rerun)
+            fix_rows.append(row(rerun, None, True, RERUN_WHY.format(sha=_sha(rerun)[:7])))
+        fix_recs.append(fix)
+        fix_rows.append(row(fix, rerun, rerun is None))
+
+    trick = cols(final)["refusal_recall"] if final else None
     counts = cols(shipped or (ladder + side)[0]) if (ladder or side) else None
     data = {
         "intro": counts and {"questions": counts["refusal_recall"]["n"] + counts["false_refusals"]["n"],
                              "refuse": counts["refusal_recall"]["n"]},
         "headerLink": f"Evals · {_count(trick)}/{trick['n']} trick questions refused" if trick else "Evals",
-        "columns": [{"key": k, "label": label, "n": _n(ladder + side, k)} for k, label, _ in PAGE_COLUMNS],
-        "ladder": [row(rec, ladder[i - 1] if i else None, i == 0) for i, rec in enumerate(ladder)],
+        "columns": [{"key": k, "label": label, "n": _n(ladder + fix_recs + side, k)} for k, label, _ in PAGE_COLUMNS],
+        "ladder": [row(rec, ladder[i - 1] if i else None, i == 0) for i, rec in enumerate(ladder)] + fix_rows,
         "side": [row(rec, shipped, False) for rec in side],
-        "shipBar": shipped and {"rung": "shipped", "unmet": ship_bar(cols(shipped))},
+        "shipBar": final and {"rung": final["header"]["rung"], "unmet": ship_bar(cols(final))},
         "agreement": agreement,
+        "fixNote": FIX_NOTE if fix_rows else None,
     }
     return {**data, "underTable": under_table(agreement)}
 
@@ -198,8 +241,8 @@ def _md_table(data: dict, rows: list[dict]) -> list[str]:
 
 def headline_block(records: list[dict], data: dict) -> str:
     """Vector search only (`dense`) against `shipped`, for the README's first screen."""
-    runs = select(records)
-    pick = [("vector search only", runs.get("dense"), False), ("shipped", runs.get("shipped"), True)]
+    runs, final = select(records), final_shipped(records)
+    pick = [("vector search only", runs.get("dense"), False), (final["header"]["rung"] if final else "shipped", final, True)]
     lines = [HEADLINE_START, "| | refuses trick questions | cite precision | answer correct |", "| --- | --- | --- | --- |"]
     for label, rec, bold in pick:
         c = rec["scores"]["columns"] if rec else {}
@@ -219,7 +262,10 @@ def ladder_block(data: dict) -> str:
         return "\n".join(lines)
     lines += [f"{data['intro']['questions']} questions written before the first build, {data['intro']['refuse']} of them "
               "meant to be refused. Each row adds one thing to the row above, all run on the same final code.", ""]
-    lines += _md_table(data, data["ladder"]) + ["", data["underTable"], ""]
+    lines += _md_table(data, data["ladder"]) + [""]
+    if data["fixNote"]:
+        lines += [data["fixNote"], ""]
+    lines += [data["underTable"], ""]
     if data["side"]:
         lines += ["Alternatives tried against `shipped`, one change each.", ""] + _md_table(data, data["side"]) + [""]
     lines.append(LADDER_END)
@@ -227,8 +273,11 @@ def ladder_block(data: dict) -> str:
 
 
 def results_md(records: list[dict], data: dict) -> str:
-    runs = select(records)
-    recs = [runs[r] for r in LADDER + SIDE if r in runs]
+    runs, pairs = select(records), fixes(records)
+    ladder = [runs[r] for r in LADDER if r in runs]
+    fix_recs = [rec for fix, rerun in pairs for rec in (rerun, fix) if rec]
+    side = [runs[r] for r in SIDE if r in runs]
+    recs = ladder + fix_recs + side
     lines = ["# Eval results", "",
              "Generated by `python -m evals results` from `evals/runs/*/run.json` (latest `split: test` run of each "
              "rung). Never hand-edited. Columns are defined in [`EVALS.md`](../EVALS.md#columns); rungs in "
@@ -236,17 +285,25 @@ def results_md(records: list[dict], data: dict) -> str:
     if not recs:
         return "\n".join(lines + ["No test-split run is committed yet.", ""])
 
-    shas = sorted({r["header"]["git"]["sha"][:7] for r in recs})
+    # the ladder and side table share one SHA; each fix pair shares its own (LADDER.md, "How it runs")
+    shas = sorted({_sha(r)[:7] for r in ladder + side})
+    fix_shas = sorted({_sha(r)[:7] for r in fix_recs} - set(shas))
     first = recs[0]["header"]
-    lines += [f"Git {', '.join(f'`{s}`' for s in shas)} · snapshot `{first['snapshot']['id']}` · threshold {first['threshold']} · "
-              f"{first['runs']} runs per rung", ""]
+    lines += [f"Git {', '.join(f'`{s}`' for s in shas)}"
+              + (f" · fix rungs on {', '.join(f'`{s}`' for s in fix_shas)}" if fix_shas else "")
+              + f" · snapshot `{first['snapshot']['id']}` · threshold {first['threshold']} · {first['runs']} runs per rung", ""]
     if len(shas) > 1:
         lines += ["> **The rungs span more than one git SHA:** the ladder is meant to run in one sitting on one SHA.", ""]
+    for fix, rerun in pairs:
+        if rerun is None:
+            lines += [f"> **`{fix['header']['rung']}` has no `shipped` re-run on its SHA** to be compared against.", ""]
 
+    reruns = {id(rerun) for _, rerun in pairs if rerun}
+    name = lambda r: f"`{r['header']['rung']}`" + (" re-run" if id(r) in reruns else "")  # noqa: E731
     headings = [k.replace("_", " ") for k, _ in ALL_COLUMNS]
     sep = "|" + " --- |" * (len(ALL_COLUMNS) + 2)
     table = lambda cell: ["| Rung | " + " | ".join(headings) + " | Run |", sep] + [  # noqa: E731
-        f"| `{r['header']['rung']}` | " + " | ".join(cell(r["scores"]["columns"].get(k), kind) for k, kind in ALL_COLUMNS)
+        f"| {name(r)} | " + " | ".join(cell(r["scores"]["columns"].get(k), kind) for k, kind in ALL_COLUMNS)
         + f" | `{r['header']['run_id']}` |" for r in recs]
     lines += table(_fmt) + [""]
     lines += ["## n scored", ""] + table(lambda c, _: "–" if not c else str(c["n"])) + [""]
@@ -255,11 +312,14 @@ def results_md(records: list[dict], data: dict) -> str:
     lines += table(lambda c, kind: "–" if not c or c.get("spread") is None else _fmt({"value": c["spread"]}, kind)) + [""]
 
     lines += ["## Ship bar", ""]
-    bar = data["shipBar"]
-    if bar is None:
+    bars = [r for r in [runs.get("shipped")] + [fix for fix, _ in pairs] if r]
+    if not bars:
         lines.append("No `shipped` run yet.")
-    else:
-        lines.append(f"`{bar['rung']}`: " + ("passes." if not bar["unmet"] else "misses: " + "; ".join(bar["unmet"]) + "."))
+    for r in bars:
+        unmet = ship_bar(r["scores"]["columns"])
+        lines += [f"`{r['header']['rung']}`: " + ("passes." if not unmet else "misses: " + "; ".join(unmet) + "."), ""]
+    if bars:
+        lines.pop()
     lines += ["", "## Judge", "", data["underTable"], ""]
     return "\n".join(lines)
 

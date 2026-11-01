@@ -251,7 +251,7 @@ async function* run(question: string, rung: Rung, deps: AskDeps, opts: AskOption
   const output = await deps.generate({
     model: config.model,
     system: systemPrompt(snapshot.snapshot_date, config.prompt),
-    prompt: userPrompt(question, passages),
+    prompt: userPrompt(question, passages, config.prompt, snapshot.snapshot_date),
     quotes: config.prompt === "quoted",
     maxOutputTokens: config.maxOutputTokens ?? MAX_OUTPUT_TOKENS,
   });

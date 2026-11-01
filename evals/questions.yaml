@@ -2,6 +2,8 @@
 #
 # 24 reported questions (split: test). The refusal threshold is never tuned on them: the
 # refusal rule adds ~10 `split: dev` questions (5 answer, 5 refuse) that never appear in the table.
+# Three more dev answers (`dev-amended-*`, `dev-deleted-*`) cover amended and deleted sections for
+# the `shipped-2` prompt fix (LADDER.md, "Ship bar"); the threshold was calibrated before them.
 #
 # Snapshot facts checked 2026-10-26 against the cached Code, the 120 candidate amending
 # by-laws and the live item pages. Patterns marked `pin` name a by-law clause whose exact
@@ -403,3 +405,49 @@
     - Owner liability already covers parking, stopping and standing violations in the Code.
     - Many moving violations assume a human driver, so they don't fit driverless vehicles.
   split: dev
+
+- id: dev-amended-park-fine
+  question: What's the biggest fine I could get for breaking a park rule?
+  category: amended_since
+  expect: answer
+  required:
+    - [ "tmc:608-54:*" ]
+    - [ "bl:1150-2026:cl11" ]
+  key_facts:
+    - A conviction under the parks chapter carries a fine of up to $100,000.
+    - By-law 1150-2026 set that maximum, in force September 1, 2026.
+  split: dev
+  notes: >
+    The consolidated § 608-54E says the fine is "as provided for in the Provincial Offences
+    Act"; 1150-2026 cl. 11 replaced that phrase. Giving the old wording as the current rule
+    contradicts the first fact. Tempts citing the park rules the fine applies to.
+
+- id: dev-amended-vendor-street
+  question: I have a street vending permit for my food cart. Do I also need a permit to occupy the street?
+  category: amended_since
+  expect: answer
+  required:
+    - [ "tmc:743-18:*" ]
+    - [ "bl:353-2026:cl3" ]
+  key_facts:
+    - No — a person with a valid Chapter 740 street vending permit is exempt from needing a permit to temporarily occupy the street.
+    - By-law 353-2026 added the exemption, in force June 15, 2026.
+  split: dev
+  notes: >
+    The consolidated § 743-18A requires the permit with no exemption; 353-2026 cl. 3 added
+    § 743-18G. Saying a permit is still needed contradicts the first fact.
+
+- id: dev-deleted-holistic-fees
+  question: I own a holistic centre. Do I have to give the City a list of my services and prices?
+  category: amended_since
+  expect: answer
+  required:
+    - [ "tmc:545-181:*" ]
+    - [ "bl:1108-2025:cl1:A-C" ]
+  key_facts:
+    - No — the requirement to file a list of services and fees (§ 545-181) was deleted.
+    - By-law 1108-2025 deleted it, in force January 1, 2026.
+  split: dev
+  notes: >
+    A deleted section: the consolidated § 545-181 still prints the duty, and 1108-2025
+    cl. 1A deletes it. Presenting § 545-181 as the current rule contradicts the first fact.

@@ -170,14 +170,14 @@ unknown rung is a 400. Without the header the field is ignored and every request
 `shipped`.
 
 ```ts
-type Rung = "dense" | "hybrid" | "rerank" | "shipped" | "side-sonnet" | "side-quoted"; // + shipped-2, shipped-3
+type Rung = "dense" | "hybrid" | "rerank" | "shipped" | "shipped-2" | "side-sonnet" | "side-quoted"; // + shipped-3
 
 type RungConfig = {
   search: "vector" | "hybrid";      // search_chunks mode arg: vector skips FTS and the pin
   rerank: boolean;                  // false: top 5 by fused rank, and the gate is off
   companions: boolean;
   model: string;                    // pinned id, never an alias
-  prompt: "default" | "quoted";
+  prompt: "default" | "quoted" | "fix";
 };
 ```
 

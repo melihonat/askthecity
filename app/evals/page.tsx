@@ -40,7 +40,7 @@ function Table({ rows, caption }: { rows: Row[]; caption: string }) {
       </thead>
       <tbody>
         {rows.map((r) => (
-          <tr key={r.rung} className={r.highlight ? "shipped" : undefined}>
+          <tr key={r.run} className={r.highlight ? "shipped" : undefined}>
             <th scope="row">
               <code>{r.rung}</code>
               {r.highlight && <span className="bar"> ✓ ship bar</span>}
@@ -74,6 +74,7 @@ export default function EvalsPage() {
         {EVALS.ladder.length > 0 && (
           <>
             <Table rows={EVALS.ladder} caption="Main ladder" />
+            {EVALS.fixNote && <p>{EVALS.fixNote}</p>}
             <p className="muted">{EVALS.underTable}</p>
           </>
         )}

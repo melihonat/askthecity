@@ -398,6 +398,7 @@ describe("ask", () => {
       ["hybrid", "hybrid", false, false],
       ["rerank", "hybrid", true, false],
       ["shipped", "hybrid", true, true],
+      ["shipped-2", "hybrid", true, true],
       ["side-sonnet", "hybrid", true, true],
       ["side-quoted", "hybrid", true, true],
     ] as const)("%s: search %s, rerank %s, companions %s", async (rung, search, rerank, companions) => {
@@ -454,6 +455,48 @@ describe("ask", () => {
     it("gives the quoted prompt its own version and hash", () => {
       expect(PROMPTS.quoted.version).not.toBe(PROMPTS.default.version);
       expect(PROMPTS.quoted.hash).not.toBe(PROMPTS.default.hash);
+    });
+
+    it("shipped-2 changes only the prompt", () => {
+      expect(RUNGS["shipped-2"]).toEqual({ ...RUNGS.shipped, prompt: "fix" });
+    });
+
+    // shipped-2 is compared against shipped re-run on the same commit (LADDER.md, "Ship bar"), so adding
+    // the fix must leave shipped's prompt, and the public cache key, exactly as the ladder measured it
+    it("leaves the shipped prompt as the ladder ran it", () => {
+      expect(PROMPTS.default).toEqual({ version: "default-9", hash: "90d2a516850e" });
+      expect(PROMPTS.fix.hash).not.toBe(PROMPTS.default.hash);
+    });
+
+    describe("shipped-2's in-force marks", () => {
+      const byLaw = (inForce: string): CompanionRow => ({
+        ...companion("bl:1482-2025:cl1:O-Y", "608-19"),
+        label: "By-law 1482-2025 cl. 1 O–Y",
+        sublabel: `amends § 608-19 · in force ${inForce}`,
+      });
+      const prompt = async (rung: Rung, inForce: string) => {
+        const deps = fakeDeps(amended, amended.map(() => HIGH), ANSWER, [byLaw(inForce)]);
+        const { debug } = await run(deps, rung);
+        return { prompt: deps.generate.mock.calls[0][0].prompt as string, debug };
+      };
+
+      it("marks a by-law in force on the snapshot date, and the section it changed", async () => {
+        const { prompt: p, debug } = await prompt("shipped-2", "2026-03-02");
+        expect(p).toContain('in_force="yes, since 2026-03-02"');
+        expect(p).toMatch(/label="tmc:608-19"[^>]*out_of_date="changed by By-law 1482-2025 cl\. 1 O–Y \[\d\], in force since 2026-03-02"/);
+        expect(debug?.build).toMatchObject({ promptVersion: PROMPTS.fix.version, promptHash: PROMPTS.fix.hash });
+      });
+
+      it("marks a by-law not yet in force, and leaves its section unmarked", async () => {
+        const { prompt: p } = await prompt("shipped-2", "2027-01-01");
+        expect(p).toContain('in_force="not yet, from 2027-01-01"');
+        expect(p).not.toContain("out_of_date=");
+      });
+
+      it("adds no mark on shipped", async () => {
+        const { prompt: p } = await prompt("shipped", "2026-03-02");
+        expect(p).not.toMatch(/in_force=|out_of_date=/);
+      });
     });
   });
 

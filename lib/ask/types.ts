@@ -54,14 +54,14 @@ export type Quote = { n: number; sentence: string };
 export type ModelOutput = { decision: "answer" | "decline"; text: string; cited: number[]; quotes?: Quote[] };
 
 /** Named configurations for the eval table (evals/LADDER.md); only the eval header selects one. */
-export type Rung = "dense" | "hybrid" | "rerank" | "shipped" | "side-sonnet" | "side-quoted";
+export type Rung = "dense" | "hybrid" | "rerank" | "shipped" | "shipped-2" | "side-sonnet" | "side-quoted";
 
 export type RungConfig = {
   search: "vector" | "hybrid"; // search_chunks mode arg
   rerank: boolean; // false: top 5 by fused rank, and the gate is off
   companions: boolean;
   model: string; // pinned id, never an alias
-  prompt: "default" | "quoted";
+  prompt: "default" | "quoted" | "fix";
   maxOutputTokens?: number; // side rungs only; absent means MAX_OUTPUT_TOKENS, so `shipped` and its cache key don't change
 };
 

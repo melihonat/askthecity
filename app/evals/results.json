@@ -243,5 +243,6 @@
   "total": 34,
   "contradictionsMissed": 1
  },
+ "fixNote": null,
  "underTable": "Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; on the first full run a human grader, blind to its verdicts, agreed with it on 32 of 34 facts (94%), and marked 1 fact contradicted that the judge passed, which the ship bar's contradicted check doesn't see. Cite precision counts a cited definition the app attached as correct; that rule was added after the first full run, when the citations outside gold turned out to be mostly definitions written after the gold was (0.69 → 0.78 for shipped), and applies to every row."
 }
