@@ -120,6 +120,33 @@ def test_an_unjudged_run_says_so(tmp_path, monkeypatch):
     assert "Not judged" in (out / "report.md").read_text(encoding="utf-8")
 
 
+@pytest.mark.parametrize("balance, rung, ok", [
+    (3.30, "shipped", True),        # 72 calls × $0.0011 ≈ $0.08 → $3.22 left
+    (3.05, "shipped", False),       # $2.97 left
+    (3.50, "side-sonnet", False),   # 72 × $0.012 ≈ $0.86 → $2.64 left
+])
+def test_preflight_blocks_a_run_that_would_leave_under_3_dollars(monkeypatch, balance, rung, ok):
+    monkeypatch.setattr(harness, "_gateway_get", lambda path, key, params=None: {"balance": str(balance)})
+    if ok:
+        assert harness.preflight(72, "key", rung)["balance_usd"] == balance
+    else:
+        with pytest.raises(SystemExit, match="Top up first"):
+            harness.preflight(72, "key", rung)
+
+
+def test_earlier_rungs_output_doesnt_make_the_tree_dirty(tmp_path, monkeypatch):
+    import subprocess
+    git = lambda *a: subprocess.run(["git", *a], cwd=tmp_path, check=True, capture_output=True)  # noqa: E731
+    git("init", "-q")
+    git("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "x")
+    monkeypatch.setattr(harness, "ROOT", tmp_path)
+    (tmp_path / "evals" / "runs" / "2026-11-02-dense").mkdir(parents=True)
+    (tmp_path / "evals" / "runs" / "2026-11-02-dense" / "run.json").write_text("{}")
+    assert harness.git_state()["dirty"] is False
+    (tmp_path / "evals" / "harness.py").write_text("")
+    assert harness.git_state()["dirty"] is True
+
+
 def test_strips_passage_bodies_but_keeps_ids_labels_and_hrefs():
     c = call(FakeTransport(), "q?", "shipped")
     stripped = strip_bodies(c)

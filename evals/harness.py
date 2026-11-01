@@ -113,8 +113,11 @@ def strip_bodies(c: dict) -> dict:
 # ── the world outside: git, the database, the Gateway ─────────────────────────────────────────
 
 def git_state() -> dict:
+    """HEAD and whether the tree differs from it. Earlier rungs' output under evals/runs/ doesn't count:
+    a ladder runs in one sitting and commits its runs together afterwards."""
     sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, cwd=ROOT, check=True).stdout.strip()
-    dirty = bool(subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=ROOT, check=True).stdout.strip())
+    dirty = bool(subprocess.run(["git", "status", "--porcelain", "--", ".", ":(exclude)evals/runs"],
+                                capture_output=True, text=True, cwd=ROOT, check=True).stdout.strip())
     return {"sha": sha, "dirty": dirty}
 
 
