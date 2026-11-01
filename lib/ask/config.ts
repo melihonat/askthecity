@@ -12,10 +12,9 @@ export const MAX_QUESTION = 300; // characters; longer is the `too_long` limit
 
 export const RERANK_MODEL = "voyage/rerank-3";
 
-// Provisional and permissive: catches clearly off-corpus questions only. Calibrated from the
-// dev split later (EVALS.md, "Refusal threshold"); it is part of the answer-cache key.
-// A first probe: off-topic questions ~0.28-0.30, the lowest dev answer question 0.45.
-export const REFUSAL_THRESHOLD = 0.35;
+// Permissive: catches clearly off-corpus questions only. Set by `python -m evals calibrate` from
+// a dev run, never by hand (EVALS.md, "Refusal threshold"); it is part of the answer-cache key.
+export const REFUSAL_THRESHOLD = 0.359;
 
 const MODEL = "anthropic/claude-haiku-5.5";
 
