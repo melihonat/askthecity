@@ -62,6 +62,7 @@ export type RungConfig = {
   companions: boolean;
   model: string; // pinned id, never an alias
   prompt: "default" | "quoted";
+  maxOutputTokens?: number; // side rungs only; absent means MAX_OUTPUT_TOKENS, so `shipped` and its cache key don't change
 };
 
 /** The chunk fields a passage is built from. */

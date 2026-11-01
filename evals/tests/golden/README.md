@@ -23,7 +23,7 @@ Hand-written text between.
 | `rerank`<br><sub>A reranker scores every passage against the question; if none scores high enough, it refuses before the model writes anything.</sub> | **6.7 / 7** | 1 / 17 | 0.94 | ≈ 0.81 | 0.70 | 2.1 s |
 | **`shipped`** ✓ ship bar<br><sub>Brings in the by-laws that amended a cited section after the Code was last consolidated.</sub> | **7 / 7** | **0 / 17** | 0.94 | **0.93** | **0.88** | 2.3 s |
 
-Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; on the first full run it agreed with my hand grading on 47 of 52 facts (90%).
+Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; on the first full run it agreed with my hand grading on 47 of 52 facts (90%). Cite precision counts a cited definition the app attached as correct; that rule was added after the first full run, when the citations outside gold turned out to be mostly definitions written after the gold was (0.69 → 0.78 for shipped), and applies to every row.
 
 Alternatives tried against `shipped`, one change each.
 

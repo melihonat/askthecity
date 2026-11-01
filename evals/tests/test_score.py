@@ -186,3 +186,18 @@ def test_any_contradicted_fact_zeroes_answer_correct():
     assert c["spread"] == pytest.approx(0.25)
     assert c["contradicted"] == 1
     assert result["contradicted"] == [{"id": "q1", "run": 2, "fact": 2, "span": ""}]
+
+
+def test_citing_a_definition_companion_is_acceptable_but_satisfies_nothing():
+    # q2 run 2 cites its gold § plus two companions: a definition (acceptable) and an amending by-law
+    # that defines nothing (outside gold). Precision 2/3; cite full still needs the gold § itself.
+    response = answer("Drones need a permit in every City park [1][6][7].", "tmc:608-19:A", "tmc:608-1:drone", "bl:9-2026:cl1")
+    response["passages"] = [{"chunkId": "tmc:608-19:A", "companion": False, "defines": []},
+                            {"chunkId": "tmc:608-1:drone", "companion": True, "defines": ["DRONE"]},
+                            {"chunkId": "bl:9-2026:cl1", "companion": True, "defines": []}]
+    data = {**RUN_DATA, "q2": [RUN_DATA["q2"][0], {**RUN_DATA["q2"][1], "response": response}, RUN_DATA["q2"][2]]}
+    result = score(data, GOLD, SNAPSHOT)
+    assert col(result, "cite_precision")["per_run"][1]["value"] == pytest.approx((0.5 + 2 / 3) / 2)
+    assert col(result, "cite_full")["per_run"][1]["value"] == 0.5
+    assert {"id": "q2", "run": 2, "chunkId": "bl:9-2026:cl1"} in result["off_gold"]
+    assert all(o["chunkId"] != "tmc:608-1:drone" for o in result["off_gold"])

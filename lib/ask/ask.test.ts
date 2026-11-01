@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { type AskDeps, ask, toPassage } from "./ask";
-import { REFUSAL_THRESHOLD, RUNGS } from "./config";
+import { MAX_OUTPUT_TOKENS, REFUSAL_THRESHOLD, RUNGS } from "./config";
 import { GLOBAL_DAILY, IP_DAILY } from "./guardrails";
 import { cacheKey } from "./cache";
 import { PROMPTS } from "./prompt";
@@ -422,8 +422,22 @@ describe("ask", () => {
       expect(debug?.quotes).toBeNull();
     });
 
-    it("side-sonnet changes only the generator", () => {
-      expect(RUNGS["side-sonnet"]).toEqual({ ...RUNGS.shipped, model: "anthropic/claude-sonnet-5.5" });
+    it("side-sonnet changes only the generator, with room for the thinking it can't turn off", () => {
+      expect(RUNGS["side-sonnet"]).toEqual({ ...RUNGS.shipped, model: "anthropic/claude-sonnet-5.5", maxOutputTokens: 1600 });
+    });
+
+    it.each([
+      ["shipped", MAX_OUTPUT_TOKENS],
+      ["side-sonnet", 1600],
+      ["side-quoted", 1200],
+    ] as const)("%s generates with an output cap of %i tokens", async (rung, cap) => {
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
+      await run(deps, rung);
+      expect(deps.generate.mock.calls[0][0].maxOutputTokens).toBe(cap);
+    });
+
+    it("leaves the shipped preset without a cap field, so the public cache key is unchanged", () => {
+      expect(RUNGS.shipped).not.toHaveProperty("maxOutputTokens");
     });
 
     it("side-quoted asks for quotes and keeps them in debug, out of the response", async () => {

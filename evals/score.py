@@ -59,6 +59,18 @@ def _in_gold(chunk_id: str, q: dict) -> bool:
     return any(matches(p, chunk_id) for g in q["required"] for p in g) or any(matches(p, chunk_id) for p in q.get("acceptable") or [])
 
 
+def _definitions(response: dict) -> set[str]:
+    """Definition companions the app attached to this answer: a citation of one is acceptable."""
+    return {p["chunkId"] for p in response.get("passages") or [] if p.get("companion") and p.get("defines")}
+
+
+def _acceptable(chunk_id: str, q: dict, response: dict) -> bool:
+    """In `required` or `acceptable`, or a definition companion of this answer (EVALS.md, "Columns"). Gold
+    was written before definition companions existed; citing the definition of a term the answer uses
+    isn't a wrong citation. Satisfies no required group."""
+    return _in_gold(chunk_id, q) or chunk_id in _definitions(response)
+
+
 def _generation_columns(gold: list[dict], calls: dict[str, dict], scored: set[str]) -> dict[str, dict]:
     """The columns that vary with generation, for one run. `calls` maps question id → that run's call."""
     answer_qs = [q for q in gold if q["expect"] == "answer"]
@@ -68,7 +80,7 @@ def _generation_columns(gold: list[dict], calls: dict[str, dict], scored: set[st
     precision, full = [], []
     for q in answered:
         cited = _cited(calls[q["id"]]["response"])
-        precision.append(sum(_in_gold(c, q) for c in cited) / len(cited))
+        precision.append(sum(_acceptable(c, q, calls[q["id"]]["response"]) for c in cited) / len(cited))
         full.append(float(all(satisfies(g, cited) for g in q["required"])))
 
     cover = []
@@ -210,7 +222,7 @@ def _off_gold(gold: list[dict], run_data: dict, scored: set[str]) -> list[dict]:
             continue
         for run, call in enumerate(run_data[q["id"]], 1):
             if call["response"]["kind"] == "answer":
-                out += [{"id": q["id"], "run": run, "chunkId": c} for c in _cited(call["response"]) if not _in_gold(c, q)]
+                out += [{"id": q["id"], "run": run, "chunkId": c} for c in _cited(call["response"]) if not _acceptable(c, q, call["response"])]
     return out
 
 
