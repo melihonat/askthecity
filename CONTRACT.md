@@ -150,6 +150,7 @@ type DebugEvent = {
   threshold: number;
   gateBypassed: boolean;   // a pin fired, so the threshold was not applied
   declineText: string | null; // the model's text on decision = "decline"; never public
+  quotes: { n: number; sentence: string }[] | null; // side-quoted's sentence per citation; never public
   timings: { retrieval_ms: number; rerank_ms: number; generation_ms: number | null; total_ms: number };
   rung: Rung;
   config: RungConfig;      // resolved from the rung

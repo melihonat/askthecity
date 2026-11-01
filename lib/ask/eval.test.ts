@@ -15,6 +15,13 @@ describe("resolveEval", () => {
     expect(resolveEval(h, { rung: "dense" }, SECRET)).toEqual({ eval: true, rung: "dense", tags: ["eval:2026-10-30-dense-dev-1405"] });
   });
 
+  it("selects a side rung only under the eval header", () => {
+    for (const rung of ["side-sonnet", "side-quoted"]) {
+      expect(resolveEval(headers({ [EVAL_HEADER]: SECRET }), { rung }, SECRET)).toMatchObject({ eval: true, rung });
+      expect(resolveEval(headers(), { rung }, SECRET)).toMatchObject({ eval: false, rung: "shipped" });
+    }
+  });
+
   it("defaults to shipped under the eval header, and rejects an unknown rung", () => {
     const h = headers({ [EVAL_HEADER]: SECRET });
     expect(resolveEval(h, {}, SECRET)).toEqual({ eval: true, rung: "shipped", tags: [] });

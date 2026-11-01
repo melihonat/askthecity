@@ -51,6 +51,10 @@ const modelOutput = z.object({
   cited: z.array(z.number().int()),
 });
 
+const quotedOutput = modelOutput.extend({
+  quotes: z.array(z.object({ n: z.number().int(), sentence: z.string() })),
+});
+
 /**
  * The app's dependencies. `tags` go on every AI Gateway call (embed, rerank, generate), so an
  * eval run's spend can be read back from its `eval:<run-id>` tag.
@@ -99,13 +103,14 @@ export function createDeps(tags: string[] = []): AskDeps {
       return scores;
     },
 
-    async generate({ model, system, prompt }) {
+    async generate({ model, system, prompt, quotes }) {
       const { output } = await generateText({
         model,
         system,
         prompt,
-        maxOutputTokens: MAX_OUTPUT_TOKENS,
-        output: Output.object({ schema: modelOutput }),
+        // the quotes get their own room, so quoting can't cut the answer short
+        maxOutputTokens: quotes ? 2 * MAX_OUTPUT_TOKENS : MAX_OUTPUT_TOKENS,
+        output: Output.object({ schema: quotes ? quotedOutput : modelOutput }),
         // adaptive thinking would spend the whole output cap before the answer
         providerOptions: { ...gateway, anthropic: { thinking: { type: "disabled" } } },
       });
