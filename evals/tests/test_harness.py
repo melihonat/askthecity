@@ -161,3 +161,10 @@ def test_run_dir_names_a_second_run_on_the_same_day_by_suffix():
     assert harness.run_dir("shipped", "test", "2026-11-01").name == "2026-11-01-shipped"
     assert harness.run_dir("shipped", "dev", "2026-11-01").name == "2026-11-01-shipped-dev"
     assert harness.run_dir("shipped", "dev", "2026-11-01", "2").name == "2026-11-01-shipped-dev-2"
+
+
+def test_run_dir_refuses_a_suffix_that_names_another_rung():
+    # `shipped --suffix 2` wrote `2026-11-01-shipped-2`, the `shipped-2` rung's directory
+    with pytest.raises(SystemExit, match="shipped-2"):
+        harness.run_dir("shipped", "test", "2026-11-01", "2")
+    assert harness.run_dir("shipped", "test", "2026-11-01", "b").name == "2026-11-01-shipped-b"

@@ -151,6 +151,14 @@ def test_the_ship_bar_and_highlight_move_to_the_last_fix_rung(fixed):
     assert "`shipped`: misses: cite precision under 0.9." in md and "`shipped-2`: passes." in md
 
 
+def test_the_headline_shows_a_fix_rung_only_once_it_passes(fixed):
+    """The public app switches to a fix only when it passes, so the README's first screen does too."""
+    assert "| **shipped-2** |" in readme(README_IN, fixed, page_data(fixed))
+    missed = [_run(r, cite_precision=0.85) if r["header"]["rung"] == "shipped-2" else r for r in fixed]
+    out = readme(README_IN, missed, page_data(missed))
+    assert "| **shipped** | **7 / 7** | **0.80** |" in out and "**shipped-2**" not in out.split("headline:end")[0]
+
+
 def test_a_fix_pair_on_its_own_sha_is_not_a_sha_warning(fixed, records):
     md = results_md(fixed, page_data(fixed))
     assert "more than one git SHA" not in md

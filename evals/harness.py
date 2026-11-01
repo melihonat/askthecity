@@ -28,6 +28,9 @@ RUNS_DIR = ROOT / "evals" / "runs"
 
 EVAL_HEADER = "x-eval-key"       # lib/ask/eval.ts
 EVAL_RUN_HEADER = "x-eval-run"
+# lib/ask/config.ts RUNGS; `shipped-3` is the last fix rung LADDER.md allows, so no suffix may name it either
+RUNGS = ["dense", "hybrid", "rerank", "shipped", "shipped-2", "side-sonnet", "side-quoted"]
+RESERVED = set(RUNGS) | {"shipped-3"}
 GATEWAY = "https://ai-gateway.vercel.sh"
 COST_PER_CALL = 0.0011           # an answered Haiku question, STACK.md; refusals cost less
 # Sonnet 5.5 is 20× Haiku 5.5's per-token price: generation ≈ $0.011 plus the same rerank
@@ -199,6 +202,8 @@ def header(*, run_id: str, rung: str, split: str, base_url: str, data: dict, git
 
 def run_dir(rung: str, split: str, day: str, suffix: str = "") -> Path:
     """`<date>-<rung>[-dev][-<suffix>]`; the suffix names a second run of a rung on the same day."""
+    if split == "test" and suffix and f"{rung}-{suffix}" in RESERVED:
+        raise SystemExit(f"--suffix {suffix} would name the `{rung}-{suffix}` rung's directory; pick another suffix")
     return RUNS_DIR / (f"{day}-{rung}" + ("" if split == "test" else f"-{split}") + (f"-{suffix}" if suffix else ""))
 
 

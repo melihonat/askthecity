@@ -101,6 +101,13 @@ def final_shipped(records: list[dict]) -> dict | None:
     return pairs[-1][0] if pairs else select(records).get("shipped")
 
 
+def public(records: list[dict]) -> dict | None:
+    """What the public app serves: the last fix rung that passed the bar (it is switched on only then), else
+    the ladder's `shipped`."""
+    passed = [fix for fix, _ in fixes(records) if not ship_bar(fix["scores"]["columns"])]
+    return passed[-1] if passed else select(records).get("shipped")
+
+
 def ship_bar(cols: dict) -> list[str]:
     """The checks `shipped` misses (evals/LADDER.md, "Ship bar"); empty means it passes. The
     contradicted check needs the judge's `answer_correct.contradicted` count; unjudged never passes."""
@@ -185,7 +192,8 @@ def page_data(records: list[dict], agreement: dict | None = None) -> dict:
         fix_recs.append(fix)
         fix_rows.append(row(fix, rerun, rerun is None))
 
-    trick = cols(final)["refusal_recall"] if final else None
+    live = public(records)
+    trick = cols(live)["refusal_recall"] if live else None
     counts = cols(shipped or (ladder + side)[0]) if (ladder or side) else None
     data = {
         "intro": counts and {"questions": counts["refusal_recall"]["n"] + counts["false_refusals"]["n"],
@@ -240,8 +248,8 @@ def _md_table(data: dict, rows: list[dict]) -> list[str]:
 
 
 def headline_block(records: list[dict], data: dict) -> str:
-    """Vector search only (`dense`) against `shipped`, for the README's first screen."""
-    runs, final = select(records), final_shipped(records)
+    """Vector search only (`dense`) against what the public app serves, for the README's first screen."""
+    runs, final = select(records), public(records)
     pick = [("vector search only", runs.get("dense"), False), (final["header"]["rung"] if final else "shipped", final, True)]
     lines = [HEADLINE_START, "| | refuses trick questions | cite precision | answer correct |", "| --- | --- | --- | --- |"]
     for label, rec, bold in pick:

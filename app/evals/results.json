@@ -164,6 +164,70 @@
      "mark": "same"
     }
    ]
+  },
+  {
+   "rung": "shipped",
+   "why": "The same shipped stack re-run on a0e67b2, beside the fix below it: the fix is compared against this row.",
+   "highlight": false,
+   "run": "2026-11-01-shipped-2-162450",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "0 / 17",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "0.79",
+     "mark": null
+    },
+    {
+     "text": "0.87",
+     "mark": null
+    },
+    {
+     "text": "2.2 s",
+     "mark": null
+    }
+   ]
+  },
+  {
+   "rung": "shipped-2",
+   "why": "Fix: the prompt cites only the passage that states each sentence, and leads with the rule in force when a by-law changed a section.",
+   "highlight": false,
+   "run": "2026-11-01-shipped-2-fix-162935",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "0 / 17",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "0.85",
+     "mark": "gain"
+    },
+    {
+     "text": "0.90",
+     "mark": "same"
+    },
+    {
+     "text": "2.0 s",
+     "mark": "same"
+    }
+   ]
   }
  ],
  "side": [
@@ -233,9 +297,10 @@
   }
  ],
  "shipBar": {
-  "rung": "shipped",
+  "rung": "shipped-2",
   "unmet": [
-   "cite precision under 0.9"
+   "cite precision under 0.9",
+   "a contradicted key fact"
   ]
  },
  "agreement": {
@@ -243,6 +308,6 @@
   "total": 34,
   "contradictionsMissed": 1
  },
- "fixNote": null,
+ "fixNote": "The rows below the first shipped row were added after it missed the ship bar. A fix runs on its own later commit, with shipped re-run beside it on that commit, and is compared against that re-run. The rows above are left as they were.",
  "underTable": "Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; on the first full run a human grader, blind to its verdicts, agreed with it on 32 of 34 facts (94%), and marked 1 fact contradicted that the judge passed, which the ship bar's contradicted check doesn't see. Cite precision counts a cited definition the app attached as correct; that rule was added after the first full run, when the citations outside gold turned out to be mostly definitions written after the gold was (0.69 → 0.78 for shipped), and applies to every row."
 }
