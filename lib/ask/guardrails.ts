@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { MAX_QUESTION } from "./config";
 import type { LimitKind, Usage } from "./types";
 
@@ -28,6 +28,14 @@ export function checkInput(question: string): "ok" | "too_long" {
 /** Keyed hash of the client IP: `usage_daily` never holds the IP itself. */
 export function ipHash(ip: string, salt: string): string {
   return createHmac("sha256", salt).update(ip).digest("hex");
+}
+
+const digest = (s: string) => createHash("sha256").update(s).digest();
+
+/** Constant-time compare of a header against a secret; no secret configured means no access. */
+export function matchesSecret(header: string | null, secret: string | undefined): boolean {
+  if (!secret || !header) return false;
+  return timingSafeEqual(digest(header), digest(secret));
 }
 
 export function usageLimit(usage: Usage): "ip_daily" | "global_daily" | null {

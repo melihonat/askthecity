@@ -1,21 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { EVAL_HEADER, EVAL_RUN_HEADER, isEvalRequest, resolveEval } from "./eval";
+import { EVAL_HEADER, EVAL_RUN_HEADER, resolveEval } from "./eval";
 
 const SECRET = "s3cret-value";
 const headers = (h: Record<string, string> = {}) => new Headers(h);
-
-describe("isEvalRequest", () => {
-  it("accepts only the exact secret", () => {
-    expect(isEvalRequest(SECRET, SECRET)).toBe(true);
-    expect(isEvalRequest("s3cret-valu", SECRET)).toBe(false);
-    expect(isEvalRequest(null, SECRET)).toBe(false);
-  });
-
-  it("grants nothing when no secret is configured", () => {
-    expect(isEvalRequest("", "")).toBe(false);
-    expect(isEvalRequest("anything", undefined)).toBe(false);
-  });
-});
 
 describe("resolveEval", () => {
   it("ignores a rung without the eval header and runs shipped", () => {

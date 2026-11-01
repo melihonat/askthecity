@@ -62,3 +62,11 @@ Vercel deploys `main` on push (Production) and every branch (Preview). For a pro
    Needed after any deploy that changes the cache key (model, prompt, threshold, `shipped`
    preset) and after a re-ingestion (new snapshot id); harmless otherwise, since a warm chip
    is a free hit.
+
+## Keep-alive and health
+
+- `vercel.json` schedules `/api/keepalive` at 06:00 and 18:00 UTC; it searches with the stored
+  embedding in `app/api/keepalive/query.json`. Re-make that file (`npm run keepalive-query`,
+  one Gateway embed call) only if the embedding model or dimension changes.
+- `.github/workflows/health.yml` calls `/api/health` daily at 12:00 UTC; run it by hand from
+  Actions to check. GitHub disables it after 60 days without a commit: re-enable it in Actions.

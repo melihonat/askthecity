@@ -1,5 +1,5 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import { isRung } from "./config";
+import { matchesSecret } from "./guardrails";
 import type { Rung } from "./types";
 
 // The eval header (GUARDRAILS.md, "The eval header"): only the harness sends it. It unlocks the
@@ -10,14 +10,6 @@ export const EVAL_RUN_HEADER = "x-eval-run";
 
 const RUN_ID = /^[\w.-]{1,64}$/;
 
-const digest = (s: string) => createHash("sha256").update(s).digest();
-
-/** Constant-time compare of the header against the secret; no secret configured means no eval access. */
-export function isEvalRequest(header: string | null, secret: string | undefined): boolean {
-  if (!secret || !header) return false;
-  return timingSafeEqual(digest(header), digest(secret));
-}
-
 export type EvalRequest = { eval: boolean; rung: Rung; tags: string[] };
 
 /**
@@ -25,7 +17,7 @@ export type EvalRequest = { eval: boolean; rung: Rung; tags: string[] };
  * request is `shipped`; with it, an unknown rung is an error (null), never a silent fallback.
  */
 export function resolveEval(headers: Headers, body: { rung?: unknown }, secret: string | undefined): EvalRequest | null {
-  if (!isEvalRequest(headers.get(EVAL_HEADER), secret)) return { eval: false, rung: "shipped", tags: [] };
+  if (!matchesSecret(headers.get(EVAL_HEADER), secret)) return { eval: false, rung: "shipped", tags: [] };
   const rung = body.rung ?? "shipped";
   if (!isRung(rung)) return null;
   const runId = headers.get(EVAL_RUN_HEADER);
