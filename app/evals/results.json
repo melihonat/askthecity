@@ -1,41 +1,243 @@
 {
- "intro": null,
- "headerLink": "Evals",
+ "intro": {
+  "questions": 24,
+  "refuse": 7
+ },
+ "headerLink": "Evals · 7/7 trick questions refused",
  "columns": [
   {
    "key": "refusal_recall",
    "label": "trick questions refused",
-   "n": "–"
+   "n": "7"
   },
   {
    "key": "false_refusals",
    "label": "false refusals",
-   "n": "–"
+   "n": "17"
   },
   {
    "key": "hit@ctx",
    "label": "hit@ctx",
-   "n": "–"
+   "n": "15"
   },
   {
    "key": "cite_precision",
    "label": "cite precision",
-   "n": "–"
+   "n": "12–15"
   },
   {
    "key": "answer_correct",
    "label": "answer correct",
-   "n": "–"
+   "n": "13–17"
   },
   {
    "key": "total_p50",
    "label": "total p50",
-   "n": "–"
+   "n": "41–51"
   }
  ],
- "ladder": [],
- "side": [],
- "shipBar": null,
+ "ladder": [
+  {
+   "rung": "dense",
+   "why": "Vector search only: embed the question, take the 5 closest passages.",
+   "highlight": false,
+   "run": "2026-11-01-dense-130002",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "2 / 17",
+     "mark": null
+    },
+    {
+     "text": "0.87",
+     "mark": null
+    },
+    {
+     "text": "0.72",
+     "mark": null
+    },
+    {
+     "text": "0.81",
+     "mark": null
+    },
+    {
+     "text": "2.0 s",
+     "mark": null
+    }
+   ]
+  },
+  {
+   "rung": "hybrid",
+   "why": "Adds keyword search and exact section-number matching, so \"591-2.1\" finds § 591-2.1.",
+   "highlight": false,
+   "run": "2026-11-01-hybrid-130354",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "3.3 / 17",
+     "mark": null
+    },
+    {
+     "text": "0.87",
+     "mark": null
+    },
+    {
+     "text": "0.76",
+     "mark": "gain"
+    },
+    {
+     "text": "0.79",
+     "mark": "same"
+    },
+    {
+     "text": "1.8 s",
+     "mark": "gain"
+    }
+   ]
+  },
+  {
+   "rung": "rerank",
+   "why": "A reranker scores every passage against the question; if none scores high enough, it refuses before the model writes anything.",
+   "highlight": false,
+   "run": "2026-11-01-rerank-130730",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "0 / 17",
+     "mark": "gain"
+    },
+    {
+     "text": "1.00",
+     "mark": "gain"
+    },
+    {
+     "text": "0.76",
+     "mark": "same"
+    },
+    {
+     "text": "0.86",
+     "mark": "gain"
+    },
+    {
+     "text": "2.1 s",
+     "mark": null
+    }
+   ]
+  },
+  {
+   "rung": "shipped",
+   "why": "Brings in the by-laws that amended a cited section after the Code was last consolidated.",
+   "highlight": false,
+   "run": "2026-11-01-shipped-131142",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "0 / 17",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "0.80",
+     "mark": "same"
+    },
+    {
+     "text": "0.93",
+     "mark": "gain"
+    },
+    {
+     "text": "2.2 s",
+     "mark": "same"
+    }
+   ]
+  }
+ ],
+ "side": [
+  {
+   "rung": "side-sonnet",
+   "why": "Sonnet 5.5 instead of Haiku 5.5, at ~20× the generation cost.",
+   "highlight": false,
+   "run": "2026-11-01-side-sonnet-131615",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "0 / 17",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "0.71",
+     "mark": null
+    },
+    {
+     "text": "0.96",
+     "mark": "gain"
+    },
+    {
+     "text": "3.1 s",
+     "mark": null
+    }
+   ]
+  },
+  {
+   "rung": "side-quoted",
+   "why": "Asks the model to quote the supporting sentence for every citation — no measurable gain.",
+   "highlight": false,
+   "run": "2026-11-01-side-quoted-132135",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "1 / 17",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "0.81",
+     "mark": "same"
+    },
+    {
+     "text": "0.82",
+     "mark": null
+    },
+    {
+     "text": "2.9 s",
+     "mark": null
+    }
+   ]
+  }
+ ],
+ "shipBar": {
+  "rung": "shipped",
+  "unmet": [
+   "cite precision under 0.9"
+  ]
+ },
  "agreement": null,
- "underTable": "Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; the judge/human audit isn't committed yet."
+ "underTable": "Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; the judge/human audit isn't committed yet. Cite precision counts a cited definition the app attached as correct; that rule was added after the first full run, when the citations outside gold turned out to be mostly definitions written after the gold was (0.69 → 0.78 for shipped), and applies to every row."
 }
