@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkInput, clean, failureLimit, GLOBAL_DAILY, IP_DAILY, ipHash, normalise, usageLimit } from "./guardrails";
+import { checkInput, clean, failureLimit, GLOBAL_DAILY, IP_DAILY, ipHash, matchesSecret, normalise, usageLimit } from "./guardrails";
 
 describe("clean", () => {
   it("turns tab, CR and LF into spaces and strips other control characters", () => {
@@ -36,6 +36,21 @@ describe("ipHash", () => {
     expect(h).not.toBe(ipHash("203.0.113.7", "salt-b"));
     expect(h).not.toBe(ipHash("203.0.113.8", "salt-a"));
     expect(h).toMatch(/^[0-9a-f]{64}$/);
+  });
+});
+
+describe("matchesSecret", () => {
+  const SECRET = "s3cret-value";
+
+  it("accepts only the exact secret", () => {
+    expect(matchesSecret(SECRET, SECRET)).toBe(true);
+    expect(matchesSecret("s3cret-valu", SECRET)).toBe(false);
+    expect(matchesSecret(null, SECRET)).toBe(false);
+  });
+
+  it("grants nothing when no secret is configured", () => {
+    expect(matchesSecret("", "")).toBe(false);
+    expect(matchesSecret("anything", undefined)).toBe(false);
   });
 });
 

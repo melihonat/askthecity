@@ -11,7 +11,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "prewarm": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/prewarm.ts"
+    "prewarm": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/prewarm.ts",
+    "keepalive-query": "node --env-file=.env --experimental-strip-types --no-warnings=ExperimentalWarning scripts/keepalive-query.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

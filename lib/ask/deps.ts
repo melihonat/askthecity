@@ -39,6 +39,12 @@ export function getSnapshot(): Promise<Snapshot> {
 }
 getSnapshot().catch(() => {});
 
+/** A fresh DB round trip for /api/health; getSnapshot() is cached, so it can't see a DB that died since. */
+export async function pingDb(): Promise<void> {
+  const { error } = await db().from("snapshot").select("id").limit(1);
+  if (error) throw new Error(`reading snapshot: ${error.message}`);
+}
+
 const modelOutput = z.object({
   decision: z.enum(["answer", "decline"]),
   text: z.string(),

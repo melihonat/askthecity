@@ -1,0 +1,16 @@
+# Daily DB health check (GUARDRAILS.md, "Keep-alive and failure detection"). A paused or broken
+# DB makes /api/health return 503, the job fails, and GitHub e-mails the owner.
+# GitHub disables scheduled workflows after 60 days without a commit: re-enable it in Actions.
+name: DB health
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: curl --fail-with-body --silent --show-error --retry 2 --retry-all-errors --max-time 30 https://ask-the-city.vercel.app/api/health
