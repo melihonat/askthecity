@@ -1,5 +1,6 @@
 """python -m evals run --rung <rung> [--split dev] — one rung against the deployed /api/ask.
-python -m evals calibrate <dev run dir> — set the refusal threshold from a dev run."""
+python -m evals calibrate <dev run dir> — set the refusal threshold from a dev run.
+python -m evals results — regenerate RESULTS.md, the README's blocks and /evals from the committed runs."""
 from __future__ import annotations
 
 import argparse
@@ -21,7 +22,18 @@ def main() -> None:
     r.add_argument("--skip-preflight", action="store_true", help="don't check the remaining Gateway credit")
     c = sub.add_parser("calibrate", help="threshold from a dev run: rewrite EVALS.md's table and lib/ask/config.ts")
     c.add_argument("run_dir", type=Path, help="e.g. evals/runs/2026-10-31-shipped-dev")
+    sub.add_parser("results", help="from evals/runs: write evals/RESULTS.md, the README's generated blocks and the /evals data")
     args = p.parse_args()
+
+    if args.command == "results":
+        from .results import ResultsError, apply
+        try:
+            data = apply()
+        except ResultsError as e:
+            raise SystemExit(f"can't render results: {e}")
+        print(f"{len(data['ladder'])} ladder and {len(data['side'])} side rungs; {data['headerLink']}; "
+              "wrote evals/RESULTS.md, README.md and app/evals/results.json")
+        return
 
     if args.command == "calibrate":
         from .calibrate import CalibrationError, apply, calibrate
