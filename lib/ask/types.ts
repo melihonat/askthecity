@@ -35,6 +35,7 @@ export type DebugEvent = {
   threshold: number;
   gateBypassed: boolean; // a pin fired, so the threshold was not applied
   declineText: string | null; // the model's text on decision = "decline"; never public
+  quotes: Quote[] | null; // the `quoted` prompt's sentences; never public (CONTRACT.md: no quoted span)
   timings: { retrieval_ms: number; rerank_ms: number; generation_ms: number | null; total_ms: number };
   rung: Rung;
   config: RungConfig; // resolved from the rung
@@ -46,11 +47,14 @@ export type AskEvent =
   | { type: "debug"; debug: DebugEvent }
   | { type: "final"; response: AskResponse };
 
-/** What the generator returns (structured output). */
-export type ModelOutput = { decision: "answer" | "decline"; text: string; cited: number[] };
+/** A cited passage's supporting sentence, from the `quoted` prompt only. */
+export type Quote = { n: number; sentence: string };
+
+/** What the generator returns (structured output); `quotes` only from the `quoted` prompt. */
+export type ModelOutput = { decision: "answer" | "decline"; text: string; cited: number[]; quotes?: Quote[] };
 
 /** Named configurations for the eval table (evals/LADDER.md); only the eval header selects one. */
-export type Rung = "dense" | "hybrid" | "rerank" | "shipped";
+export type Rung = "dense" | "hybrid" | "rerank" | "shipped" | "side-sonnet" | "side-quoted";
 
 export type RungConfig = {
   search: "vector" | "hybrid"; // search_chunks mode arg

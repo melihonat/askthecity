@@ -13,7 +13,7 @@ def main() -> None:
     p = argparse.ArgumentParser(prog="python -m evals")
     sub = p.add_subparsers(dest="command", required=True)
     r = sub.add_parser("run", help="run one rung, write evals/runs/<date>-<rung>[-dev][-<suffix>]/run.json and report.md")
-    r.add_argument("--rung", required=True, choices=["dense", "hybrid", "rerank", "shipped"])
+    r.add_argument("--rung", required=True, choices=["dense", "hybrid", "rerank", "shipped", "side-sonnet", "side-quoted"])
     r.add_argument("--split", default="test", choices=["test", "dev"])
     r.add_argument("--base-url", default="https://ask-the-city.vercel.app", help="the deployment to measure")
     r.add_argument("--runs", type=int, default=3)

@@ -35,7 +35,7 @@ against each other.
 
 | Rung | Change | Question it answers |
 | --- | --- | --- |
-| `side-sonnet` | Generator Sonnet 5, same prompt | Is the bigger model worth ~3–5× the generation cost? |
+| `side-sonnet` | Generator Sonnet 5.5, same prompt | Is the bigger model worth ~20× the generation cost? |
 | `side-quoted` | Prompt and output also ask for the supporting sentence per citation | Does quoting raise cite precision? |
 
 - `side-quoted`'s sentences go to `debug` only, never the public contract (the contract rules spans
@@ -54,7 +54,7 @@ against each other.
   separate key capped in the Anthropic console; judging never spends demo credit.
 - **Tagged.** Every eval call carries Gateway tag `eval:<run-id>`; each rung's real spend is
   read back into its `run.json`.
-- Rough cost of a full ladder: ≈ $1–2 (Haiku rungs ≈ $0.40, `side-sonnet` ≈ $0.20–0.40,
+- Rough cost of a full ladder: ≈ $2–3 (Haiku rungs ≈ $0.40, `side-sonnet` ≈ $0.90,
   judge ≈ $0.50–1.00). A fix rung ≈ $0.25.
 
 ## Ship bar

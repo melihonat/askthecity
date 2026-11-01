@@ -1,11 +1,21 @@
 import { createHash } from "node:crypto";
-import type { PassageView } from "./types";
+import type { PassageView, RungConfig } from "./types";
 
-// The `default` prompt variant. Bump the version on any wording change; the hash is of the
-// templates themselves, so a change that forgets the bump still shows in the eval run record.
-export const PROMPT_VERSION = "default-9";
+type Variant = RungConfig["prompt"];
 
-export function systemPrompt(snapshotDate: string): string {
+// One version per prompt variant. Bump it on any wording change; the hash is of the templates
+// themselves, so a change that forgets the bump still shows in the eval run record. `quoted` is
+// `default` plus one rule, so a change to `default` bumps both.
+const VERSIONS: Record<Variant, string> = { default: "default-9", quoted: "quoted-1" };
+
+// `side-quoted` (evals/LADDER.md): the supporting sentence per citation, for `debug` only.
+const QUOTE_RULE = `- For every number in "cited", add to "quotes" the sentence of that passage that backs your answer, copied word for word.`;
+
+export function systemPrompt(snapshotDate: string, variant: Variant = "default"): string {
+  return variant === "quoted" ? `${defaultPrompt(snapshotDate)}\n${QUOTE_RULE}` : defaultPrompt(snapshotDate);
+}
+
+function defaultPrompt(snapshotDate: string): string {
   return `You answer questions about the City of Toronto's rules and committee decisions using only the numbered passages you are given. The passages are from a snapshot of City documents taken on ${snapshotDate}.
 
 Rules:
@@ -62,9 +72,20 @@ const sample = (p: Partial<PassageView>): PassageView => ({
   ...p,
 });
 
-export const PROMPT_HASH = createHash("sha256")
-  .update(systemPrompt("{snapshot_date}"))
-  .update("\0")
-  .update(userPrompt("{question}", [sample({ amendedSince: ["{n}"], notYetLaw: true }), sample({ defines: ["{term}"] })]))
-  .digest("hex")
-  .slice(0, 12);
+function hash(variant: Variant): string {
+  return createHash("sha256")
+    .update(systemPrompt("{snapshot_date}", variant))
+    .update("\0")
+    .update(userPrompt("{question}", [sample({ amendedSince: ["{n}"], notYetLaw: true }), sample({ defines: ["{term}"] })]))
+    .digest("hex")
+    .slice(0, 12);
+}
+
+export const PROMPTS: Record<Variant, { version: string; hash: string }> = {
+  default: { version: VERSIONS.default, hash: hash("default") },
+  quoted: { version: VERSIONS.quoted, hash: hash("quoted") },
+};
+
+// The public stack's prompt (`shipped`): part of the answer-cache key.
+export const PROMPT_VERSION = PROMPTS.default.version;
+export const PROMPT_HASH = PROMPTS.default.hash;

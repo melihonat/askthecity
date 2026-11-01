@@ -3,6 +3,7 @@ import { type AskDeps, ask, toPassage } from "./ask";
 import { REFUSAL_THRESHOLD, RUNGS } from "./config";
 import { GLOBAL_DAILY, IP_DAILY } from "./guardrails";
 import { cacheKey } from "./cache";
+import { PROMPTS } from "./prompt";
 import type { AskEvent, AskResponse, CompanionRow, DefinitionRow, ModelOutput, Rung, SearchRow } from "./types";
 
 const SCOPE = "Knows the Toronto Municipal Code…";
@@ -397,6 +398,8 @@ describe("ask", () => {
       ["hybrid", "hybrid", false, false],
       ["rerank", "hybrid", true, false],
       ["shipped", "hybrid", true, true],
+      ["side-sonnet", "hybrid", true, true],
+      ["side-quoted", "hybrid", true, true],
     ] as const)("%s: search %s, rerank %s, companions %s", async (rung, search, rerank, companions) => {
       const deps = fakeDeps(amended, lifted, ANSWER, found);
       const { passages, debug } = await run(deps, rung);
@@ -411,11 +414,32 @@ describe("ask", () => {
     it("records what produced the answer in debug", async () => {
       const { debug } = await run(fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER));
       expect(debug?.build).toMatchObject({
-        promptVersion: expect.any(String),
+        promptVersion: PROMPTS.default.version,
         promptHash: expect.stringMatching(/^[0-9a-f]{12}$/),
         embedder: "voyage/voyage-4-large",
         reranker: "voyage/rerank-3",
       });
+      expect(debug?.quotes).toBeNull();
+    });
+
+    it("side-sonnet changes only the generator", () => {
+      expect(RUNGS["side-sonnet"]).toEqual({ ...RUNGS.shipped, model: "anthropic/claude-sonnet-5.5" });
+    });
+
+    it("side-quoted asks for quotes and keeps them in debug, out of the response", async () => {
+      const quotes = [{ n: 1, sentence: "No person shall use a leaf blower." }];
+      const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), { ...ANSWER, quotes });
+      const { final, debug } = await run(deps, "side-quoted");
+      const req = deps.generate.mock.calls[0][0];
+      expect(req.quotes).toBe(true);
+      expect(req.system).toContain('"quotes"');
+      expect(debug).toMatchObject({ quotes, build: { promptVersion: PROMPTS.quoted.version, promptHash: PROMPTS.quoted.hash } });
+      expect(JSON.stringify(final)).not.toContain("quotes");
+    });
+
+    it("gives the quoted prompt its own version and hash", () => {
+      expect(PROMPTS.quoted.version).not.toBe(PROMPTS.default.version);
+      expect(PROMPTS.quoted.hash).not.toBe(PROMPTS.default.hash);
     });
   });
 

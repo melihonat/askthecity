@@ -17,14 +17,18 @@ export const RERANK_MODEL = "voyage/rerank-3";
 export const REFUSAL_THRESHOLD = 0.359;
 
 const MODEL = "anthropic/claude-haiku-5.5";
+const SHIPPED: RungConfig = { search: "hybrid", rerank: true, companions: true, model: MODEL, prompt: "default" };
 
-// The main ladder (evals/LADDER.md): cumulative, one component per rung, ending at `shipped`.
-// A closed set of presets read by the one orchestration path; no free-form knobs.
+// evals/LADDER.md. The main ladder is cumulative, one component per rung, ending at `shipped`;
+// each side rung changes one thing on `shipped`. A closed set of presets read by the one
+// orchestration path; no free-form knobs.
 export const RUNGS: Record<Rung, RungConfig> = {
   dense: { search: "vector", rerank: false, companions: false, model: MODEL, prompt: "default" },
   hybrid: { search: "hybrid", rerank: false, companions: false, model: MODEL, prompt: "default" },
   rerank: { search: "hybrid", rerank: true, companions: false, model: MODEL, prompt: "default" },
-  shipped: { search: "hybrid", rerank: true, companions: true, model: MODEL, prompt: "default" },
+  shipped: SHIPPED,
+  "side-sonnet": { ...SHIPPED, model: "anthropic/claude-sonnet-5.5" },
+  "side-quoted": { ...SHIPPED, prompt: "quoted" },
 };
 
 export function isRung(value: unknown): value is Rung {

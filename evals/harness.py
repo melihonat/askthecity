@@ -29,6 +29,8 @@ EVAL_HEADER = "x-eval-key"       # lib/ask/eval.ts
 EVAL_RUN_HEADER = "x-eval-run"
 GATEWAY = "https://ai-gateway.vercel.sh"
 COST_PER_CALL = 0.0011           # an answered Haiku question, STACK.md; refusals cost less
+# Sonnet 5.5 is 20× Haiku 5.5's per-token price: generation ≈ $0.011 plus the same rerank
+RUNG_COST_PER_CALL = {"side-sonnet": 0.012}
 RESERVE_USD = 3.0                # left for the public demo (evals/LADDER.md, "Spend preflight")
 TIMEOUT_S = 60
 
@@ -129,10 +131,10 @@ def _gateway_get(path: str, key: str, params: dict | None = None) -> dict:
     return r.json()
 
 
-def preflight(calls: int, key: str) -> dict:
+def preflight(calls: int, key: str, rung: str = "shipped") -> dict:
     """Refuses to start unless RESERVE_USD of Gateway credit would remain for the public demo."""
     balance = float(_gateway_get("/v1/credits", key)["balance"])
-    estimate = round(calls * COST_PER_CALL, 4)
+    estimate = round(calls * RUNG_COST_PER_CALL.get(rung, COST_PER_CALL), 4)
     if balance - estimate < RESERVE_USD:
         raise SystemExit(f"preflight: ${balance:.2f} credit, run ≈ ${estimate:.2f}; under ${RESERVE_USD:.0f} would remain. Top up first.")
     return {"balance_usd": balance, "estimate_usd": estimate}
@@ -195,7 +197,7 @@ def run(rung: str, split: str, base_url: str, secret: str, gateway_key: str, run
 
     git = git_state()
     snapshot, chunk_ids = read_snapshot()
-    pre = None if skip_preflight else preflight(len(gold) * runs + 1, gateway_key)
+    pre = None if skip_preflight else preflight(len(gold) * runs + 1, gateway_key, rung)
     started = utc_day()  # Gateway reports by UTC day
     print(f"{run_id}: {len(gold)} {split} questions × {runs} runs on `{rung}` against {base_url}")
 

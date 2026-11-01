@@ -1,7 +1,7 @@
 import { cacheKey } from "./cache";
 import { CONTEXT_PASSAGES, EMBEDDING, MAX_COMPANIONS, REFUSAL_THRESHOLD, RERANK_MODEL, RUNGS } from "./config";
 import { failureLimit, IP_DAILY, usageLimit } from "./guardrails";
-import { PROMPT_HASH, PROMPT_VERSION, systemPrompt, userPrompt } from "./prompt";
+import { PROMPTS, systemPrompt, userPrompt } from "./prompt";
 import type {
   AskEvent,
   AskResponse,
@@ -29,7 +29,8 @@ export type AskDeps = {
   definitions(documents: string[]): Promise<DefinitionRow[]>;
   /** One relevance score per document, in input order. */
   rerank(question: string, documents: string[]): Promise<number[]>;
-  generate(req: { model: string; system: string; prompt: string }): Promise<ModelOutput>;
+  /** `quotes` asks the structured output for a supporting sentence per citation too. */
+  generate(req: { model: string; system: string; prompt: string; quotes: boolean }): Promise<ModelOutput>;
   /**
    * Counts one paid question against the IP's day and, while the IP is under `ipLimit`, the
    * global day. Returns the counts from before it.
@@ -208,13 +209,14 @@ async function* run(question: string, rung: Rung, deps: AskDeps, opts: AskOption
   const pinned = rows.filter((r) => r.pinned).map((r) => r.id);
   const gateScore = config.rerank ? Math.max(0, ...(scores ?? [])) : null;
   const gateBypassed = pinned.length > 0;
-  const debug = (declineText: string | null, generation_ms: number | null): DebugEvent => ({
+  const debug = (output: ModelOutput | null, generation_ms: number | null): DebugEvent => ({
     candidates: rows.map((r, i) => ({ chunkId: r.id, rrfRank: r.rank, rerankScore: scores?.[i] ?? null })),
     pinned,
     gateScore,
     threshold: REFUSAL_THRESHOLD,
     gateBypassed,
-    declineText,
+    declineText: output?.decision === "decline" ? output.text : null,
+    quotes: output?.quotes ?? null,
     timings: {
       retrieval_ms: Math.round(t1 - t0),
       rerank_ms: Math.round(t2 - t1),
@@ -225,8 +227,8 @@ async function* run(question: string, rung: Rung, deps: AskDeps, opts: AskOption
     config,
     build: {
       sha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
-      promptVersion: PROMPT_VERSION,
-      promptHash: PROMPT_HASH,
+      promptVersion: PROMPTS[config.prompt].version,
+      promptHash: PROMPTS[config.prompt].hash,
       embedder: EMBEDDING.gatewayModel,
       reranker: RERANK_MODEL,
     },
@@ -248,13 +250,14 @@ async function* run(question: string, rung: Rung, deps: AskDeps, opts: AskOption
   const t3 = performance.now();
   const output = await deps.generate({
     model: config.model,
-    system: systemPrompt(snapshot.snapshot_date),
+    system: systemPrompt(snapshot.snapshot_date, config.prompt),
     prompt: userPrompt(question, passages),
+    quotes: config.prompt === "quoted",
   });
   const generation_ms = Math.round(performance.now() - t3);
   const response = validate(output, passages, snapshot.scope_sentence);
 
-  if (opts.debug) yield { type: "debug", debug: debug(output.decision === "decline" ? output.text : null, generation_ms) };
+  if (opts.debug) yield { type: "debug", debug: debug(output, generation_ms) };
   if (key) await store(deps, key, response);
   yield { type: "final", response };
 }
