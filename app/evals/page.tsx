@@ -75,6 +75,12 @@ export default function EvalsPage() {
           <>
             <Table rows={EVALS.ladder} caption="Main ladder" />
             {EVALS.fixNote && <p>{EVALS.fixNote}</p>}
+            {EVALS.audited.length > 0 && (
+              <>
+                <p>{EVALS.auditNote}</p>
+                <Table rows={EVALS.audited} caption="After the gold audit" />
+              </>
+            )}
             <p className="muted">{EVALS.underTable}</p>
           </>
         )}

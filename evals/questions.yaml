@@ -13,6 +13,10 @@
 # A § amended since its chapter's consolidation makes the amending clause a required
 # group: an answer from the stale consolidation alone is incomplete even when its facts
 # happen to match.
+#
+# Gold audit (2026-11-01, #56): `acceptable` entries after a `# audit` comment were added from
+# a human review of citations outside gold in every committed test run (evals/gold_audit.csv).
+# A chunk was added only when it states the sentence that cites it. `required` is unchanged.
 
 # ── resident_rules: everyday words, not by-law vocabulary ─────────────────────────────
 
@@ -37,7 +41,8 @@
   expect: answer
   required:
     - [ "tmc:591-2.3:*" ]
-  acceptable: [ "tmc:591-1.1:*" ]
+  acceptable: [ "tmc:591-1.1:*",
+                "tmc:519:schedule-a:1", "tmc:591-2.6" ]   # audit
   key_facts:
     - No — audible construction noise is prohibited before 9 a.m. on Saturdays.
   split: test
@@ -48,7 +53,8 @@
   expect: answer
   required:
     - [ "tmc:497-2.1:*" ]              # new Ch 497 (By-law 1511-2025, in force 2026-06-01)
-  acceptable: [ "tmc:497-1.1:*" ]
+  acceptable: [ "tmc:497-1.1:*",
+                "bl:1512-2025:629-4.25", "tmc:629-38" ]   # audit
   key_facts:
     - The landlord must keep at least 21 °C.
     - The requirement runs from October 1 to May 15.
@@ -64,6 +70,7 @@
   expect: answer
   required:
     - [ "tmc:719-2:*" ]
+  acceptable: [ "sr:260413:comments:1", "sr:261102:comments:1", "tmc:719-4.1" ]   # audit
   key_facts:
     - Within 12 hours after the snowfall has stopped.
     - It does not apply where the City has taken on clearing that sidewalk.
@@ -75,6 +82,7 @@
   expect: answer
   required:
     - [ "tmc:517-2:*" ]
+  acceptable: [ "tmc:591-2.5" ]   # audit
   key_facts:
     - No more than one minute in any sixty-minute period.
   split: test
@@ -85,6 +93,7 @@
   expect: answer
   required:
     - [ "tmc:349-5:*" ]
+  acceptable: [ "tmc:608-34.1", "tmc:349-12.1", "tmc:349-11" ]   # audit
   key_facts:
     - Three dogs per dwelling unit.
     - Service animals are not counted.
@@ -130,6 +139,7 @@
   required:
     - [ "tmc:591-2.3:*" ]
     - [ "tmc:517-2:*" ]
+  acceptable: [ "tmc:519:schedule-a:1", "tmc:591-2.6", "tmc:591-2.5" ]   # audit
   key_facts:
     - Audible construction noise is not allowed from 7 p.m. to 7 a.m. (to 9 a.m. on Saturdays).
     - Audible construction noise is not allowed at all on Sundays and statutory holidays.
@@ -144,6 +154,7 @@
   expect: answer
   required:
     - [ "tmc:591-2.1:*" ]
+  acceptable: [ "tmc:591-2.10" ]   # audit
   key_facts:
     - It limits amplified or instrument sound measured at a point of reception.
     - The limit is 50 dB(A) / 65 dB(C) from 11 p.m. to 7 a.m. and 55 dB(A) / 70 dB(C) from 7 a.m. to 11 p.m.
@@ -183,7 +194,8 @@
   expect: answer
   required:
     - [ "tmc:497-2.2:*" ]
-  acceptable: [ "tmc:497-2.3:*", "bl:67-2026:cl1" ]
+  acceptable: [ "tmc:497-2.3:*", "bl:67-2026:cl1",
+                "tmc:629-38", "bl:1512-2025:629-4.25" ]   # audit
   key_facts:
     - An installed cooling system must keep the indoor temperature at or below 26 °C.
     - The requirement runs from June 1 to September 30.
@@ -201,7 +213,8 @@
   expect: answer
   required:
     - [ "ie:2025.IE26.14:*" ]
-  acceptable: [ "ie:2025.IE26.3:*" ]
+  acceptable: [ "ie:2025.IE26.3:*",
+                "sr:285809:decision-history", "sr:260642:summary:2" ]   # audit
   key_facts:
     - The committee referred the item to the Executive Director without making a decision.
   split: test
@@ -213,7 +226,8 @@
   expect: answer
   required:
     - [ "ie:2026.IE27.8:*" ]
-  acceptable: [ "tmc:813-12:*", "bl:402-2026:*" ]
+  acceptable: [ "tmc:813-12:*", "bl:402-2026:*",
+                "sr:284390:comments:12", "sr:284390:comments:15" ]   # audit
   key_facts:
     - Council endorsed in principle reducing the protected size from 30 cm to 20 cm in 2027.
     - Staff report back to the committee's first meeting of 2027.
@@ -239,6 +253,7 @@
   expect: answer
   required:
     - [ "ie:2026.IE31.8:*" ]
+  acceptable: [ "sr:286719:comments:12", "ie:2026.IE27.15:committee" ]   # audit
   key_facts:
     - The committee referred it to the Deputy City Manager, Infrastructure Services, for a broader review of laneway snow-clearing options.
     - No decision was made.

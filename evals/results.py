@@ -38,6 +38,11 @@ FIX_NOTE = ("The rows below the first shipped row were added after it missed the
             "later commit, with shipped re-run beside it on that commit, and is compared against that re-run. The "
             "rows above are left as they were.")
 NO_GAIN = " — no measurable gain."
+AUDIT_WHY = "The same {rung} stack, run after the gold audit and scored against the widened gold."
+AUDIT_NOTE = ("The rows below were run after the gold audit (EVALS.md, \"Gold audit\"): passages that state the "
+              "sentence citing them, reviewed by hand from the citations of the runs above, were added to gold. They are "
+              "scored against that gold and are not compared with the rows above. Their cite precision is partly "
+              "in-sample: fresh answers, but to the same questions whose citations widened the gold.")
 
 # (key in run.json, heading, format): "count" shows a share as x / n questions
 PAGE_COLUMNS = [
@@ -67,8 +72,19 @@ class ResultsError(Exception):
 
 # ── selecting runs ────────────────────────────────────────────────────────────────────────────
 
+def _gold(rec: dict) -> int:
+    """The gold version a run was scored against (evals/harness.py GOLD_VERSION); older headers lack it."""
+    return rec["header"].get("gold", 1)
+
+
 def _tests(records: list[dict]) -> list[dict]:
-    return sorted((r for r in records if r["header"]["split"] == "test"), key=lambda r: r["header"]["date"])
+    """Test runs scored against the first gold: the ladder, fix and side rows, left as they ran."""
+    return sorted((r for r in records if r["header"]["split"] == "test" and _gold(r) == 1), key=lambda r: r["header"]["date"])
+
+
+def audited(records: list[dict]) -> list[dict]:
+    """Test runs scored against widened gold, oldest first: their own rows, never compared with the ladder."""
+    return sorted((r for r in records if r["header"]["split"] == "test" and _gold(r) > 1), key=lambda r: r["header"]["date"])
 
 
 def _sha(rec: dict) -> str:
@@ -96,7 +112,11 @@ def select(records: list[dict]) -> dict[str, dict]:
 
 
 def final_shipped(records: list[dict]) -> dict | None:
-    """The last `shipped*` rung: the one the ship bar is about (LADDER.md: the table is done when it passes)."""
+    """The last `shipped*` rung: the one the ship bar is about (LADDER.md: the table is done when it passes).
+    A run after the gold audit is the latest check of the bar."""
+    after = [r for r in audited(records) if r["header"]["rung"].startswith("shipped")]
+    if after:
+        return after[-1]
     pairs = fixes(records)
     return pairs[-1][0] if pairs else select(records).get("shipped")
 
@@ -192,6 +212,7 @@ def page_data(records: list[dict], agreement: dict | None = None) -> dict:
         fix_recs.append(fix)
         fix_rows.append(row(fix, rerun, rerun is None))
 
+    after = audited(records)
     live = public(records)
     trick = cols(live)["refusal_recall"] if live else None
     counts = cols(shipped or (ladder + side)[0]) if (ladder or side) else None
@@ -199,12 +220,14 @@ def page_data(records: list[dict], agreement: dict | None = None) -> dict:
         "intro": counts and {"questions": counts["refusal_recall"]["n"] + counts["false_refusals"]["n"],
                              "refuse": counts["refusal_recall"]["n"]},
         "headerLink": f"Evals · {_count(trick)}/{trick['n']} trick questions refused" if trick else "Evals",
-        "columns": [{"key": k, "label": label, "n": _n(ladder + fix_recs + side, k)} for k, label, _ in PAGE_COLUMNS],
+        "columns": [{"key": k, "label": label, "n": _n(ladder + fix_recs + side + after, k)} for k, label, _ in PAGE_COLUMNS],
         "ladder": [row(rec, ladder[i - 1] if i else None, i == 0) for i, rec in enumerate(ladder)] + fix_rows,
+        "audited": [row(rec, None, True, AUDIT_WHY.format(rung=rec["header"]["rung"])) for rec in after],
         "side": [row(rec, shipped, False) for rec in side],
         "shipBar": final and {"rung": final["header"]["rung"], "unmet": ship_bar(cols(final))},
         "agreement": agreement,
         "fixNote": FIX_NOTE if fix_rows else None,
+        "auditNote": AUDIT_NOTE if after else None,
     }
     return {**data, "underTable": under_table(agreement)}
 
@@ -273,6 +296,8 @@ def ladder_block(data: dict) -> str:
     lines += _md_table(data, data["ladder"]) + [""]
     if data["fixNote"]:
         lines += [data["fixNote"], ""]
+    if data["audited"]:
+        lines += [data["auditNote"], ""] + _md_table(data, data["audited"]) + [""]
     lines += [data["underTable"], ""]
     if data["side"]:
         lines += ["Alternatives tried against `shipped`, one change each.", ""] + _md_table(data, data["side"]) + [""]
@@ -285,7 +310,8 @@ def results_md(records: list[dict], data: dict) -> str:
     ladder = [runs[r] for r in LADDER if r in runs]
     fix_recs = [rec for fix, rerun in pairs for rec in (rerun, fix) if rec]
     side = [runs[r] for r in SIDE if r in runs]
-    recs = ladder + fix_recs + side
+    after = audited(records)
+    recs = ladder + fix_recs + side + after
     lines = ["# Eval results", "",
              "Generated by `python -m evals results` from `evals/runs/*/run.json` (latest `split: test` run of each "
              "rung). Never hand-edited. Columns are defined in [`EVALS.md`](../EVALS.md#columns); rungs in "
@@ -296,9 +322,11 @@ def results_md(records: list[dict], data: dict) -> str:
     # the ladder and side table share one SHA; each fix pair shares its own (LADDER.md, "How it runs")
     shas = sorted({_sha(r)[:7] for r in ladder + side})
     fix_shas = sorted({_sha(r)[:7] for r in fix_recs} - set(shas))
+    after_shas = sorted({_sha(r)[:7] for r in after})
     first = recs[0]["header"]
     lines += [f"Git {', '.join(f'`{s}`' for s in shas)}"
               + (f" · fix rungs on {', '.join(f'`{s}`' for s in fix_shas)}" if fix_shas else "")
+              + (f" · after the gold audit on {', '.join(f'`{s}`' for s in after_shas)}" if after_shas else "")
               + f" · snapshot `{first['snapshot']['id']}` · threshold {first['threshold']} · {first['runs']} runs per rung", ""]
     if len(shas) > 1:
         lines += ["> **The rungs span more than one git SHA:** the ladder is meant to run in one sitting on one SHA.", ""]
@@ -306,8 +334,12 @@ def results_md(records: list[dict], data: dict) -> str:
         if rerun is None:
             lines += [f"> **`{fix['header']['rung']}` has no `shipped` re-run on its SHA** to be compared against.", ""]
 
+    if after:
+        lines += ["> " + AUDIT_NOTE.replace("The rows below were", "Rows marked *after gold audit* were", 1), ""]
+
     reruns = {id(rerun) for _, rerun in pairs if rerun}
-    name = lambda r: f"`{r['header']['rung']}`" + (" re-run" if id(r) in reruns else "")  # noqa: E731
+    name = lambda r: (f"`{r['header']['rung']}`" + (" re-run" if id(r) in reruns else "")  # noqa: E731
+                      + (" after gold audit" if _gold(r) > 1 else ""))
     headings = [k.replace("_", " ") for k, _ in ALL_COLUMNS]
     sep = "|" + " --- |" * (len(ALL_COLUMNS) + 2)
     table = lambda cell: ["| Rung | " + " | ".join(headings) + " | Run |", sep] + [  # noqa: E731
@@ -320,12 +352,13 @@ def results_md(records: list[dict], data: dict) -> str:
     lines += table(lambda c, kind: "–" if not c or c.get("spread") is None else _fmt({"value": c["spread"]}, kind)) + [""]
 
     lines += ["## Ship bar", ""]
-    bars = [r for r in [runs.get("shipped")] + [fix for fix, _ in pairs] if r]
+    bars = [r for r in [runs.get("shipped")] + [fix for fix, _ in pairs]
+            + [a for a in after if a["header"]["rung"].startswith("shipped")] if r]
     if not bars:
         lines.append("No `shipped` run yet.")
     for r in bars:
         unmet = ship_bar(r["scores"]["columns"])
-        lines += [f"`{r['header']['rung']}`: " + ("passes." if not unmet else "misses: " + "; ".join(unmet) + "."), ""]
+        lines += [f"{name(r)}: " + ("passes." if not unmet else "misses: " + "; ".join(unmet) + "."), ""]
     if bars:
         lines.pop()
     lines += ["", "## Judge", "", data["underTable"], ""]

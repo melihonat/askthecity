@@ -33,6 +33,12 @@ Try: "How late can my neighbour run a leaf blower?" · "What does § 591-2.1 say
 
 The rows below the first shipped row were added after it missed the ship bar. A fix runs on its own later commit, with shipped re-run beside it on that commit, and is compared against that re-run. The rows above are left as they were.
 
+The rows below were run after the gold audit (EVALS.md, "Gold audit"): passages that state the sentence citing them, reviewed by hand from the citations of the runs above, were added to gold. They are scored against that gold and are not compared with the rows above. Their cite precision is partly in-sample: fresh answers, but to the same questions whose citations widened the gold.
+
+| Rung | trick questions refused<br><sub>n 7</sub> | false refusals<br><sub>n 17</sub> | hit@ctx<br><sub>n 15</sub> | cite precision<br><sub>n 12–15</sub> | answer correct<br><sub>n 13–17</sub> | total p50<br><sub>n 41–51</sub> |
+| --- | --- | --- | --- | --- | --- | --- |
+| `shipped`<br><sub>The same shipped stack, run after the gold audit and scored against the widened gold.</sub> | 7 / 7 | 0 / 17 | 1.00 | 0.99 | 0.91 | 2.4 s |
+
 Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; on the first full run a human grader, blind to its verdicts, agreed with it on 32 of 34 facts (94%), and marked 1 fact contradicted that the judge passed, which the ship bar's contradicted check doesn't see. Cite precision counts a cited definition the app attached as correct; that rule was added after the first full run, when the citations outside gold turned out to be mostly definitions written after the gold was (0.69 → 0.78 for shipped), and applies to every row.
 
 Alternatives tried against `shipped`, one change each.

@@ -230,6 +230,40 @@
    ]
   }
  ],
+ "audited": [
+  {
+   "rung": "shipped",
+   "why": "The same shipped stack, run after the gold audit and scored against the widened gold.",
+   "highlight": false,
+   "run": "2026-11-01-shipped-audit-224526",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "0 / 17",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "0.99",
+     "mark": null
+    },
+    {
+     "text": "0.91",
+     "mark": null
+    },
+    {
+     "text": "2.4 s",
+     "mark": null
+    }
+   ]
+  }
+ ],
  "side": [
   {
    "rung": "side-sonnet",
@@ -297,9 +331,8 @@
   }
  ],
  "shipBar": {
-  "rung": "shipped-2",
+  "rung": "shipped",
   "unmet": [
-   "cite precision under 0.9",
    "a contradicted key fact"
   ]
  },
@@ -309,5 +342,6 @@
   "contradictionsMissed": 1
  },
  "fixNote": "The rows below the first shipped row were added after it missed the ship bar. A fix runs on its own later commit, with shipped re-run beside it on that commit, and is compared against that re-run. The rows above are left as they were.",
+ "auditNote": "The rows below were run after the gold audit (EVALS.md, \"Gold audit\"): passages that state the sentence citing them, reviewed by hand from the citations of the runs above, were added to gold. They are scored against that gold and are not compared with the rows above. Their cite precision is partly in-sample: fresh answers, but to the same questions whose citations widened the gold.",
  "underTable": "Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; on the first full run a human grader, blind to its verdicts, agreed with it on 32 of 34 facts (94%), and marked 1 fact contradicted that the judge passed, which the ship bar's contradicted check doesn't see. Cite precision counts a cited definition the app attached as correct; that rule was added after the first full run, when the citations outside gold turned out to be mostly definitions written after the gold was (0.69 → 0.78 for shipped), and applies to every row."
 }

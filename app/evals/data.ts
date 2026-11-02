@@ -10,10 +10,12 @@ export type EvalsData = {
   headerLink: string;
   columns: { key: string; label: string; n: string }[];
   ladder: Row[];
+  audited: Row[]; // runs scored against gold widened by the gold audit (EVALS.md), never compared with the ladder
   side: Row[];
   shipBar: { rung: string; unmet: string[] } | null;
   agreement: { agree: number; total: number; contradictionsMissed: number } | null;
   fixNote: string | null; // under the ladder once a fix rung (LADDER.md, "Ship bar") is appended
+  auditNote: string | null; // above the audited rows
   underTable: string;
 };
 
