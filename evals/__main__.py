@@ -1,6 +1,7 @@
 """python -m evals run --rung <rung> [--split dev] — one rung against the deployed /api/ask.
 python -m evals audit sheet <run dir> | agreement — the judge/human audit.
 python -m evals gold-audit — the review sheet of citations outside gold.
+python -m evals absence check <run dir>... | sheet — false absence claims, and their review sheet.
 python -m evals calibrate <dev run dir> — set the refusal threshold from a dev run.
 python -m evals results — regenerate RESULTS.md, the README's blocks and /evals from the committed runs."""
 from __future__ import annotations
@@ -30,6 +31,10 @@ def main() -> None:
     a.add_argument("run_dir", type=Path, nargs="?", help="sheet: the judged run to hand-score, e.g. evals/runs/2026-11-02-shipped")
     a.add_argument("--runs", default="1", help="sheet: which of its runs, e.g. 1 or 1,2,3")
     sub.add_parser("gold-audit", help="write evals/gold_audit.csv: citations outside gold in every committed test run, for review")
+    ab = sub.add_parser("absence", help="check: find false absence claims in committed runs (judge key); "
+                                        "sheet: write evals/absence_review.csv for the human check")
+    ab.add_argument("step", choices=["check", "sheet"])
+    ab.add_argument("run_dirs", type=Path, nargs="*", help="check: e.g. evals/runs/2026-11-01-shipped")
     c = sub.add_parser("calibrate", help="threshold from a dev run: rewrite EVALS.md's table and lib/ask/config.ts")
     c.add_argument("run_dir", type=Path, help="e.g. evals/runs/2026-10-31-shipped-dev")
     sub.add_parser("results", help="from evals/runs: write evals/RESULTS.md, the README's generated blocks and the /evals data")
@@ -72,6 +77,26 @@ def main() -> None:
             print(f"wrote {n} off-gold citations to {SHEET}; fill `decision` with accept / reject")
         except GoldAuditError as e:
             raise SystemExit(f"gold audit: {e}")
+        return
+
+    if args.command == "absence":
+        from .absence import SHEET, AbsenceError, AnthropicChecker, check, write_sheet
+        from .harness import RUNS_DIR
+        try:
+            if args.step == "sheet":
+                n = write_sheet(RUNS_DIR)
+                print(f"wrote {n} verdicts to {SHEET}; fill `human` with true / false")
+                return
+            if not args.run_dirs:
+                raise AbsenceError("check needs run dirs")
+            from ingest.config import env
+            checker = AnthropicChecker(env("JUDGE_ANTHROPIC_API_KEY"))
+            for s in check(args.run_dirs, checker):
+                print(f"{s['run']}: {s['false']} false of {s['absence']} absence sentences in {s['answers']} answers "
+                      f"({s['answers_with_false']} answers with one; {s['unfound_quotes']} quotes not found)")
+            print(f"checker usage: {checker.usage}")
+        except AbsenceError as e:
+            raise SystemExit(f"absence: {e}")
         return
 
     if args.command == "calibrate":

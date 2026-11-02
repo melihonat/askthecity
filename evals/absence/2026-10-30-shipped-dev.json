@@ -1,0 +1,161 @@
+{
+ "run_id": "2026-10-30-shipped-dev-221801",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether any other backyard restrictions apply beyond these.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't address the specific time of day for days other than these holidays.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether a permit is needed for a backyard on a day other than these, beyond the special occasions permit described above.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:466-7",
+     "span": "A person who wishes to discharge consumer fireworks on any day other than Victoria Day or Canada Day shall submit an application to the Fire Chief for a special occasions fireworks discharge permit",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover any requirements for discharging pool water, which are separate from the enclosure permit.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether a separate permit is needed for wastewater discharge when the pool is drained, or the details of the City's pre-application or fee requirements beyond what is stated here.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover your pool's wastewater discharge requirements for when you drain or maintain it beyond the general rules, nor the enclosure's specific construction standards in detail.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state what penalties apply if the height limit is exceeded.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Chapter 629 is set to be replaced on 2027-05-01 by a new by-law, which does not change the 20-centimetre limit in the passages provided, but the passages do not state the penalties for exceeding it [6][7].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Chapter 629's 20 centimetre limit is scheduled to be replaced by By-law 1512-2025 in force 2027-05-01, but that replacement text does not address grass height [6][7].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    },
+    {
+     "sentence": 2,
+     "text": "The passages do not cover whether any different limit applies to lawns outside these chapters.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 9,
+  "absence": 10,
+  "false": 3,
+  "answers_with_false": 3,
+  "unfound_quotes": 0
+ }
+}

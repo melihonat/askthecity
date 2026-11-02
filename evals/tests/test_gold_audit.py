@@ -7,7 +7,7 @@ GOLD = {"a": {"question": "A?", "expect": "answer", "required": [["tmc:1-1:*"]],
 
 def answer(text, *cited, passages=()):
     return {"response": {"kind": "answer", "text": text, "citations": [{"n": n, "chunkId": c} for n, c in cited],
-                         "passages": list(passages)}}
+                         "passages": list(passages) + [{"n": n, "chunkId": c, "href": f"https://x/{c}"} for n, c in cited]}}
 
 
 def record(rung, *runs, stale=()):
@@ -22,7 +22,8 @@ def test_off_gold_citations_are_grouped_across_rungs_with_their_sentences():
                  GOLD)
     assert [(r["question_id"], r["chunk_id"], r["cites"], r["rungs"]) for r in sheet] == [("a", "tmc:9-9", 2, "dense shipped")]
     assert sheet[0]["sentences"].split("\n") == ["Off gold says more [2].", "Both [1][2].", "Off gold again [3]."]
-    assert sheet[0]["decision"] == ""
+    assert sheet[0]["decision"] == "" and sheet[0]["href"] == "https://x/tmc:9-9"
+    assert "chunk" not in sheet[0]  # chunk text stays out of the repo (CORPUS.md)
 
 
 def test_definition_companions_and_stale_questions_are_left_out():
