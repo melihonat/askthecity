@@ -73,7 +73,16 @@ its **n scored**.
 run, applied to every rung): gold was written before definition companions existed, so a
 citation of a definition the app attached to that answer counts as acceptable. It satisfies
 no required group, so cite full is unchanged. The run that prompted it scored `shipped` at
-0.69 cite precision without the rule and 0.78 with it; no other gold was widened.
+0.69 cite precision without the rule and 0.78 with it.
+
+**Gold audit** (2026-11-01, #56, after `shipped-2` missed the bar): every distinct citation
+outside gold in the committed test runs (25 question/chunk pairs, `python -m evals gold-audit`)
+was reviewed by hand in `evals/gold_audit.csv`. 23 were accepted because the passage states the
+sentence citing it, and were added to `acceptable` (marked `# audit` in `evals/questions.yaml`).
+`required`, key facts and splits are unchanged. Rows run before the audit keep the scores they ran
+with: re-scored against gold widened from their own citations, every rung's cite precision goes to
+0.99–1.00 by construction, so the column would no longer tell them apart. Only runs after the audit
+are scored against it.
 
 The reranker's contribution is the gap between recall@20 and hit@ctx; the companions'
 contribution shows in full@ctx and cite full.

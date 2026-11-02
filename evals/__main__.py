@@ -69,9 +69,9 @@ def main() -> None:
         from .harness import RUNS_DIR, load_gold
         try:
             n = write_sheet(RUNS_DIR, load_gold("test"))
+            print(f"wrote {n} off-gold citations to {SHEET}; fill `decision` with accept / reject")
         except GoldAuditError as e:
             raise SystemExit(f"gold audit: {e}")
-        print(f"wrote {n} off-gold citations to {SHEET}; fill `decision` with accept / reject")
         return
 
     if args.command == "calibrate":
