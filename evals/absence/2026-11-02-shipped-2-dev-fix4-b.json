@@ -1,0 +1,228 @@
+{
+ "run_id": "2026-11-02-shipped-2-dev-fix4-b-172016",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-refuse-landlord-entry",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Under the Executive Director's rules, entry into a rental unit requires the occupier's consent after being told they may refuse, or a warrant under the Residential Tenancies Act; this covers City inspectors, not landlords, so the passages don't say what a landlord may do. [1]",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-refuse-landlord-entry",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the landlord's own right of entry or notice requirements.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-refuse-landlord-entry",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover a landlord's own entry rights.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover building or zoning approvals beyond this pool enclosure permit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't set a penalty for going over that height.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Chapter 629's rule is replaced on 2027-05-01 by By-law 1512-2025, but the replacement text does not set a height limit [6][7].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't say whether the City can ticket a driverless car for a moving violation under current law.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:287415:comments:3",
+     "span": "provisions in the provincial Highway Traffic Act or the Provincial Offences Act that limit the ability to enforce against driverless vehicles",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether the City can ticket a driverless car for a moving violation under current law.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:287415:comments:3",
+     "span": "provisions in the provincial Highway Traffic Act or the Provincial Offences Act that limit the ability to enforce against driverless vehicles",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether a ticket can be issued to a driverless car's owner for every type of moving violation.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-park-fine",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't set out fines for parking-type park offences beyond the amounts listed in the Schedule A penalty tables.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "bl:1150-2026:cl11",
+     "span": "other than an administrative penalty under §§ 608-27A, B, C, D, E.1, F or 608-30.1 or an offence under § 608-32, is liable to a fine of no more than $100,000",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-holistic-fees",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not show whether any list-filing requirement remains elsewhere in the Code.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Yes, in a park listed in Schedule A you may possess an open container of liquor and drink it between 5:30 a.m. and 12 a.m., without a permit, provided you are not inside the swimming pool or deck area or within two metres of playground equipment, a wading pool or splash pad, a skateboard or BMX park, or an ice rink [1].",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:608-8",
+     "span": "a person may possess an open container of liquor and consume liquor in the parks listed in Schedule A between the hours of 5:30 a.m. and 12 a.m. without a permit",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Yes, in a park listed in Schedule A you may possess an open container of liquor and consume liquor between 5:30 a.m. and 12 a.m. without a permit, provided you are not within the boundary of an outdoor swimming pool or deck, or within two metres of a playground, wading pool or splash pad, skateboard or BMX park, or ice rink [1][2].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-dealer-hours",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state any other hours rule for second-hand goods stores on a Tuesday.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 39,
+  "absence": 14,
+  "false": 4,
+  "answers_with_false": 4,
+  "unfound_quotes": 0,
+  "unchecked": 0
+ }
+}
