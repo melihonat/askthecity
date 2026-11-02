@@ -33,8 +33,10 @@ def main() -> None:
     sub.add_parser("gold-audit", help="write evals/gold_audit.csv: citations outside gold in every committed test run, for review")
     ab = sub.add_parser("absence", help="check: find false absence claims in committed runs (judge key); "
                                         "sheet: write evals/absence_review.csv for the human check")
-    ab.add_argument("step", choices=["check", "sheet"])
+    ab.add_argument("step", choices=["check", "sheet", "agreement"])
     ab.add_argument("run_dirs", type=Path, nargs="*", help="check: e.g. evals/runs/2026-11-01-shipped")
+    ab.add_argument("--out", type=Path, help="check / agreement: the verdicts dir (default evals/absence)")
+    ab.add_argument("--labelled", action="store_true", help="check: only the calls with a row in the review sheet")
     c = sub.add_parser("calibrate", help="threshold from a dev run: rewrite EVALS.md's table and lib/ask/config.ts")
     c.add_argument("run_dir", type=Path, help="e.g. evals/runs/2026-10-31-shipped-dev")
     sub.add_parser("results", help="from evals/runs: write evals/RESULTS.md, the README's generated blocks and the /evals data")
@@ -80,18 +82,25 @@ def main() -> None:
         return
 
     if args.command == "absence":
-        from .absence import SHEET, AbsenceError, AnthropicChecker, check, write_sheet
+        from .absence import OUT_DIR, SHEET, AbsenceError, AnthropicChecker, _sheet, agreement, check, write_sheet
         from .harness import RUNS_DIR
+        out_dir = args.out or OUT_DIR
         try:
             if args.step == "sheet":
                 n = write_sheet(RUNS_DIR)
                 print(f"wrote {n} verdicts to {SHEET}; fill `human` with true / false")
                 return
+            if args.step == "agreement":
+                results = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(out_dir.glob("*.json"))]
+                for half, a in agreement(_sheet(), results).items():
+                    print(f"{half}: {a['right']} of {a['flagged']} `false` verdicts are false claims; missed {a['missed']} "
+                          f"of {a['human_false']} human-false ({a['checked']} of {a['rows']} labelled rows checked)")
+                return
             if not args.run_dirs:
                 raise AbsenceError("check needs run dirs")
             from ingest.config import env
             checker = AnthropicChecker(env("JUDGE_ANTHROPIC_API_KEY"))
-            for s in check(args.run_dirs, checker):
+            for s in check(args.run_dirs, checker, out_dir, labelled=args.labelled):
                 print(f"{s['run']}: {s['false']} false of {s['absence']} absence sentences in {s['answers']} answers "
                       f"({s['answers_with_false']} answers with one; {s['unfound_quotes']} quotes not found)")
             print(f"checker usage: {checker.usage}")

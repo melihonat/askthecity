@@ -1,0 +1,137 @@
+{
+ "run_id": "2026-11-01-shipped-dev-000003",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "2",
+  "prompt_hash": "f6b52e96e585"
+ },
+ "calls": [
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state the specific hours permitted for a special occasions permit day.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:466-7",
+     "span": "consumer fireworks may only be discharged on the date and at the time and location specified in the special occasions fireworks discharge permit",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether a permit is needed for your specific property beyond these conditions.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state the times on days other than Victoria Day and Canada Day.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:466-7",
+     "span": "consumer fireworks may only be discharged on the date and at the time and location specified in the special occasions fireworks discharge permit",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents provided do not cover any other City requirements for the pool, such as discharge rules for its water.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "Subject to § 681-11U, no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the drainage or discharge rules for backyard pools in full detail, so check those separately.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the City's rules on draining or discharging pool water, or whether a separate requirement applies to your specific property.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say whether the City can ticket a driverless car for a moving violation.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:287415:comments:3",
+     "span": "nor provisions in the provincial Highway Traffic Act or the Provincial Offences Act that limit the ability to enforce against driverless vehicles",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say whether the City can ticket a driverless car for a specific moving violation.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:287415:comments:3",
+     "span": "provisions in the provincial Highway Traffic Act or the Provincial Offences Act that limit the ability to enforce against driverless vehicles",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 15,
+  "absence": 8,
+  "false": 6,
+  "answers_with_false": 6,
+  "unfound_quotes": 0
+ }
+}

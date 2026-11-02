@@ -26,10 +26,14 @@ ROOT = Path(__file__).resolve().parent.parent
 PROMPT = ROOT / "evals" / "absence_prompt.md"
 OUT_DIR = ROOT / "evals" / "absence"
 SHEET = ROOT / "evals" / "absence_review.csv"
-PROMPT_VERSION = "1"             # bump with any change to absence_prompt.md
+PROMPT_VERSION = "2"             # bump with any change to absence_prompt.md; v1 verdicts are in evals/absence/
 MAX_TOKENS = 2000
 VERDICTS = ("true", "false")
 SAMPLE_TRUE = 30
+# The labelled rows of evals/absence_review.csv split by question, balanced on v1 `false` verdicts (32 each),
+# fixed before any prompt change: a new checker prompt is tuned on TUNE and measured on the rest.
+TUNE = {"amended-summer-cooling", "decisions-electricity-referred", "decisions-laneway-snow", "decisions-tree-size",
+        "dev-fireworks-backyard", "dev-leaf-blower", "multi-dead-tree", "multi-reno-hours-idling", "rules-apartment-heat"}
 FIELDS = ["run_id", "question_id", "run", "sentence", "verdict", "passage", "href", "span", "human", "note"]
 
 # "the passages do not state", "the documents don't cover", "not addressed in the passages", "no passage …"
@@ -142,14 +146,16 @@ class AnthropicChecker:
         return parse(next(b.text for b in r.content if b.type == "text"), passages, sentences)
 
 
-def check_run(record: dict, questions: dict[str, str], bodies: dict[str, str], checker: Checker, log=print) -> dict:
-    """Every answered call of `record` with an absence sentence, checked. `questions`: id → question text."""
+def check_run(record: dict, questions: dict[str, str], bodies: dict[str, str], checker: Checker, log=print,
+              only: set[tuple[str, int]] | None = None) -> dict:
+    """Every answered call of `record` with an absence sentence, checked. `questions`: id → question text;
+    `only`: just these (question id, run) calls."""
     calls = []
     for q in record["questions"]:
         for run, call in enumerate(q["runs"], 1):
             response = call["response"]
             sentences = absence_sentences(response["text"]) if response["kind"] == "answer" else []
-            if not sentences:
+            if not sentences or only is not None and (q["id"], run) not in only:
                 continue
             passages = [{"n": p["n"], "chunkId": p["chunkId"], "label": p["label"], "body": bodies[p["chunkId"]]}
                         for p in response["passages"]]
@@ -193,19 +199,22 @@ def _bodies(records: list[dict]) -> dict[str, str]:
         return dict(conn.execute("select id, body from chunks where id = any(%s)", (ids,)).fetchall())
 
 
-def check(run_dirs: list[Path], checker: Checker, out_dir: Path = OUT_DIR) -> list[dict]:
+def check(run_dirs: list[Path], checker: Checker, out_dir: Path = OUT_DIR, labelled: bool = False) -> list[dict]:
+    """`labelled`: only the calls with a row in the review sheet, to measure a new prompt against it."""
     from .harness import load_gold
     records = [json.loads((d / "run.json").read_text(encoding="utf-8")) for d in run_dirs]
     for d in run_dirs:
         if (out_dir / f"{d.name}.json").exists():
             raise AbsenceError(f"{d.name} is already checked; verdicts are never overwritten")
     bodies = _bodies(records)
-    out_dir.mkdir(exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
     summaries = []
     for d, record in zip(run_dirs, records):
         questions = {q["id"]: q["question"] for q in load_gold(record["header"]["split"])}
         print(f"{d.name}:")
-        result = check_run(record, questions, bodies, checker)
+        only = ({(r["question_id"], int(r["run"])) for r in _sheet() if r["run_id"] == record["header"]["run_id"]}
+                if labelled else None)
+        result = check_run(record, questions, bodies, checker, only=only)
         (out_dir / f"{d.name}.json").write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         summaries.append({"run": d.name, **result["summary"]})
     return summaries
@@ -225,3 +234,24 @@ def write_sheet(runs_dir: Path, out_dir: Path = OUT_DIR, out: Path = SHEET) -> i
         w.writeheader()
         w.writerows(sheet)
     return len(sheet)
+
+
+def _sheet(path: Path = SHEET) -> list[dict]:
+    with path.open(encoding="utf-8-sig", newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def agreement(sheet: list[dict], results: list[dict]) -> dict:
+    """Each labelled row's verdict from `results` against the human label, per half: how often a `false`
+    is a false claim (precision), and how many human-false rows it calls true (misses)."""
+    verdicts = {(res["run_id"], c["id"], c["run"], v["text"]): v for res in results for c in res["calls"] for v in c["verdicts"]}
+    out = {}
+    for half in ("tune", "held"):
+        rows = [r for r in sheet if (r["question_id"] in TUNE) == (half == "tune")]
+        pairs = [(verdicts.get((r["run_id"], r["question_id"], int(r["run"]), r["sentence"])), r["human"].strip().lower()[:1])
+                 for r in rows]
+        flagged = [h for v, h in pairs if v and is_false(v)]
+        out[half] = {"rows": len(rows), "checked": sum(v is not None for v, _ in pairs), "flagged": len(flagged),
+                     "right": flagged.count("f"), "human_false": sum(h == "f" for _, h in pairs),
+                     "missed": sum(h == "f" and v is not None and not is_false(v) for v, h in pairs)}
+    return out
