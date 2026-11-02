@@ -4,6 +4,7 @@
 # refusal rule adds ~10 `split: dev` questions (5 answer, 5 refuse) that never appear in the table.
 # Three more dev answers (`dev-amended-*`, `dev-deleted-*`) cover amended and deleted sections for
 # the `shipped-2` prompt fix (LADDER.md, "Ship bar"); the threshold was calibrated before them.
+# Three more (`dev-exception-*`, `dev-deleted-dealer-hours`) cover exception wording for #57.
 #
 # Snapshot facts checked 2026-10-26 against the cached Code, the 120 candidate amending
 # by-laws and the live item pages. Patterns marked `pin` name a by-law clause whose exact
@@ -466,3 +467,46 @@
   notes: >
     A deleted section: the consolidated § 545-181 still prints the duty, and 1108-2025
     cl. 1A deletes it. Presenting § 545-181 as the current rule contradicts the first fact.
+
+# Exception wording (#57): a rule, a time window and its exceptions, read in the right order.
+# Written from chapters other than 591 so the test split's noise questions stay unseen.
+
+- id: dev-exception-park-drinking
+  question: My local park is on the City's list where drinking is allowed. Can I have a beer there at 11 p.m.?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:608-8:*" ]
+  key_facts:
+    - Yes — in a listed park you may drink without a permit between 5:30 a.m. and 12 a.m.
+    - Not within an outdoor pool or deck, or within two metres of a playground, wading pool, splash pad, skate park or rink.
+  split: dev
+  notes: >
+    § 608-8 A(4) is an exception to the A(1) and A(3) bans, with its own exceptions. Saying
+    11 p.m. is outside the allowed hours contradicts the first fact.
+
+- id: dev-exception-park-night
+  question: Can I walk my dog through the park at 5 in the morning?
+  category: resident_rules
+  expect: answer
+  required:
+    - [ "tmc:608-9:*" ]
+  key_facts:
+    - No — no one may use or enter a park between 12:01 a.m. and 5:30 a.m. unless authorized by permit.
+  split: dev
+  notes: Tempts the dog rules (§ 608-34.1 and Ch 349), which don't answer the hours.
+
+- id: dev-deleted-dealer-hours
+  question: I run a second-hand goods store. Can I stay open until midnight on a Tuesday?
+  category: amended_since
+  expect: answer
+  required:
+    - [ "tmc:545-282:*" ]
+    - [ "bl:507-2026:cl1" ]
+  key_facts:
+    - Yes — the hours limit in § 545-282 (closed 11 p.m. to 7 a.m., later only on Saturdays and days before a holiday) was deleted.
+    - By-law 507-2026 deleted it, in force September 30, 2026.
+  split: dev
+  notes: >
+    The consolidated § 545-282 still prints the hours and their Saturday exception; 507-2026
+    cl. 1A deletes them. Saying the store must close at 11 p.m. contradicts the first fact.
