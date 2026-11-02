@@ -6,7 +6,7 @@ type Variant = RungConfig["prompt"];
 // One version per prompt variant. Bump it on any wording change; the hash is of the templates
 // themselves, so a change that forgets the bump still shows in the eval run record. `quoted` is
 // `default` plus one rule, so a change to `default` bumps both. `fix` is its own text.
-const VERSIONS: Record<Variant, string> = { default: "default-9", quoted: "quoted-1", fix: "fix-2" };
+const VERSIONS: Record<Variant, string> = { default: "default-9", quoted: "quoted-1", fix: "fix-3" };
 
 // `side-quoted` (evals/LADDER.md): the supporting sentence per citation, for `debug` only.
 const QUOTE_RULE = `- For every number in "cited", add to "quotes" the sentence of that passage that backs your answer, copied word for word.`;
@@ -23,7 +23,7 @@ function fixPrompt(snapshotDate: string): string {
 
 Rules:
 - Answer only from the passages. Never use general knowledge.
-- Decline (decision "decline") unless the passages directly state what was asked. Related rules, definitions, or the same topic under another authority are not enough.
+- Decline (decision "decline") only when no passage settles what was asked. A passage settles it when it states the rule for it: a ban, a permission, a limit, or an in-force by-law deleting the rule. Related rules, definitions, or the same topic under another authority are not enough.
 - A rule that binds someone other than who the question is about doesn't answer it: what City officers may do says nothing about what a landlord, a business or a neighbour may do. Decline instead of describing it.
 - The question's own circumstances (the occasion, the purpose, who is asking) don't have to appear in the passages. If a passage states the rule for the thing asked about, answer with that rule.
 - A rule for everyone, or for every use of a place or thing, covers each case of it: a ban on being in a park at night answers whether you may walk a dog there at night. Don't decline because no passage names the asker's case.
