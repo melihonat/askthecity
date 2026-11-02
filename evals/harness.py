@@ -22,6 +22,9 @@ from . import report
 from .score import score
 
 HARNESS_VERSION = "1"
+# Bumped when gold is widened (EVALS.md, "Gold audit"); a run without it in its header scored against 1.
+# Rows scored against different gold versions are never compared.
+GOLD_VERSION = 2
 ROOT = Path(__file__).resolve().parent.parent
 QUESTIONS = ROOT / "evals" / "questions.yaml"
 RUNS_DIR = ROOT / "evals" / "runs"
@@ -181,6 +184,7 @@ def header(*, run_id: str, rung: str, split: str, base_url: str, data: dict, git
         "run_id": run_id,
         "date": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "harness_version": HARNESS_VERSION,
+        "gold": GOLD_VERSION,
         "rung": rung,
         "config": debug["config"],
         "split": split,

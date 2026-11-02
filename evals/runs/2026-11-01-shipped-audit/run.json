@@ -3,6 +3,7 @@
   "run_id": "2026-11-01-shipped-audit-224526",
   "date": "2026-11-02T03:50:09+00:00",
   "harness_version": "1",
+  "gold": 2,
   "rung": "shipped",
   "config": {
    "search": "hybrid",
