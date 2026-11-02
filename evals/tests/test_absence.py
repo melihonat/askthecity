@@ -58,7 +58,7 @@ def test_check_run_sends_bodies_only_for_answers_with_an_absence_sentence_and_ke
     checker = FakeChecker()
     result = check_run(RECORD, {"a": "When?"}, {p["chunkId"]: p["body"] for p in PASSAGES}, checker, log=lambda _: None)
     assert checker.seen == [("When?", [p["body"] for p in PASSAGES], ["The passages do not state the date."])]
-    assert result["summary"] == {"answers": 2, "absence": 1, "false": 1, "answers_with_false": 1, "unfound_quotes": 0}
+    assert result["summary"] == {"answers": 2, "absence": 1, "false": 1, "answers_with_false": 1, "unfound_quotes": 0, "unchecked": 0}
     assert "Yards must be cleared" not in json.dumps(result)  # passage bodies never stored (CORPUS.md)
 
 

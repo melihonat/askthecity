@@ -6,7 +6,7 @@ type Variant = RungConfig["prompt"];
 // One version per prompt variant. Bump it on any wording change; the hash is of the templates
 // themselves, so a change that forgets the bump still shows in the eval run record. `quoted` is
 // `default` plus one rule, so a change to `default` bumps both. `fix` is its own text.
-const VERSIONS: Record<Variant, string> = { default: "default-9", quoted: "quoted-1", fix: "fix-1" };
+const VERSIONS: Record<Variant, string> = { default: "default-9", quoted: "quoted-1", fix: "fix-2" };
 
 // `side-quoted` (evals/LADDER.md): the supporting sentence per citation, for `debug` only.
 const QUOTE_RULE = `- For every number in "cited", add to "quotes" the sentence of that passage that backs your answer, copied word for word.`;
@@ -26,6 +26,8 @@ Rules:
 - Decline (decision "decline") unless the passages directly state what was asked. Related rules, definitions, or the same topic under another authority are not enough.
 - A rule that binds someone other than who the question is about doesn't answer it: what City officers may do says nothing about what a landlord, a business or a neighbour may do. Decline instead of describing it.
 - The question's own circumstances (the occasion, the purpose, who is asking) don't have to appear in the passages. If a passage states the rule for the thing asked about, answer with that rule.
+- A rule for everyone, or for every use of a place or thing, covers each case of it: a ban on being in a park at night answers whether you may walk a dog there at night. Don't decline because no passage names the asker's case.
+- If an in-force by-law deleted the rule the question is about, that is the answer: the rule no longer applies. Say so, naming the by-law and its in-force date; don't decline because no passage grants permission instead.
 - Decline questions about what the City doesn't set (provincial acts, the TTC board, zoning, tax rates), even when a passage mentions them.
 - Decline questions about events after ${snapshotDate}: the passages can't know them.
 - First pick the passage that answers the question (and its amendment or definition, if it has one). Answer from it. Add another passage only if the answer would be wrong or incomplete without it, never for a related rule, penalty, schedule, exception or background the question didn't ask about.
@@ -33,6 +35,7 @@ Rules:
 - Cite at most two passages, plus the amendment or definition passages of the ones you cite. A question that names two separate things may need one passage for each; nothing else needs more.
 - End every factual sentence with the marker of the passage that states it, like [2]. A marker means "this passage says this": never cite a passage only because it is on the same topic, comes from the same chapter, or is the rule the sentence is about. Use only numbers of passages you were given. List every number you used in "cited", and no others.
 - If the passages cover only part of the question, answer that part with markers, then end with one sentence without a marker naming what the documents don't cover. If that gap is all you could say, decline instead.
+- Never say the documents don't state, cover or address something until you have checked every passage for it. If any passage states it, it is covered: answer it with that passage's marker, or leave it out. Name a gap only for something the question asked; don't add one about details it didn't ask (penalties, how to apply, other cases).
 - A passage marked in_force="yes, since <date>" is already the law. A passage marked in_force="not yet, from <date>" is not the law until that date.
 - A section passage marked out_of_date="…" was changed by the in-force by-law passage it names. Its printed text is not the current law: answer from that by-law passage.
 - A passage marked amendment="…" is from a by-law that changed the section it names after the Code was last consolidated. Read it before you answer from that section. If it is in force, the section's printed text is out of date and your answer is the law as amended, from your first word: if the by-law deleted the requirement asked about, the answer is that it no longer applies (say "No" to "do I have to"), not "Yes, however". Name the by-law and its in-force date, and cite both. Never call the old text the current rule, and never write "until then" about a date that has passed. If it is not yet in force, answer "Today, X [n]. From <date>, Y [m]."

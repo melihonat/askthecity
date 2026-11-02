@@ -1,0 +1,531 @@
+{
+ "run_id": "2026-11-02-shipped-dev-default9-exc-170108",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether a special occasions permit is needed for every other day or the specific rules for your backyard beyond these conditions.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:466-7",
+     "span": "A person who wishes to discharge consumer fireworks on any day other than Victoria Day or Canada Day shall submit an application to the Fire Chief for a special occasions fireworks discharge permit",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a backyard is treated differently under other rules, such as zoning or property standards.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state rules for a backyard discharge outside these designated days or permits.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover how or where you must draw your application or the amount of the fee, which are set out in the Executive Director's requirements and Chapter 441 respectively.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents provided do not cover the Ontario Building Code or other approvals beyond these City requirements.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the zoning or building approvals that may also apply to the pool.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state a penalty for exceeding this height, so I cannot say what enforcement would follow.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The 20-centimetre limit is the rule; the documents do not describe the penalties for exceeding it.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't set out a penalty for exceeding this limit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether a birthday gathering would itself be allowed or what permit would apply to it, so that part is not covered.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether a birthday-party bonfire would be granted a permit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't say whether a birthday party would qualify for a permit, and a gathering over 25 people also needs a permit. [3]",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether any other limits apply during the permitted hours.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "So your neighbour should stop by 7 p.m. on weekdays and 9 p.m. on weekends is not correct; the cut-off is 7 p.m. on weekdays and 7 p.m. until 9 a.m. the next day on weekends and holidays, rather than 9 p.m. The passages do not cover whether the general sound limits in other sections apply in addition to this time restriction.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether any exemptions apply to a private residence beyond the golf course, park and City operations exemption [1].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover the specific ticketing procedures for driverless cars.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say whether a ticket can be issued to the owner of a driverless car for a specific moving violation.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether a ticket can be issued to the owner of a driverless car for a specific moving violation.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-park-fine",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover a fine under the Parks chapter for a parking violation that is an administrative penalty, which is set by the Schedule A amounts, so those listed parking amounts are not confirmed as the biggest fine here.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:610:schedule-a:p1",
+     "span": "Park vehicle in park (not in designated space/contrary to posted conditions) | $100.00",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-park-fine",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say how a fine is set for a specific park offence outside these categories.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-park-fine",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the penalty for a § 608-32 offence.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-vendor-street",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether the exemption applies to every food cart setup, so that point is not covered.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-vendor-street",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether the exemption covers every aspect of your food cart setup.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-vendor-street",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether a food cart's vending activity is itself a temporary occupation of the street beyond that exemption.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-holistic-fees",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not show whether a replacement requirement takes its place.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-holistic-fees",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Since the passages are dated before that, the requirement appears to remain in force until then; the documents do not confirm whether it is still in effect as of 2026-10-28.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Since 11 p.m. falls inside that window, a beer is permitted there at that time, provided you are not in one of those restricted areas [1].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    },
+    {
+     "sentence": 2,
+     "text": "The documents do not say whether a specific park is a local park or whether the City's list is current beyond the snapshot date.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Schedule A lists parks where possessing an open container of liquor and drinking it is allowed between 5:30 a.m. and 12 a.m., without a permit, provided you are not inside the excluded areas such as a playground, wading pool, splash pad, skateboard park, ice rink, or swimming pool area plus a two-metre radius around them [1][2].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    },
+    {
+     "sentence": 2,
+     "text": "Note that this only covers liquor rules; the documents do not address other park restrictions that may apply to your specific park.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:608-9",
+     "span": "no person shall use, enter or gather in a park between the hours of 12:01 a.m. and 5:30 a.m.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether your specific park's own boundaries or any permit conditions apply, so check with the City for that.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-night",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Walking a dog in the park at 5 a.m. is therefore not allowed without a permit covering that time; the documents do not cover whether you can walk a dog on a public path outside the park at that hour.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-night",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether a permit for early-morning entry is available to dog walkers specifically.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-dealer-hours",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not show whether the amendment's in-force date was later changed.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-dealer-hours",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not show whether Tuesday midnight closing will be governed by any other rule after 2026-09-30.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 35,
+  "absence": 35,
+  "false": 3,
+  "answers_with_false": 3,
+  "unfound_quotes": 0,
+  "unchecked": 0
+ }
+}

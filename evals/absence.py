@@ -130,6 +130,13 @@ class AnthropicChecker:
         self.usage = {"input_tokens": 0, "output_tokens": 0, "calls": 0}
 
     def check(self, question: str, passages: list[dict], answer: str, sentences: list[str]) -> list[dict]:
+        """One retry on an unusable reply (it has come back with no verdicts once); a second raises."""
+        try:
+            return self._check(question, passages, answer, sentences)
+        except AbsenceError:
+            return self._check(question, passages, answer, sentences)
+
+    def _check(self, question: str, passages: list[dict], answer: str, sentences: list[str]) -> list[dict]:
         r = self.client.messages.create(
             model=MODEL,
             max_tokens=MAX_TOKENS,
@@ -159,7 +166,12 @@ def check_run(record: dict, questions: dict[str, str], bodies: dict[str, str], c
                 continue
             passages = [{"n": p["n"], "chunkId": p["chunkId"], "label": p["label"], "body": bodies[p["chunkId"]]}
                         for p in response["passages"]]
-            verdicts = checker.check(questions[q["id"]], passages, response["text"], sentences)
+            try:
+                verdicts = checker.check(questions[q["id"]], passages, response["text"], sentences)
+            except AbsenceError as e:  # an unusable reply twice: listed as unchecked, not a verdict
+                log(f"  unchecked run {run} {q['id']}: {e}")
+                verdicts = [{"sentence": i, "text": s, "verdict": "unchecked", "passage": 0, "chunkId": None, "span": "",
+                             "span_found": False} for i, s in enumerate(sentences, 1)]
             calls.append({"id": q["id"], "run": run, "verdicts": verdicts})
             log(f"  checked run {run} {q['id']}: " + ", ".join(v["verdict"] for v in verdicts))
     return {"run_id": record["header"]["run_id"], "checker": info(), "calls": calls, "summary": summary(record, calls)}
@@ -170,7 +182,8 @@ def summary(record: dict, calls: list[dict]) -> dict:
     verdicts = [v for c in calls for v in c["verdicts"]]
     return {"answers": answers, "absence": len(verdicts), "false": sum(map(is_false, verdicts)),
             "answers_with_false": sum(any(map(is_false, c["verdicts"])) for c in calls),
-            "unfound_quotes": sum(v["verdict"] == "false" and not v["span_found"] for v in verdicts)}
+            "unfound_quotes": sum(v["verdict"] == "false" and not v["span_found"] for v in verdicts),
+            "unchecked": sum(v["verdict"] == "unchecked" for v in verdicts)}
 
 
 def rows(results: list[dict], records: dict[str, dict], seed: int = 57) -> list[dict]:
