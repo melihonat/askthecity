@@ -1,0 +1,78 @@
+{
+ "run_id": "2026-11-02-side-sonnet-dev-fix5-214040",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-pool-permit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't cover other approvals such as zoning or building permits.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't cover any other approvals, such as building or zoning permits.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-dealer-hours",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't say whether other rules, such as zoning or other by-laws, limit your hours.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-dealer-hours",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover any other limits on hours, such as holiday retail rules in Chapter 510 for your store.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "tmc:510-4",
+     "span": "Despite § 510-2, the following retail business establishments are permitted to remain open on holidays:",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 39,
+  "absence": 4,
+  "false": 1,
+  "answers_with_false": 1,
+  "unfound_quotes": 0,
+  "unchecked": 0
+ }
+}
