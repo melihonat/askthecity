@@ -18,6 +18,8 @@ export const REFUSAL_THRESHOLD = 0.359;
 
 const MODEL = "anthropic/claude-haiku-5.5";
 const SHIPPED: RungConfig = { search: "hybrid", rerank: true, companions: true, model: MODEL, prompt: "default" };
+// Sonnet 5.5 can't turn thinking off, so its thinking shares the cap; 400 cut long answers mid-JSON
+const SONNET = { model: "anthropic/claude-sonnet-5.5", maxOutputTokens: 1600 };
 
 // evals/LADDER.md. The main ladder is cumulative, one component per rung, ending at `shipped`;
 // each side rung changes one thing on `shipped`. A closed set of presets read by the one
@@ -29,8 +31,9 @@ export const RUNGS: Record<Rung, RungConfig> = {
   shipped: SHIPPED,
   // the fix rung under `shipped` (LADDER.md, "Ship bar"): cite precision and the rule in force
   "shipped-2": { ...SHIPPED, prompt: "fix" },
-  // Sonnet 5.5 can't turn thinking off, so its thinking shares the cap; 400 cut long answers mid-JSON
-  "side-sonnet": { ...SHIPPED, model: "anthropic/claude-sonnet-5.5", maxOutputTokens: 1600 },
+  // the last fix rung: shipped-2 on Sonnet 5.5, which reads a deleted ban as "Yes" where Haiku opens "No" (#57)
+  "shipped-3": { ...SHIPPED, prompt: "fix", ...SONNET },
+  "side-sonnet": { ...SHIPPED, ...SONNET },
   // the quotes get their own room, so quoting can't cut the answer short
   "side-quoted": { ...SHIPPED, prompt: "quoted", maxOutputTokens: 1200 },
 };

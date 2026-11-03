@@ -399,6 +399,7 @@ describe("ask", () => {
       ["rerank", "hybrid", true, false],
       ["shipped", "hybrid", true, true],
       ["shipped-2", "hybrid", true, true],
+      ["shipped-3", "hybrid", true, true],
       ["side-sonnet", "hybrid", true, true],
       ["side-quoted", "hybrid", true, true],
     ] as const)("%s: search %s, rerank %s, companions %s", async (rung, search, rerank, companions) => {
@@ -430,6 +431,7 @@ describe("ask", () => {
     it.each([
       ["shipped", MAX_OUTPUT_TOKENS],
       ["side-sonnet", 1600],
+      ["shipped-3", 1600],
       ["side-quoted", 1200],
     ] as const)("%s generates with an output cap of %i tokens", async (rung, cap) => {
       const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
@@ -461,6 +463,10 @@ describe("ask", () => {
       expect(RUNGS["shipped-2"]).toEqual({ ...RUNGS.shipped, prompt: "fix" });
     });
 
+    it("shipped-3 changes only the generator on shipped-2, with side-sonnet's cap", () => {
+      expect(RUNGS["shipped-3"]).toEqual({ ...RUNGS["shipped-2"], model: RUNGS["side-sonnet"].model, maxOutputTokens: 1600 });
+    });
+
     // shipped-2 is compared against shipped re-run on the same commit (LADDER.md, "Ship bar"), so adding
     // the fix must leave shipped's prompt, and the public cache key, exactly as the ladder measured it
     it("leaves the shipped prompt as the ladder ran it", () => {
@@ -485,6 +491,16 @@ describe("ask", () => {
         expect(p).toContain('in_force="yes, since 2026-03-02"');
         expect(p).toMatch(/label="tmc:608-19"[^>]*out_of_date="changed by By-law 1482-2025 cl\. 1 O–Y \[\d\], in force since 2026-03-02"/);
         expect(debug?.build).toMatchObject({ promptVersion: PROMPTS.fix.version, promptHash: PROMPTS.fix.hash });
+      });
+
+      // dev-deleted-dealer-hours: By-law 507-2026 ranks on its own, so it is a passage, not a companion
+      it("marks the section when the in-force by-law ranks on its own", async () => {
+        const bylawRow: SearchRow = { ...byLaw("2026-03-02"), rank: 2, score: 1 / 62, pinned: false };
+        const rows = [amendedRow("tmc:608-19", 1, ["1482-2025"]), bylawRow, ...ROWS.slice(2)];
+        const deps = fakeDeps(rows, rows.map(() => HIGH), ANSWER);
+        await run(deps, "shipped-2");
+        const p = deps.generate.mock.calls[0][0].prompt as string;
+        expect(p).toMatch(/label="tmc:608-19"[^>]*out_of_date="changed by By-law 1482-2025 cl\. 1 O–Y \[2\], in force since 2026-03-02"/);
       });
 
       it("marks a by-law not yet in force, and leaves its section unmarked", async () => {

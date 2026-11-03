@@ -6,7 +6,7 @@ type Variant = RungConfig["prompt"];
 // One version per prompt variant. Bump it on any wording change; the hash is of the templates
 // themselves, so a change that forgets the bump still shows in the eval run record. `quoted` is
 // `default` plus one rule, so a change to `default` bumps both. `fix` is its own text.
-const VERSIONS: Record<Variant, string> = { default: "default-9", quoted: "quoted-1", fix: "fix-3" };
+const VERSIONS: Record<Variant, string> = { default: "default-9", quoted: "quoted-1", fix: "fix-5" };
 
 // `side-quoted` (evals/LADDER.md): the supporting sentence per citation, for `debug` only.
 const QUOTE_RULE = `- For every number in "cited", add to "quotes" the sentence of that passage that backs your answer, copied word for word.`;
@@ -20,7 +20,9 @@ export function systemPrompt(snapshotDate: string, variant: Variant = "default")
 // rule in force. Passages carry a computed in_force="…", so the model never compares dates.
 // fix-1 is the committed `shipped-2` ladder row; fix-2 and fix-3 (#57, tuned on dev) add: decline only
 // when no passage settles the question, a rule for everyone covers each case, an in-force deletion is
-// an answer, and no "the documents don't say" without checking every passage.
+// an answer, and no "the documents don't say" without checking every passage. fix-5 (fix-4 was
+// reverted): out_of_date is also set by an in-force by-law that ranked on its own, which carries no
+// amendment="…" mark.
 function fixPrompt(snapshotDate: string): string {
   return `You answer questions about the City of Toronto's rules and committee decisions using only the numbered passages you are given. The passages are from a snapshot of City documents taken on ${snapshotDate}.
 
@@ -89,7 +91,7 @@ function attrs(p: PassageView): string {
 }
 
 // `fix` only: a by-law's in-force date (from its source line) against the snapshot date, and on an
-// amended section, the in-force amendment passage that changed it.
+// amended section, the in-force amendment passage that changed it, companion or ranked on its own.
 const inForceDate = (p: PassageView) => /\bin force (\d{4}-\d{2}-\d{2})\b/.exec(p.sublabel)?.[1];
 
 function fixAttrs(p: PassageView, passages: PassageView[], snapshotDate: string): string {
@@ -97,7 +99,7 @@ function fixAttrs(p: PassageView, passages: PassageView[], snapshotDate: string)
   if (date) return date <= snapshotDate ? ` in_force="yes, since ${date}"` : ` in_force="not yet, from ${date}"`;
   const by = passages.find((a) => {
     const d = inForceDate(a);
-    return a.companion && !a.notYetLaw && d && d <= snapshotDate && p.amendedSince.some((n) => a.label.startsWith(`By-law ${n} `));
+    return !a.notYetLaw && d && d <= snapshotDate && p.amendedSince.some((n) => a.label.startsWith(`By-law ${n} `));
   });
   return by ? ` out_of_date="changed by ${by.label} [${by.n}], in force since ${inForceDate(by)}"` : "";
 }
@@ -130,10 +132,11 @@ function hash(variant: Variant): string {
     .update("\0")
     .update(userPrompt("{question}", [sample({ amendedSince: ["{n}"], notYetLaw: true }), sample({ defines: ["{term}"] })]));
   if (variant === "fix") {
-    // both in_force wordings against a fixed date between them, and out_of_date
+    // both in_force wordings against a fixed date between them, and out_of_date from a by-law that
+    // ranked on its own
     const dated = [
       sample({ companion: false, amendedSince: ["{n}"] }),
-      sample({ label: "By-law {n} {clause}", sublabel: "in force 1000-01-01" }),
+      sample({ companion: false, label: "By-law {n} {clause}", sublabel: "in force 1000-01-01" }),
       sample({ sublabel: "in force 9000-01-01" }),
     ];
     h.update("\0").update(userPrompt("{question}", dated, "fix", "5000-01-01"));

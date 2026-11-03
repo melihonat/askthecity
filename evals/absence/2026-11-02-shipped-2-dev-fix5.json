@@ -1,0 +1,153 @@
+{
+ "run_id": "2026-11-02-shipped-2-dev-fix5-211903",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't cover how to apply for the permit or the fee amount.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:447-1.3:A-B",
+     "span": "An application for a permit for a swimming pool enclosure shall be in the form required by the Executive Director",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Chapter 441 is not in these passages, so the fee amount is not stated here.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not set out the penalties for going over that limit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't state the penalty for going over that limit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state the penalty for going over this limit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether this applies to a neighbour's property differently in any other way.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Yes, if your park is one of the parks listed in Schedule A, you may possess an open container of liquor and consume liquor there between 5:30 a.m. and 12 a.m. without a permit, provided you are not within the pool or deck boundary or within two metres of a playground, wading pool, splash pad, skateboard or BMX park, or ice rink [1][2].",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:608-8",
+     "span": "a person may possess an open container of liquor and consume liquor in the parks listed in Schedule A between the hours of 5:30 a.m. and 12 a.m. without a permit or the approval of the Alcohol and Gaming Commission of Ontario",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-moved-pet-sources",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Passages 2 through 5 are out of date, and passage 7 deleting the earlier source rules is not in force by its own text, so the source list in passage 1 governs.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-moved-pet-sources",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a pet shop may buy rabbits from a breeder that is not a kennel.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 39,
+  "absence": 9,
+  "false": 2,
+  "answers_with_false": 2,
+  "unfound_quotes": 0,
+  "unchecked": 0
+ }
+}

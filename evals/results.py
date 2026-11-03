@@ -30,6 +30,7 @@ WHY = {
     "rerank": "A reranker scores every passage against the question; if none scores high enough, it refuses before the model writes anything.",
     "shipped": "Brings in the by-laws that amended a cited section after the Code was last consolidated.",
     "shipped-2": "Fix: the prompt cites only the passage that states each sentence, and leads with the rule in force when a by-law changed a section.",
+    "shipped-3": "Fix: Sonnet 5.5 instead of Haiku 5.5 on the shipped-2 prompt, which leads with the rule in force after a deletion, at ~18× the generation cost.",
     "side-sonnet": "Sonnet 5.5 instead of Haiku 5.5, at ~20× the generation cost.",
     "side-quoted": "Asks the model to quote the supporting sentence for every citation.",
 }
