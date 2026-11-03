@@ -38,7 +38,7 @@ FIX_NOTE = ("The rows below the first shipped row were added after it missed the
             "later commit, with shipped re-run beside it on that commit, and is compared against that re-run. The "
             "rows above are left as they were.")
 NO_GAIN = " — no measurable gain."
-AUDIT_WHY = "The same {rung} stack, run after the gold audit and scored against the widened gold."
+AUDIT_WHY = "The {rung} stack with prompt {prompt}, run after the gold audit and scored against the widened gold."
 AUDIT_NOTE = ("The rows below were run after the gold audit (EVALS.md, \"Gold audit\"): passages that state the "
               "sentence citing them, reviewed by hand from the citations of the runs above, were added to gold. They are "
               "scored against that gold and are not compared with the rows above. Their cite precision is partly "
@@ -222,7 +222,7 @@ def page_data(records: list[dict], agreement: dict | None = None) -> dict:
         "headerLink": f"Evals · {_count(trick)}/{trick['n']} trick questions refused" if trick else "Evals",
         "columns": [{"key": k, "label": label, "n": _n(ladder + fix_recs + side + after, k)} for k, label, _ in PAGE_COLUMNS],
         "ladder": [row(rec, ladder[i - 1] if i else None, i == 0) for i, rec in enumerate(ladder)] + fix_rows,
-        "audited": [row(rec, None, True, AUDIT_WHY.format(rung=rec["header"]["rung"])) for rec in after],
+        "audited": [row(rec, None, True, AUDIT_WHY.format(rung=rec["header"]["rung"], prompt=rec["header"]["prompt"]["version"])) for rec in after],
         "side": [row(rec, shipped, False) for rec in side],
         "shipBar": final and {"rung": final["header"]["rung"], "unmet": ship_bar(cols(final))},
         "agreement": agreement,

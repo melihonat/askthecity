@@ -1,0 +1,258 @@
+{
+ "run_id": "2026-11-02-shipped-2-dev-fix1-exc-165800",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Otherwise a permit is required, and the passages do not separately cover a backyard-specific rule beyond these conditions [1].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't cover the City's pool-water discharge rules beyond this, so check those separately.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the permit's processing time or the Chapter 441 fee amount.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the amount of the permit fee or the City's requirements for pool water discharge beyond the enclosure rules.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "a person is permitted to discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool to a storm sewer provided that all of the following conditions are met",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Chapter 608 does not say whether a birthday party bonfire could be permitted, so the documents don't cover that.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't say whether a permit for a bonfire would be granted for a birthday.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a birthday party bonfire could be permitted or what the permit process requires.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't cover the separate sound limits for leaf blowers in living areas.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say whether the City can ticket a driverless car for a specific violation beyond these categories.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't say whether the City can issue tickets to a driverless car's owner for moving violations.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:287415:comments:3",
+     "span": "nor provisions in the provincial Highway Traffic Act or the Provincial Offences Act that limit the ability to enforce against driverless vehicles",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether the City has issued any tickets to a driverless car.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-park-fine",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Under Chapter 608 (Parks), a person convicted of a park offence not covered by an administrative penalty can be fined up to $100,000 [3].",
+     "verdict": "unchecked",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": false
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-holistic-fees",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not show whether any similar filing duty now applies to holistic centres.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether any other rules, such as the Alcohol and Gaming Commission of Ontario's requirements, apply.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Yes, you may possess and consume liquor in a park listed in Schedule A between 5:30 a.m. and 12 a.m., without a permit, provided you are not within a pool or deck boundary or within two metres of a playground, wading pool or splash pad, skateboard or BMX park, or ice rink. [1][2]",
+     "verdict": "unchecked",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": false
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether your specific park is on Schedule A beyond the listed parks.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 30,
+  "absence": 16,
+  "false": 3,
+  "answers_with_false": 3,
+  "unfound_quotes": 0,
+  "unchecked": 2
+ }
+}

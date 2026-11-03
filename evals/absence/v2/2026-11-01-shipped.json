@@ -1,0 +1,272 @@
+{
+ "run_id": "2026-11-01-shipped-131142",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "2",
+  "prompt_hash": "f6b52e96e585"
+ },
+ "calls": [
+  {
+   "id": "rules-saturday-drilling",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not address whether the drilling is a power device or construction equipment under every circumstance, or any exemption for a particular site.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-saturday-drilling",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Taking both together, the 9 a.m. Saturday start in the notice is the stricter residential standard, and the documents do not clearly settle whether the notice's Saturday start time is enforceable as a noise bylaw limit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-apartment-heat",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover how a tenant enforces these requirements.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-apartment-heat",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say how the temperature is measured or enforced in your specific case.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-apartment-heat",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether the landlord's obligation applies outside the October 1 to May 15 period or to units not normally heated by the landlord.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:497-2.1",
+     "span": "Subsection (1) is only applicable to a dwelling unit that is normally heated at the landlord's expense",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-sidewalk-snow",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Staff reports indicate that the City now clears sidewalks after 2 cm of accumulation, but these reports are not decisions and the documents do not confirm which sidewalks the City currently covers.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:260413:comments:1",
+     "span": "In June 2021, City Council approved the expansion of the City’s mechanical sidewalk winter maintenance service to the remaining sidewalks that were not previously receiving this service.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-dogs-limit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover any limit on dogs at a pet establishment beyond the rules above.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-dead-tree",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether you can cut it down yourself without that certification, and Chapter 632 requires the owner to remove any decayed or dangerous tree that poses a danger to persons or property [3][8].",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:813-13",
+     "span": "a permit is not required under this article for the following activities:\n\nA. Removal of a terminally diseased, dead or imminently hazardous tree certified as such by the Executive Director.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-dead-tree",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a backyard tree on private property is governed by Chapter 813 or Chapter 658, nor whether certification can be obtained without a permit application.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-reno-hours-idling",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover renovation work that is not infill construction, or whether a truck idling while the crew works counts as a noise violation under the noise chapter.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:517-2",
+     "span": "No person shall cause or permit a vehicle or boat to idle for more than one minute in a sixty-minute period.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "amended-manganese-limit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages cover the limit for storm sewer discharge and do not say whether it applies to a business in every case, so applicable exemptions for certain development applications are set out separately [3][5].",
+     "verdict": "false",
+     "passage": 5,
+     "chunkId": "ie:2026.IE29.6:council:1",
+     "span": "to permit development applications submitted after January 1, 2026, and which are ready and eligible to apply for above-grade building permits before October 1, 2026, to be exempt from the existing Storm Sewer Quality Limit for Manganese",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "amended-manganese-limit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state the limit that applies to every business discharge, such as businesses outside those development applications.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:681-4:Jp2",
+     "span": "Manganese (total) | 2.0 | mg/L5",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "amended-manganese-limit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state how this applies to any particular business or site outside the transition for certain development applications.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-electricity-referred",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover the IESO's own plan or the Toronto Hydro and Auditor General requests from that letter's motion beyond that referral.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "ie:2025.IE26.14:committee",
+     "span": "request the Auditor General of Ontario to review the impact on Torontonians' energy costs and air quality of the Independent Electricity System Operator's draft Integrated Regional Resource Plan",
+     "span_found": false
+    }
+   ]
+  },
+  {
+   "id": "decisions-tree-size",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The current 30 cm threshold still applies, and the passages do not show a by-law in force that lowers it.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "ie:2026.IE27.8:council:1",
+     "span": "City Council endorse in principle the recommendation to reduce the minimum diameter at breast height of trees protected on private property from 30 centimetres to 20 centimetres diameter in 2027.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-tree-size",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The current 30 cm threshold remains in place until any amendment is adopted, and the passages do not state when or whether the threshold will change.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "ie:2026.IE27.8:council:1",
+     "span": "City Council endorse in principle the recommendation to reduce the minimum diameter at breast height of trees protected on private property from 30 centimetres to 20 centimetres diameter in 2027.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-tree-size",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say when, or whether, the change will take effect.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "ie:2026.IE27.8:council:1",
+     "span": "endorse in principle the recommendation to reduce the minimum diameter at breast height of trees protected on private property from 30 centimetres to 20 centimetres diameter in 2027",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 51,
+  "absence": 17,
+  "false": 9,
+  "answers_with_false": 9,
+  "unfound_quotes": 1
+ }
+}

@@ -1,0 +1,602 @@
+{
+ "run_id": "2026-11-01-shipped-131142",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "rules-drone-park",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether High Park issues drone permits or how to get one.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-drone-park",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Flying one in High Park is therefore only allowed with a City permit; the passages do not say whether High Park has any specific permit arrangements.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-drone-park",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether High Park has any specific permit or exemption, so I cannot say more about that location.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-saturday-drilling",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not address whether the drilling is a power device or construction equipment under every circumstance, or any exemption for a particular site.",
+     "verdict": "false",
+     "passage": 6,
+     "chunkId": "tmc:591-1.1:ambient-sound-level",
+     "span": "CONSTRUCTION EQUIPMENT - Any equipment or device designed and intended for use in construction, or material handling, including hand tools, power tools, air compressors, pile drivers, pneumatic or hydraulic tools",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-saturday-drilling",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Taking both together, the 9 a.m. Saturday start in the notice is the stricter residential standard, and the documents do not clearly settle whether the notice's Saturday start time is enforceable as a noise bylaw limit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-saturday-drilling",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether the drilling would be clearly audible at a specific location.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-apartment-heat",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover how a tenant enforces these requirements.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-apartment-heat",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say how the temperature is measured or enforced in your specific case.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:497-2.1",
+     "span": "at 1.5 metres above the floor level",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-apartment-heat",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether the landlord's obligation applies outside the October 1 to May 15 period or to units not normally heated by the landlord.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:497-2.1",
+     "span": "Subsection (1) is only applicable to a dwelling unit that is normally heated at the landlord's expense.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-sidewalk-snow",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether any different deadline applies to a sidewalk that the City clears under that policy.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-sidewalk-snow",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether a City policy currently covers your particular sidewalk.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-sidewalk-snow",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Staff reports indicate that the City now clears sidewalks after 2 cm of accumulation, but these reports are not decisions and the documents do not confirm which sidewalks the City currently covers.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:260413:comments:1",
+     "span": "In June 2021, City Council approved the expansion of the City’s mechanical sidewalk winter maintenance service to the remaining sidewalks that were not previously receiving this service.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-car-idling",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not address whether waiting for someone is an exemption beyond those listed.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-dogs-limit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover any limit on dogs at a pet establishment beyond the rules above.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-dogs-limit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state a limit for dogs kept at a location other than a dwelling unit or park.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-dead-tree",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a dead tree in a backyard is covered by the Chapter 813 or Chapter 658 exemption without that certification, and they do not cover the owner's obligations beyond removing dangerous trees [3].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-dead-tree",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether you can cut it down yourself without that certification, and Chapter 632 requires the owner to remove any decayed or dangerous tree that poses a danger to persons or property [3][8].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-dead-tree",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a backyard tree on private property is governed by Chapter 813 or Chapter 658, nor whether certification can be obtained without a permit application.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-reno-hours-idling",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a crew's own trucks count as construction equipment, so that point is not covered.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-reno-hours-idling",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether idling trucks at a construction site fall under any exemption beyond those listed.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-reno-hours-idling",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover renovation work that is not infill construction, or whether a truck idling while the crew works counts as a noise violation under the noise chapter.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:591-2.3",
+     "span": "construction or any operation of construction equipment that is clearly audible",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "lookup-591-2-1",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the definition of living area or point of reception.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "lookup-591-2-1",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover how instrument sound is measured beyond that definition.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "amended-manganese-limit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages cover the limit for storm sewer discharge and do not say whether it applies to a business in every case, so applicable exemptions for certain development applications are set out separately [3][5].",
+     "verdict": "false",
+     "passage": 5,
+     "chunkId": "ie:2026.IE29.6:council:1",
+     "span": "to be exempt from the existing Storm Sewer Quality Limit for Manganese in Toronto Municipal Code Chapter 681, Sewers, and to instead be subject to the updated Storm Sewer Quality Limit for Manganese, where appropriate",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "amended-manganese-limit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state the limit that applies to every business discharge, such as businesses outside those development applications.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:681-4:Jp2",
+     "span": "Manganese (total) | 2.0 | mg/L5",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "amended-manganese-limit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state how this applies to any particular business or site outside the transition for certain development applications.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "amended-summer-cooling",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover whether the Chapter 629 replacement due 2027-05-01 keeps an equivalent operating duty, though its draft text does include one [2].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "amended-summer-cooling",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover whether the 1512-2025 chapter (not yet in force) changes this duty before 2027-05-01 [2].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-electricity-referred",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover the IESO's own plan or the Toronto Hydro and Auditor General requests from that letter's motion beyond that referral.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "ie:2025.IE26.14:committee",
+     "span": "request the Toronto Hydro Board to propose and cost a plan for electricity supply to the City of Toronto that is aligned with the City's 2040 net zero target",
+     "span_found": false
+    }
+   ]
+  },
+  {
+   "id": "decisions-electricity-referred",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not show any Council decision on that letter's specific recommendations.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-tree-size",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The current 30 cm threshold still applies, and the passages do not show a by-law in force that lowers it.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "sr:284390:comments:12",
+     "span": "The Private Tree Bylaw currently protects trees on private property that are 30 cm or greater DBH.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-tree-size",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The current 30 cm threshold remains in place until any amendment is adopted, and the passages do not state when or whether the threshold will change.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "ie:2026.IE27.8:council:1",
+     "span": "endorse in principle the recommendation to reduce the minimum diameter at breast height of trees protected on private property from 30 centimetres to 20 centimetres diameter in 2027",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-tree-size",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say when, or whether, the change will take effect.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "ie:2026.IE27.8:council:1",
+     "span": "reduce the minimum diameter at breast height of trees protected on private property from 30 centimetres to 20 centimetres diameter in 2027",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-ebikes",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether the province has adopted these rules.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-ebikes",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether the province has adopted these proposals, and this is a City position on a provincial proposal.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-ebikes",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether the Province has adopted the proposed rules.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-laneway-snow",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not show any decision to start clearing snow in these laneways.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-laneway-snow",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover any decision after these items.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-laneway-snow",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not show the outcome of that review.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 51,
+  "absence": 39,
+  "false": 10,
+  "answers_with_false": 10,
+  "unfound_quotes": 1
+ }
+}

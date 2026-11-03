@@ -1,0 +1,275 @@
+{
+ "run_id": "2026-11-01-shipped-dev-3-005918",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether a backyard is considered land you own for these purposes beyond the consent rule stated.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover requirements for discharging pool water, which are set out in other sections [2][3].",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the wastewater discharge rules in detail for a specific site, nor any zoning or building approvals beyond this pool enclosure permit.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "a person is permitted to discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool either",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the City's wastewater rules for draining or filling the pool beyond the enclosure requirements, nor any other permits that may apply.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state the penalties for exceeding the limit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state what penalty applies for a breach.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether any penalty applies beyond the orders the City may issue for a contravention [5].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "A bonfire is an open fire, so a permit is needed; the passages do not say whether a birthday gathering would qualify for a permit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a birthday gathering alone would require a permit for the park's rules on picnics and gatherings, or what permit the City would issue for a bonfire [1][3].",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:608-11",
+     "span": "Unless authorized by permit, hold a picnic, organized gathering or special event for more than 25 persons",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "A bonfire at a park therefore needs a City-issued permit, and the passages do not say whether a birthday gathering could obtain one.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    },
+    {
+     "sentence": 2,
+     "text": "The passages also do not address park bookings for a birthday party.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:608-11",
+     "span": "Unless authorized by permit, hold a picnic, organized gathering or special event for more than 25 persons",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Passage 1 also says Subsection A does not apply to power devices used by the City or on golf courses or public parks, which does not cover a neighbour's use [1].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    },
+    {
+     "sentence": 2,
+     "text": "The documents do not cover whether other noise limits apply to the neighbour's leaf blower.",
+     "verdict": "false",
+     "passage": 6,
+     "chunkId": "tmc:591-1.1:living-area",
+     "span": "POWER DEVICE - Any equipment driven otherwise than by muscular power used in the servicing, maintenance or repair of property or lawns, including chainsaws, lawn mowers, leaf blowers, grass trimmers, power or pressure washers, or any other similar equipment.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether any other noise limits apply to a leaf blower during permitted hours.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether the amended 2022 version of this rule has any other exceptions for private property.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state how a ticket would be issued to a driverless car for specific offences beyond these categories.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say whether a ticket can be issued to a driverless car itself.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether the City can ticket a driverless car for a moving violation.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:287415:comments:3",
+     "span": "nor provisions in the provincial Highway Traffic Act or the Provincial Offences Act that limit the ability to enforce against driverless vehicles",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 18,
+  "absence": 18,
+  "false": 7,
+  "answers_with_false": 7,
+  "unfound_quotes": 0
+ }
+}

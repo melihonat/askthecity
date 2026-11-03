@@ -1,0 +1,407 @@
+{
+ "run_id": "2026-11-02-shipped-dev-default9-local-164556",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not address the rules for your backyard beyond these requirements.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:466-5",
+     "span": "on any land other than land belonging to the person discharging the consumer fireworks, or on other private property where the prior written consent of the owner has been obtained",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether a backyard qualifies beyond these conditions, nor any zoning or noise rules.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-fireworks-backyard",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether a backyard qualifies as your own land for these purposes beyond the consent rule, and they do not address zoning or other restrictions.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover how wastewater from filling or draining the pool must be handled beyond the rules for discharge, and do not cover any requirements for the pool's operation once finished.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "a person is permitted to discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool either",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents provided do not cover the specific fee amount or the Executive Director's permit processing timelines.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the Chapter 441 fee amount or the wastewater discharge rules for when you drain the pool later, beyond the fact that the City's wastewater rules apply [2][3].",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "a person is permitted to discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool to a storm sewer provided that all of the following conditions are met",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state a separate penalty for exceeding that height.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover penalties for exceeding this limit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover any penalty for exceeding this height.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't say whether a birthday party would be treated as a special event requiring a permit for other reasons.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't say whether a birthday gathering would itself need a separate permit.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:608-11",
+     "span": "Unless authorized by permit, hold a picnic, organized gathering or special event for more than 25 persons",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say how a bonfire permit is obtained.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover whether a neighbour's leaf blower could breach separate limits on amplified or stationary sound [2][3].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether a leaf blower used on a neighbour's property is covered by any other provision, such as the sound limits in the other sections.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether any other restrictions apply to leaf blowers during the permitted hours.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say whether the City can ticket a driverless car for moving violations specifically.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:287415:comments:3",
+     "span": "provisions in the provincial Highway Traffic Act or the Provincial Offences Act that limit the ability to enforce against driverless vehicles",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether a driverless car can be ticketed for a specific moving violation.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say how the City would ticket a driverless car for moving violations.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-park-fine",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't set out the fine for a § 608-32 offence or the amounts for the excluded parking penalties beyond the schedules shown.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:610:schedule-a:p1",
+     "span": "§ 608-27A",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-park-fine",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether the $100,000 maximum applies to every park offence without exception.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "bl:1150-2026:cl11",
+     "span": "Every person convicted of an offence under this chapter, other than an administrative penalty under §§ 608-27A, B, C, D, E.1, F or 608-30.1 or an offence under § 608-32, is liable to a fine of no more than $100,000.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-park-fine",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover fines under other chapters of the Code.",
+     "verdict": "false",
+     "passage": 5,
+     "chunkId": "tmc:813-29",
+     "span": "To a minimum fine of $500.00 and a maximum fine of $100,000.00 per tree",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-vendor-street",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether your food cart's specific location or activities fall within other conditions of the exemption.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-vendor-street",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether this exemption covers every kind of cart or vending activity, so that part is not covered.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-vendor-street",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a food cart, as opposed to other occupations, is covered by the exemption beyond the Chapter 740 permit itself, and the passages do not say what the Street Vending permit itself requires [2].",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:740-2",
+     "span": "No person shall occupy and vend on a road, sidewalk or boulevard unless issued a permit under this chapter by the Executive Director to vend from that location.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-holistic-fees",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "From 2026-01-01 this filing requirement no longer applies, but the passages don't say what replaces it.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-holistic-fees",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not show the replacement rule, so the filing requirement's status after that date is not covered by the documents provided.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 27,
+  "absence": 26,
+  "false": 9,
+  "answers_with_false": 9,
+  "unfound_quotes": 0
+ }
+}

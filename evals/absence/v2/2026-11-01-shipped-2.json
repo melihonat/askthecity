@@ -1,0 +1,242 @@
+{
+ "run_id": "2026-11-01-shipped-2-162450",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "2",
+  "prompt_hash": "f6b52e96e585"
+ },
+ "calls": [
+  {
+   "id": "rules-saturday-drilling",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether drilling counts as construction equipment noise in every case, and they do not address whether the noise must be clearly audible at a specific point to apply in your situation.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-saturday-drilling",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether drilling that is not clearly audible at a point of reception is affected.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:591-2.3",
+     "span": "that is clearly audible",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-apartment-heat",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether the landlord must meet this requirement outside the October to May period.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:497-2.1",
+     "span": "from October 1 in each year to May 15 in the following year",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-sidewalk-snow",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state the City's current policy on which sidewalks it clears, so I can't confirm whether this exemption applies to your sidewalk.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-car-idling",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not address whether a waiting vehicle is covered by any other exemption not listed.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:517-2",
+     "span": "Subsection A does not apply to:",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-dogs-limit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover dogs kept outside a dwelling unit or a park beyond these limits.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-dogs-limit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say how many dogs a pet store may sell or how many a non-owner may control outside a park.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "tmc:545-260.1",
+     "span": "any person or business that sells more than 10 dogs per year",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-dead-tree",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a tree in a backyard that is not within a ravine protection area or other regulated area needs a certification in order to be removed without a permit, so confirm that with the Executive Director before cutting it down.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:813-13",
+     "span": "Removal of a terminally diseased, dead or imminently hazardous tree certified as such by the Executive Director.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-reno-hours-idling",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether the Infill notice's hours or the idling limit apply to every renovation, and they do not cover idling for reasons other than those listed.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:517-2",
+     "span": "Subsection A does not apply to:",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "amended-manganese-limit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state the limit that applies to businesses other than these development applications, beyond the Table 2 limit itself [1].",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:681-4:Jp2",
+     "span": "Manganese (total) | 2.0 | mg/L5",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-electricity-referred",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover the content of the plan that staff will deliver.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-tree-size",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say when, or whether, the change will take effect.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "ie:2026.IE27.8:council:1",
+     "span": "reduce the minimum diameter at breast height of trees protected on private property from 30 centimetres to 20 centimetres diameter in 2027",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-tree-size",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say when, or whether, the threshold will actually be lowered.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-ebikes",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover whether the province has adopted these proposals, so the final rules are not confirmed.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-laneway-snow",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say whether any future change will be made.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 51,
+  "absence": 15,
+  "false": 8,
+  "answers_with_false": 8,
+  "unfound_quotes": 0
+ }
+}

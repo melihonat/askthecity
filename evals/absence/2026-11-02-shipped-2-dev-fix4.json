@@ -1,0 +1,162 @@
+{
+ "run_id": "2026-11-02-shipped-2-dev-fix4-171629",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-refuse-landlord-entry",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't set rules for a landlord's own entry into an apartment, so I can't say whether a landlord needs notice.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-refuse-landlord-entry",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Those powers belong to City officers, not private landlords, and the passages do not state a landlord's notice rules [1][6].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-refuse-landlord-entry",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state what a landlord may do.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the City's rules for wastewater discharge from the pool once it is in use.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover the wastewater rules for discharging the pool's water, which are outside this question.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Chapter 629 is set to be replaced on 2027-05-01 by By-law 1512-2025, but the replacement passages do not restate the height limit [6][7].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say whether the City can issue such tickets to a driverless car's owner for moving violations.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:287415:comments:3",
+     "span": "nor provisions in the provincial Highway Traffic Act or the Provincial Offences Act that limit the ability to enforce against driverless vehicles",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say whether a specific driverless car can be ticketed for a particular moving violation.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Yes, if your park is one of the 45 parks listed in Schedule A, you may possess an open container of liquor and drink it there between 5:30 a.m. and 12 a.m. without a permit, provided you are not inside the pool or deck boundary or within two metres of a playground, wading pool, splash pad, skateboard park or ice rink [1][2].",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:608-8",
+     "span": "not state",
+     "span_found": false
+    },
+    {
+     "sentence": 2,
+     "text": "The passages do not cover whether the alternative-hours rule in the sidewalk café chapter applies to parks.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 39,
+  "absence": 10,
+  "false": 3,
+  "answers_with_false": 3,
+  "unfound_quotes": 1,
+  "unchecked": 0
+ }
+}

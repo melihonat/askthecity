@@ -1,0 +1,243 @@
+{
+ "run_id": "2026-11-02-shipped-2-dev-fix2-170805",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-pool-permit",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't cover how to apply for the permit or the fee amount.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:447-1.3:A-B",
+     "span": "An application for a permit for a swimming pool enclosure shall be in the form required by the Executive Director and shall be accompanied with the non-refundable fee set out in Chapter 441, Fees and Charges, and by plans",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover how or where to submit the application.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-pool-permit",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the permit's processing time or the fee amount.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't set a penalty for going over that height.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't set a penalty amount for letting grass grow past that height.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't state the penalty for letting it grow too long.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Passages don't cover whether the rule applies to a neighbour's device specifically beyond this general ban.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't cover the exact hour your neighbour must stop beyond that general rule.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:591-2.6",
+     "span": "No person shall emit or cause or permit the emission of sound from a power device from 7 p.m. until 8 a.m. the next day",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say how a ticket to a driverless car's owner would be issued in practice.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The City's authority over automated vehicles is otherwise limited, and the documents do not say whether a driverless car can be ticketed for moving violations under current law. [4]",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:287415:comments:3",
+     "span": "nor provisions in the provincial Highway Traffic Act or the Provincial Offences Act that limit the ability to enforce against driverless vehicles",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-park-fine",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state a maximum fine for every other park offence.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "bl:1150-2026:cl11",
+     "span": "is liable to a fine of no more than $100,000.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-vendor-street",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't cover whether the exemption applies to every type of food cart or vending setup.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-vendor-street",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether a food cart's own occupation of the street falls under this exemption beyond that, and the permit to vend is required under Chapter 740 itself [2].",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "bl:353-2026:cl3",
+     "span": "a person with a valid permit issued pursuant to Chapter 740, Street Vending is exempted from the obligation to obtain a permit to temporarily occupy the street",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether the park's own closing rules or a sidewalk café permit area would apply to your location.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:608-9",
+     "span": "no person shall use, enter or gather in a park between the hours of 12:01 a.m. and 5:30 a.m.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-night",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state the rule for a walk outside those hours in a way that was asked, so this answer is limited to the early-morning hours.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 32,
+  "absence": 15,
+  "false": 6,
+  "answers_with_false": 6,
+  "unfound_quotes": 0,
+  "unchecked": 0
+ }
+}

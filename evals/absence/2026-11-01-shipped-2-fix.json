@@ -1,0 +1,386 @@
+{
+ "run_id": "2026-11-01-shipped-2-fix-162935",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "rules-drone-park",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't say whether High Park has any further restrictions.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-saturday-drilling",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't say whether drilling at 7:30 a.m. is clearly audible at a neighbour's property.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-apartment-heat",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Passage 2's By-law 1512-2025 changes the requirement from 2027-05-01 and is not yet law [2].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-apartment-heat",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover a rule for a dwelling where heat is not provided at the landlord's expense.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:497-2.1",
+     "span": "Subsection (1) is only applicable to a dwelling unit that is normally heated at the landlord's expense",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-apartment-heat",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't say how this applies to a specific building beyond these rules.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-sidewalk-snow",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state how the City policy applies to any specific street.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-sidewalk-snow",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't say whether the City currently clears your particular sidewalk.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-sidewalk-snow",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not say whether the City's current policy covers your particular street.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "rules-car-idling",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The exemptions in that section do not cover simply waiting for someone, and the documents do not address whether the rule applies to every kind of stopped vehicle in the same way.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-dead-tree",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say how to obtain that certification.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-dead-tree",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not say whether a dead tree on private property can be cut down without that certification.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:813-13",
+     "span": "Removal of a terminally diseased, dead or imminently hazardous tree certified as such by the Executive Director",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-reno-hours-idling",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state the permitted hours for ordinary (non-equipment) renovation work.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "tmc:519:schedule-a:1",
+     "span": "Monday to Friday 7am to 7pm and Saturday 9am to 7pm.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-reno-hours-idling",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not set general working hours for renovation crews beyond the noise rules.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "tmc:519:schedule-a:1",
+     "span": "Monday to Friday 7am to 7pm and Saturday 9am to 7pm.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "multi-reno-hours-idling",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state the crew's own permitted working hours beyond this noise rule.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "tmc:519:schedule-a:1",
+     "span": "Monday to Friday 7am to 7pm and Saturday 9am to 7pm.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "amended-manganese-limit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover limits for businesses beyond the storm sewer table.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:681-4:Jp2",
+     "span": "Table 2 - Limits for Storm Sewer Discharge",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-electricity-referred",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't show a Council decision on IE26.14 itself.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-tree-size",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not show that the threshold has been lowered or when it would take effect.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "ie:2026.IE27.8:council:1",
+     "span": "reduce the minimum diameter at breast height of trees protected on private property from 30 centimetres to 20 centimetres diameter in 2027",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-tree-size",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not show a by-law that has changed the threshold yet.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-ebikes",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "These were proposals from the Province, and the documents don't say whether the Province has adopted them.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-ebikes",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "These are requests and comments to the Province, not provincial law; the documents do not say whether the Province will adopt the proposal.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-ebikes",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Council expects the province to be asked to put these e-bike rules in place, and the documents don't say whether the province has adopted them.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-laneway-snow",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not show any date for that review.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-laneway-snow",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover any decision to start clearing laneway snow in the future.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "decisions-laneway-snow",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "No. The City's current laneway service is salting only, and snow plowing is not provided; staff are not recommending changes to that level of service at this time [3].",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "sr:286719:comments:12",
+     "span": "Transportation Services is not recommending changes to current winter maintenance service levels for public laneways at this time.in-force date not applicable",
+     "span_found": false
+    },
+    {
+     "sentence": 2,
+     "text": "The documents do not say whether any change will follow from that review.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 51,
+  "absence": 25,
+  "false": 7,
+  "answers_with_false": 7,
+  "unfound_quotes": 1
+ }
+}
