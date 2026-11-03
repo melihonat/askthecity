@@ -114,8 +114,11 @@ def select(records: list[dict]) -> dict[str, dict]:
 
 def final_shipped(records: list[dict]) -> dict | None:
     """The last `shipped*` rung: the one the ship bar is about (LADDER.md: the table is done when it passes).
-    A run after the gold audit is the latest check of the bar."""
-    after = [r for r in audited(records) if r["header"]["rung"].startswith("shipped")]
+    A run after the gold audit is the latest check of the bar; a `shipped` re-run beside a fix rung on its
+    SHA is that rung's comparison, not a check of the bar."""
+    after = audited(records)
+    fix_shas = {_sha(r) for r in after if r["header"]["rung"] in FIX}
+    after = [r for r in after if r["header"]["rung"] in FIX or (r["header"]["rung"] == "shipped" and _sha(r) not in fix_shas)]
     if after:
         return after[-1]
     pairs = fixes(records)
@@ -125,7 +128,8 @@ def final_shipped(records: list[dict]) -> dict | None:
 def public(records: list[dict]) -> dict | None:
     """What the public app serves: the last fix rung that passed the bar (it is switched on only then), else
     the ladder's `shipped`."""
-    passed = [fix for fix, _ in fixes(records) if not ship_bar(fix["scores"]["columns"])]
+    runs = [fix for fix, _ in fixes(records)] + [r for r in audited(records) if r["header"]["rung"] in FIX]
+    passed = sorted((r for r in runs if not ship_bar(r["scores"]["columns"])), key=lambda r: r["header"]["date"])
     return passed[-1] if passed else select(records).get("shipped")
 
 
@@ -283,6 +287,9 @@ def headline_block(records: list[dict], data: dict) -> str:
         lines.append(f"| {b(label)} | " + " | ".join(b(x) for x in cells) + " |")
     if data["intro"]:
         lines += ["", f"{data['intro']['questions']} questions written before the first build; full ladder below."]
+    if final and _gold(final) > 1:
+        lines += ["", f"{final['header']['rung']} was run after the gold audit, so its cite precision is scored "
+                      "against the widened gold and is partly in-sample."]
     lines.append(HEADLINE_END)
     return "\n".join(lines)
 

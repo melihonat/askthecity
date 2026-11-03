@@ -38,6 +38,10 @@ export const RUNGS: Record<Rung, RungConfig> = {
   "side-quoted": { ...SHIPPED, prompt: "quoted", maxOutputTokens: 1200 },
 };
 
+// What every public request runs: the last `shipped*` rung that passed the ship bar (LADDER.md,
+// "Ship bar"); the public app switches to a fix rung only once it passes.
+export const PUBLIC_RUNG: Rung = "shipped-3";
+
 export function isRung(value: unknown): value is Rung {
   return typeof value === "string" && Object.hasOwn(RUNGS, value);
 }

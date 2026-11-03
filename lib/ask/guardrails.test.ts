@@ -55,8 +55,8 @@ describe("matchesSecret", () => {
 });
 
 describe("usageLimit", () => {
-  it("allows 30 questions per IP and 500 in all per day", () => {
-    expect([IP_DAILY, GLOBAL_DAILY]).toEqual([30, 500]);
+  it("allows 30 questions per IP and 30 in all per day", () => {
+    expect([IP_DAILY, GLOBAL_DAILY]).toEqual([30, 30]);
   });
 
   // counts are questions already asked today, before this one
@@ -69,15 +69,15 @@ describe("usageLimit", () => {
   });
 
   it.each([
-    [499, null],
-    [500, "global_daily"],
-    [501, "global_daily"],
+    [29, null],
+    [30, "global_daily"],
+    [31, "global_daily"],
   ])("globally: %i before → %s", (global, limit) => {
     expect(usageLimit({ ip: 0, global })).toBe(limit);
   });
 
   it("names the visitor's own limit when both are reached", () => {
-    expect(usageLimit({ ip: 30, global: 500 })).toBe("ip_daily");
+    expect(usageLimit({ ip: 30, global: 30 })).toBe("ip_daily");
   });
 });
 

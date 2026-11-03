@@ -298,7 +298,7 @@
   {
    "rung": "shipped-3",
    "why": "The shipped-3 stack with prompt fix-5, run after the gold audit and scored against the widened gold.",
-   "highlight": false,
+   "highlight": true,
    "run": "2026-11-02-shipped-3-215817",
    "cells": [
     {
@@ -427,10 +427,8 @@
   }
  ],
  "shipBar": {
-  "rung": "shipped",
-  "unmet": [
-   "a contradicted key fact"
-  ]
+  "rung": "shipped-3",
+  "unmet": []
  },
  "agreement": {
   "agree": 32,

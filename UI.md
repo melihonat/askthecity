@@ -59,7 +59,7 @@ search was run.
 | Limit | Headline | Line |
 | --- | --- | --- |
 | `ip_daily` | You've asked 30 questions today. | That's the per-visitor limit for this demo. It resets at midnight Toronto time. |
-| `global_daily` | The demo is resting until tomorrow. | It has answered its 500 questions for today. It resets at midnight Toronto time. |
+| `global_daily` | The demo is resting until tomorrow. | It has answered its 30 questions for today. It resets at midnight Toronto time. |
 | `budget` | The demo is resting until tomorrow. | This month's model budget is used up. |
 | `burst` | Too many questions at once. | Wait a few seconds and try again. |
 | `too_long` | That question is over 300 characters. | Shorten it and ask again. |

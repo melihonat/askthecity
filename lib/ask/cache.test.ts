@@ -5,6 +5,11 @@ import { EXAMPLES } from "./scope";
 describe("cacheKey", () => {
   const base = cacheKey("How late can my neighbour run a leaf blower?", "s1");
 
+  it("is keyed on what public requests run: shipped-3's model and prompt", () => {
+    expect(CONFIG_VERSION.rung.model).toBe("anthropic/claude-sonnet-5.5");
+    expect(CONFIG_VERSION.promptVersion).toBe("fix-5");
+  });
+
   it("is the same for questions that differ only in case and spacing", () => {
     expect(cacheKey("  how LATE can my neighbour\n run a leaf blower? ", "s1")).toBe(base);
   });

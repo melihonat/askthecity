@@ -1,4 +1,4 @@
-import { isRung } from "./config";
+import { isRung, PUBLIC_RUNG } from "./config";
 import { matchesSecret } from "./guardrails";
 import type { Rung } from "./types";
 
@@ -14,11 +14,11 @@ export type EvalRequest = { eval: boolean; rung: Rung; tags: string[] };
 
 /**
  * What a request may select. Without the eval header the `rung` field is ignored and every
- * request is `shipped`; with it, an unknown rung is an error (null), never a silent fallback.
+ * request is `PUBLIC_RUNG`; with it, an unknown rung is an error (null), never a silent fallback.
  */
 export function resolveEval(headers: Headers, body: { rung?: unknown }, secret: string | undefined): EvalRequest | null {
-  if (!matchesSecret(headers.get(EVAL_HEADER), secret)) return { eval: false, rung: "shipped", tags: [] };
-  const rung = body.rung ?? "shipped";
+  if (!matchesSecret(headers.get(EVAL_HEADER), secret)) return { eval: false, rung: PUBLIC_RUNG, tags: [] };
+  const rung = body.rung ?? PUBLIC_RUNG;
   if (!isRung(rung)) return null;
   const runId = headers.get(EVAL_RUN_HEADER);
   return { eval: true, rung, tags: runId && RUN_ID.test(runId) ? [`eval:${runId}`] : [] };
