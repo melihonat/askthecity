@@ -487,6 +487,16 @@ describe("ask", () => {
         expect(debug?.build).toMatchObject({ promptVersion: PROMPTS.fix.version, promptHash: PROMPTS.fix.hash });
       });
 
+      // dev-deleted-dealer-hours: By-law 507-2026 ranks on its own, so it is a passage, not a companion
+      it("marks the section when the in-force by-law ranks on its own", async () => {
+        const bylawRow: SearchRow = { ...byLaw("2026-03-02"), rank: 2, score: 1 / 62, pinned: false };
+        const rows = [amendedRow("tmc:608-19", 1, ["1482-2025"]), bylawRow, ...ROWS.slice(2)];
+        const deps = fakeDeps(rows, rows.map(() => HIGH), ANSWER);
+        await run(deps, "shipped-2");
+        const p = deps.generate.mock.calls[0][0].prompt as string;
+        expect(p).toMatch(/label="tmc:608-19"[^>]*out_of_date="changed by By-law 1482-2025 cl\. 1 O–Y \[2\], in force since 2026-03-02"/);
+      });
+
       it("marks a by-law not yet in force, and leaves its section unmarked", async () => {
         const { prompt: p } = await prompt("shipped-2", "2027-01-01");
         expect(p).toContain('in_force="not yet, from 2027-01-01"');
