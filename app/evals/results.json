@@ -262,6 +262,38 @@
      "mark": null
     }
    ]
+  },
+  {
+   "rung": "shipped-2",
+   "why": "The shipped-2 stack with prompt fix-3, run after the gold audit and scored against the widened gold.",
+   "highlight": false,
+   "run": "2026-11-02-shipped-2-fix3-203432",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "0 / 17",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "0.89",
+     "mark": null
+    },
+    {
+     "text": "2.2 s",
+     "mark": null
+    }
+   ]
   }
  ],
  "side": [
@@ -331,7 +363,7 @@
   }
  ],
  "shipBar": {
-  "rung": "shipped",
+  "rung": "shipped-2",
   "unmet": [
    "a contradicted key fact"
   ]

@@ -1,0 +1,198 @@
+{
+ "run_id": "2026-11-02-shipped-2-dev-fix3-moved-204251",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover the wastewater rules for emptying the pool after it is built, which are a separate matter.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state the penalty for going over that limit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't set the penalty for going over that height.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Chapter 629's 20-centimetre rule is replaced on 2027-05-01 by By-law 1512-2025, which drops the height limit from its replacement text [6]; the documents don't state the height rule after that date.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-park-bonfire",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't say how to obtain a permit.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state whether the City can ticket a driverless car for any specific offence, so that question is not fully answered.",
+     "verdict": "false",
+     "passage": 4,
+     "chunkId": "sr:287415:comments:3",
+     "span": "provisions in the provincial Highway Traffic Act or the Provincial Offences Act that limit the ability to enforce against driverless vehicles",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not state whether the City can ticket a driverless car for a moving violation.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-amended-park-fine",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Under Chapter 608 (Parks), a person convicted of a park offence not covered by the listed administrative penalties is liable to a fine of no more than $100,000 [3].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not cover whether a Schedule A park is restricted at night beyond what is stated in Section 608-8.",
+     "verdict": "false",
+     "passage": 3,
+     "chunkId": "tmc:608-9",
+     "span": "no person shall use, enter or gather in a park between the hours of 12:01 a.m. and 5:30 a.m.",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Yes, if your park is one of the parks listed in Schedule A, you may possess an open container of liquor and consume liquor there between 5:30 a.m. and 12 a.m. without a permit, provided you are not in the excluded areas such as a pool deck, playground surface or equipment, wading pool or splash pad, skateboard or BMX park, or ice rink and their two-metre surroundings [1][2].",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "tmc:608-8",
+     "span": "a person may possess an open container of liquor and consume liquor in the parks listed in Schedule A between the hours of 5:30 a.m. and 12 a.m. without a permit or the approval of the Alcohol and Gaming Commission of Ontario",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-dealer-hours",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The amended text does not set a new closing hour, and the passages do not state a midnight limit for a Tuesday [1].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-moved-pet-sources",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not state any exception for buying rabbits from breeders.",
+     "verdict": "false",
+     "passage": 1,
+     "chunkId": "bl:1105-2025:cl1:O",
+     "span": "except when breeding kennels are obtaining purebred animals in accordance with the standards set out in Canada’s Animal Pedigree Act",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 37,
+  "absence": 12,
+  "false": 5,
+  "answers_with_false": 5,
+  "unfound_quotes": 0,
+  "unchecked": 0
+ }
+}
