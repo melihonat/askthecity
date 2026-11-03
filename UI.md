@@ -14,10 +14,22 @@ throwaway prototype variants. The response shape is in [`CONTRACT.md`](CONTRACT.
 - **Scope band** under the header: the short line ("Toronto Municipal Code + Infrastructure
   & Environment Committee decisions, as of <date>.") with a "What's included" expander
   holding the full scope sentence. A refusal always shows the full sentence.
-- **Question box:** textarea with a live `n / 300` counter that turns red past 300; Enter
-  submits.
+- **Question box:** one composer surface: textarea, a key hint (hidden on phones), a live
+  `n / 300` counter that turns red past 300, and an `Ask` button. Enter submits.
 - **Example chips:** four, one of them a trick question (dashed border, "· try a trick")
   that is refused. Their responses are cached, so they work in every limit state.
+- **Before a question:** the left opens with a heading and two sentences on what it answers
+  from; the panel shows "How an answer is made", the five pipeline steps (search, rerank,
+  stop if nothing fits, answer, check) with the counts from `lib/ask/config.ts` and a link
+  to `/evals`. Both go once a question is asked.
+
+## Look
+
+Cool paper (`#f4f6f8`) and lake-blue ink (`#1c5ba3`); Public Sans for the interface,
+Source Serif for the answer and passage bodies, read like the bylaw text they quote. The
+mark is Toronto City Hall. Each card has a left rule in its family's colour: blue for the
+Code, green for Decisions, violet for a companion. Light and dark follow the system
+setting; motion stops under reduced motion.
 
 ## Answer
 
@@ -25,6 +37,10 @@ throwaway prototype variants. The response shape is in [`CONTRACT.md`](CONTRACT.
   sentence. Hover or tap highlights and scrolls to the passage card.
 - **Gap sentence** (the final uncited sentence): italic, muted, no icon. Other uncited
   sentences (a lead "No.") render plainly.
+- **Under the answer:** `Copy answer` (the text with its markers, then each cited passage's
+  label and link) and a receipt: "n of N passages cited", then the time from submit to the
+  final event, or "served from cache" when no `passages` event came. A refusal gets the
+  same receipt with "no answer given".
 - **Sources panel:**
   - **"Cited (n)":** one card per cited passage, in marker order. Card: number tag, label in
     bold, badges, sublabel line (breadcrumb · dates · page), `source ↗` to the PDF
@@ -39,10 +55,11 @@ throwaway prototype variants. The response shape is in [`CONTRACT.md`](CONTRACT.
 
 ## Waiting
 
-Buffered, not streamed. On submit: a skeleton in both panes. When the `passages` event
-arrives, the panel fills under "Passages found" and the left says "Found N passages.
-Writing an answer from them…" above a skeleton. The final `AskResponse` splits the panel
-into cited and not cited.
+Buffered, not streamed. On submit: a skeleton in both panes, and on the left two steps,
+the only two the client can tell apart: "Searching the bylaws and decisions", then "Writing
+an answer from them and checking its citations". When the `passages` event arrives, the
+panel fills under "Passages found" and the first step turns to "Found N passages in the
+bylaws and decisions". The final `AskResponse` splits the panel into cited and not cited.
 
 ## Refusal
 
@@ -71,7 +88,7 @@ failed request, or a dropped connection, as `unavailable`.
 ## `/evals`
 
 A real route, static, rendered from the same data as `evals/RESULTS.md`, so it costs $0 and
-works in every limit state. Full width, no sources panel. One-line intro (24 questions
+works in every limit state. Full width, no sources panel. A heading ("How it was tested"), a one-line intro (24 questions
 written before the build, 7 meant to be refused), the main ladder table with `shipped`
 highlighted, one muted "why" line under each rung name, `n` under each column heading,
 then the judge/human agreement line and the spread rule, then the side-rung table. The

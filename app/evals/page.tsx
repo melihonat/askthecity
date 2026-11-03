@@ -25,36 +25,38 @@ function Value({ cell }: { cell: Cell }) {
 
 function Table({ rows, caption }: { rows: Row[]; caption: string }) {
   return (
-    <table className="evals">
-      <caption>{caption}</caption>
-      <thead>
-        <tr>
-          <th scope="col">Rung</th>
-          {EVALS.columns.map((c) => (
-            <th scope="col" key={c.key}>
-              {c.label}
-              <span className="muted">n {c.n}</span>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r) => (
-          <tr key={r.run} className={r.highlight ? "shipped" : undefined}>
-            <th scope="row">
-              <code>{r.rung}</code>
-              {r.highlight && <span className="bar"> ✓ ship bar</span>}
-              <span className="muted">{r.why}</span>
-            </th>
-            {r.cells.map((cell, i) => (
-              <td key={EVALS.columns[i].key}>
-                <Value cell={cell} />
-              </td>
+    <div className="table-wrap">
+      <table className="evals">
+        <caption>{caption}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Rung</th>
+            {EVALS.columns.map((c) => (
+              <th scope="col" key={c.key}>
+                {c.label}
+                <span className="muted">n {c.n}</span>
+              </th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.run} className={r.highlight ? "shipped" : undefined}>
+              <th scope="row">
+                <code>{r.rung}</code>
+                {r.highlight && <span className="bar"> ✓ ship bar</span>}
+                <span className="muted">{r.why}</span>
+              </th>
+              {r.cells.map((cell, i) => (
+                <td key={EVALS.columns[i].key}>
+                  <Value cell={cell} />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -63,6 +65,7 @@ export default function EvalsPage() {
     <>
       <SiteHeader current="evals" />
       <main className="evals-page">
+        <h1>How it was tested</h1>
         {EVALS.intro ? (
           <p>
             {EVALS.intro.questions} questions written before the first build, {EVALS.intro.refuse} of them meant to
