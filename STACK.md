@@ -41,8 +41,10 @@ Then, in TypeScript:
    candidates.
 6. **Refusal gate** on the top rerank score, before any LLM call
    ([`CONTRACT.md`](CONTRACT.md#refusal-rule)).
-7. **Generate: Claude Haiku 5.5 via AI Gateway**, structured output. The model id is pinned
-   in config, never a moving alias, so evals stay reproducible.
+7. **Generate: Claude Sonnet 5.5 via AI Gateway** (`shipped-3`, prompt `fix-5`), structured
+   output. The model id is pinned in config, never a moving alias, so evals stay reproducible.
+   The stack was built on Haiku 5.5; the public app moved to Sonnet 5.5 when `shipped-3`, the
+   last fix rung, passed the ship bar (evals/LADDER.md).
 
 Retrieval logic lives in SQL (search and fusion) and TypeScript (orchestration), nowhere
 else; the eval harness calls the same `/api/ask`.
@@ -61,8 +63,9 @@ One Vercel Node function, `/api/ask`, in `iad1`; Supabase in `us-east-1`. Embed 
 
 ## Cost and latency
 
-- **Per question:** ≈ $0.0011 answered (generation ≈ $0.00055, rerank ≈ $0.0003–0.0006,
-  embed ≈ $0.000001); a refusal at the gate ≈ $0.0005 (no generation).
+- **Per question:** ≈ $0.021 answered on Sonnet 5.5, measured on the `shipped-3` test run
+  (its thinking can't be turned off and is billed as output); ≈ $0.0016 on Haiku 5.5. Rerank
+  ≈ $0.0003–0.0006, embed ≈ $0.000001; a refusal at the gate ≈ $0.0005 (no generation).
 - **Latency budget (p50):** embed ~150 ms, SQL ~100 ms, rerank ~400 ms; first token
   **< 1.5 s**, full answer **< 5 s**. The eval harness records time to first token and
   total per question, so latency is a column in the eval table, not a claim.

@@ -12,9 +12,11 @@ Try: "How late can my neighbour run a leaf blower?" · "What does § 591-2.1 say
 | | refuses trick questions | cite precision | answer correct |
 | --- | --- | --- | --- |
 | vector search only | 7 / 7 | 0.72 | 0.81 |
-| **shipped** | **7 / 7** | **0.80** | **0.93** |
+| **shipped-3** | **7 / 7** | **1.00** | **0.94** |
 
 24 questions written before the first build; full ladder below.
+
+shipped-3 was run after the gold audit, so its cite precision is scored against the widened gold and is partly in-sample.
 <!-- headline:end -->
 
 ## Evals
@@ -39,7 +41,7 @@ The rows below were run after the gold audit (EVALS.md, "Gold audit"): passages 
 | --- | --- | --- | --- | --- | --- | --- |
 | `shipped`<br><sub>The shipped stack with prompt default-9, run after the gold audit and scored against the widened gold.</sub> | 7 / 7 | 0 / 17 | 1.00 | 0.99 | 0.91 | 2.4 s |
 | `shipped-2`<br><sub>The shipped-2 stack with prompt fix-3, run after the gold audit and scored against the widened gold.</sub> | 7 / 7 | 0 / 17 | 1.00 | 1.00 | 0.89 | 2.2 s |
-| `shipped-3`<br><sub>The shipped-3 stack with prompt fix-5, run after the gold audit and scored against the widened gold.</sub> | 7 / 7 | 0 / 17 | 1.00 | 1.00 | 0.94 | 2.7 s |
+| **`shipped-3`** ✓ ship bar<br><sub>The shipped-3 stack with prompt fix-5, run after the gold audit and scored against the widened gold.</sub> | 7 / 7 | 0 / 17 | 1.00 | 1.00 | 0.94 | 2.7 s |
 | `shipped`<br><sub>The shipped stack with prompt default-9, run after the gold audit and scored against the widened gold.</sub> | 7 / 7 | 0 / 17 | 1.00 | 1.00 | 0.89 | 2.4 s |
 
 Generation columns are the mean of 3 runs. A row only counts as better when the gain is bigger than its own run-to-run spread; ≈ marks changes inside it. Answers were graded by Sonnet 5 against key facts written with the questions; on the first full run a human grader, blind to its verdicts, agreed with it on 32 of 34 facts (94%), and marked 1 fact contradicted that the judge passed, which the ship bar's contradicted check doesn't see. Cite precision counts a cited definition the app attached as correct; that rule was added after the first full run, when the citations outside gold turned out to be mostly definitions written after the gold was (0.69 → 0.78 for shipped), and applies to every row.
@@ -67,7 +69,7 @@ Code PDFs + by-laws + IE item pages              question
   → extract (pdfplumber) → § chunks                → search_chunks RPC:
   → embed (voyage-4-large)                            § pin + FTS + vector, RRF
   → Postgres (Supabase)  ───────────────────────►  → rerank-3 20→5  (low score → refuse)
-                                                   → Haiku 5.5 → validate [n] citations
+                                                   → Sonnet 5.5 → validate [n] citations
 eval harness ──── HTTP ────► the same /api/ask    → answer | refusal | limit
 ```
 

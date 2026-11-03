@@ -191,6 +191,23 @@ def test_a_run_after_the_gold_audit_gets_its_own_rows_and_the_ship_bar(fixed):
     assert page_data(fixed)["audited"] == [] and page_data(fixed)["auditNote"] is None
 
 
+def test_a_shipped_rerun_beside_an_audited_fix_rung_is_its_comparison_not_the_ship_bar(fixed):
+    """shipped-3 passes after the audit; the `shipped` re-run beside it on its SHA, later in time, misses."""
+    def after(rung: str, date: str, **cols) -> dict:
+        rec = _run(results.select(fixed)["shipped"], rung, "5555555eeee", date, **cols)
+        rec["header"] = {**rec["header"], "gold": 2, "prompt": {"version": "fix-5", "hash": "abc"}}
+        return rec
+    fix = after("shipped-3", "2026-11-05T10:00:00+00:00", cite_precision=1.0)
+    rerun = after("shipped", "2026-11-05T10:05:00+00:00", cite_precision=0.85)
+    recs = fixed + [fix, rerun]
+    data = page_data(recs)
+    assert ship_bar(rerun["scores"]["columns"]) and not ship_bar(fix["scores"]["columns"])
+    assert data["shipBar"] == {"rung": "shipped-3", "unmet": []}
+    assert [r["rung"] for r in data["audited"] if r["highlight"]] == ["shipped-3"]
+    headline = readme(README_IN, recs, data).split("headline:end")[0]
+    assert "| **shipped-3** |" in headline and "partly in-sample" in headline
+
+
 def test_fix_rung_goldens(fixed):
     data = page_data(fixed, AGREEMENT)
     golden("fix/RESULTS.md", results_md(fixed, data))

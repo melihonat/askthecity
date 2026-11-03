@@ -6,8 +6,10 @@ worded in [`UI.md`](UI.md#limit).
 
 ## Spend
 
-- **Ceiling: $10 prepaid AI Gateway credit (the minimum top-up), auto top-up off.** ≈ 9,000
-  answers or ≈ 20,000 refusals. A zero balance returns 402, which the app turns into the `budget` limit.
+- **Ceiling: $10 prepaid AI Gateway credit (the minimum top-up), auto top-up off.** ≈ 480
+  answers or ≈ 20,000 refusals on `shipped-3` (Sonnet 5.5, ≈ $0.021 an answer, measured on its
+  test run; Haiku 5.5 was ≈ $0.0016). A zero balance returns 402, which the app turns into
+  the `budget` limit.
 - A **$2/month Gateway budget** is an early-warning alert only (Gateway budgets are a soft
   cap). Refill is manual; nothing renews on its own.
 
@@ -16,10 +18,11 @@ worded in [`UI.md`](UI.md#limit).
 - **Burst:** the one Hobby firewall rule on `/api/ask`: 10 requests / 60 s per IP → 429
   (configured below).
 - **Daily, in Postgres**: a `usage_daily` table keyed by Toronto date + salted IP hash (no raw
-  IPs stored). **30 questions per IP per day, 500 paid questions per day globally** (≈ $0.55/day
-  worst case: a sustained bot needs ~18 days to drain $10, and the $2 alert fires around day
-  4). Cache hits and example questions don't count. No Upstash: one fewer free tier to keep
-  alive.
+  IPs stored). **30 questions per IP per day, 30 paid questions per day globally** (≈ $0.65/day
+  worst case: a sustained bot needs ~16 days to drain $10, and the $2 alert fires around day
+  3). The global limit was 500 on Haiku 5.5; it dropped to 30 when the public app moved to
+  `shipped-3`, at ~13× the cost per answer. Cache hits and example questions don't count. No
+  Upstash: one fewer free tier to keep alive.
 - **How the daily check runs:** one `use_quota(ip_hash, 30)` RPC ([`db/app.sql`](db/app.sql)),
   started beside the query embedding so it adds no latency, before the search. It counts the
   question against the IP and, only while the IP is under 30, against the global day (one IP

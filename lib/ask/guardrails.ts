@@ -5,7 +5,7 @@ import type { LimitKind, Usage } from "./types";
 // The pure core of GUARDRAILS.md: input checks, the IP hash, and the limit decisions.
 
 export const IP_DAILY = 30; // paid questions per IP per Toronto day
-export const GLOBAL_DAILY = 500; // paid questions per Toronto day, all visitors
+export const GLOBAL_DAILY = 30; // paid questions per Toronto day, all visitors
 
 /** Control characters out (tab, CR and LF become spaces), trimmed: what the pipeline sees. */
 export function clean(raw: string): string {

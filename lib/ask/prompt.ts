@@ -149,7 +149,3 @@ export const PROMPTS: Record<Variant, { version: string; hash: string }> = {
   quoted: { version: VERSIONS.quoted, hash: hash("quoted") },
   fix: { version: VERSIONS.fix, hash: hash("fix") },
 };
-
-// The public stack's prompt (`shipped`): part of the answer-cache key.
-export const PROMPT_VERSION = PROMPTS.default.version;
-export const PROMPT_HASH = PROMPTS.default.hash;

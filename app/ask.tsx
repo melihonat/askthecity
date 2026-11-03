@@ -26,7 +26,7 @@ const LIMIT: Record<LimitKind, { headline: string; line: string }> = {
   },
   global_daily: {
     headline: "The demo is resting until tomorrow.",
-    line: "It has answered its 500 questions for today. It resets at midnight Toronto time.",
+    line: "It has answered its 30 questions for today. It resets at midnight Toronto time.",
   },
   budget: { headline: "The demo is resting until tomorrow.", line: "This month's model budget is used up." },
   burst: { headline: "Too many questions at once.", line: "Wait a few seconds and try again." },
