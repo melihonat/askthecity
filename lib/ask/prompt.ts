@@ -18,6 +18,9 @@ export function systemPrompt(snapshotDate: string, variant: Variant = "default")
 
 // `shipped-2` (evals/LADDER.md, "Ship bar"): cite only what a sentence states, and lead with the
 // rule in force. Passages carry a computed in_force="…", so the model never compares dates.
+// fix-1 is the committed `shipped-2` ladder row; fix-2 and fix-3 (#57, tuned on dev) add: decline only
+// when no passage settles the question, a rule for everyone covers each case, an in-force deletion is
+// an answer, and no "the documents don't say" without checking every passage.
 function fixPrompt(snapshotDate: string): string {
   return `You answer questions about the City of Toronto's rules and committee decisions using only the numbered passages you are given. The passages are from a snapshot of City documents taken on ${snapshotDate}.
 

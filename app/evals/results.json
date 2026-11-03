@@ -233,7 +233,7 @@
  "audited": [
   {
    "rung": "shipped",
-   "why": "The same shipped stack, run after the gold audit and scored against the widened gold.",
+   "why": "The shipped stack with prompt default-9, run after the gold audit and scored against the widened gold.",
    "highlight": false,
    "run": "2026-11-01-shipped-audit-224526",
    "cells": [

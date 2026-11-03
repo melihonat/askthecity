@@ -177,12 +177,13 @@ def test_a_fix_rung_without_a_rerun_on_its_sha_says_so(fixed):
 
 def test_a_run_after_the_gold_audit_gets_its_own_rows_and_the_ship_bar(fixed):
     after = _run(results.select(fixed)["shipped"], "shipped", "4444444dddd", "2026-11-04T10:00:00+00:00", cite_precision=0.99)
-    after["header"] = {**after["header"], "gold": 2}
+    after["header"] = {**after["header"], "gold": 2, "prompt": {"version": "default-9", "hash": "abc"}}
     recs = fixed + [after]
     data = page_data(recs)
     assert [r["run"] for r in data["ladder"]] == [r["run"] for r in page_data(fixed)["ladder"]]  # ladder as it ran
     assert [(r["rung"], r["run"]) for r in data["audited"]] == [("shipped", "2026-11-04-shipped-130000")]
     assert all(c["mark"] is None for c in data["audited"][0]["cells"])  # compared with nothing
+    assert "prompt default-9" in data["audited"][0]["why"]  # a rung's prompt can change after the audit
     assert data["auditNote"] and data["shipBar"]["rung"] == "shipped" and data["audited"][0]["highlight"]
     md = results_md(recs, data)
     assert "`shipped` after gold audit: passes." in md and "after the gold audit on `4444444`" in md

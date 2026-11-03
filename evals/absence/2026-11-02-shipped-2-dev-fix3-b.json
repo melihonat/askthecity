@@ -1,0 +1,177 @@
+{
+ "run_id": "2026-11-02-shipped-2-dev-fix3-b-195943",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "dev-pool-permit",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't cover the City's wastewater rules for pool water beyond this, which are separate.",
+     "verdict": "false",
+     "passage": 2,
+     "chunkId": "tmc:681-11:T",
+     "span": "no person shall discharge wastewater from a private residential swimming pool or hot tub/spa or wading pool",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents do not cover the penalties for going over that height.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The 20-centimetre limit is the same under both rules, and the documents do not give a separate penalty for exceeding it.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-lawn-height",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Passage 6 from By-law 1512-2025 would change Chapter 629 from 2027-05-01, but it does not state a grass height limit, so the 20 centimetre limit appears to remain.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-leaf-blower",
+   "run": 3,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages do not give a separate rule for the neighbour's own property, so this is the general limit for power devices.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-driverless-tickets",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Whether the City can ticket a driverless car for moving violations is therefore limited by provincial law, and the documents do not state the exact ticketing procedure for driverless vehicles.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "Yes, in a park listed in Schedule A you may possess an open container of liquor and consume liquor between 5:30 a.m. and 12 a.m. without a permit, provided you are not within a pool or deck boundary or within two metres of a playground, wading pool or splash pad, skateboard or BMX park, or ice rink [1][2].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    },
+    {
+     "sentence": 2,
+     "text": "Note that the City's documents here don't state whether the Schedule A exception applies on a particular park's own terms beyond these rules.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-exception-park-drinking",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The documents don't cover whether a park-access rule about non-recreational use or entry changes this [3].",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-dealer-hours",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "A Tuesday is not a Saturday or pre-holiday day, so the midnight extension does not apply to the old wording, and the City documents provided do not state any current closing-hour rule for second-hand goods dealers after 2026-09-30.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  },
+  {
+   "id": "dev-deleted-dealer-hours",
+   "run": 2,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The rules that now apply to licensed second-hand goods dealers do not set a closing hour for a Tuesday, and the documents don't state any other closing-hour rule for that business.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 36,
+  "absence": 11,
+  "false": 1,
+  "answers_with_false": 1,
+  "unfound_quotes": 0,
+  "unchecked": 0
+ }
+}
