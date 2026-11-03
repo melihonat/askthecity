@@ -4,7 +4,8 @@
 # refusal rule adds ~10 `split: dev` questions (5 answer, 5 refuse) that never appear in the table.
 # Three more dev answers (`dev-amended-*`, `dev-deleted-*`) cover amended and deleted sections for
 # the `shipped-2` prompt fix (LADDER.md, "Ship bar"); the threshold was calibrated before them.
-# Three more (`dev-exception-*`, `dev-deleted-dealer-hours`) cover exception wording for #57.
+# Three more (`dev-exception-*`, `dev-deleted-dealer-hours`) cover exception wording for #57, and
+# `dev-moved-pet-sources` a rule deleted in one section and moved to another.
 #
 # Snapshot facts checked 2026-10-26 against the cached Code, the 120 candidate amending
 # by-laws and the live item pages. Patterns marked `pin` name a by-law clause whose exact
@@ -510,3 +511,19 @@
   notes: >
     The consolidated § 545-282 still prints the hours and their Saturday exception; 507-2026
     cl. 1A deletes them. Saying the store must close at 11 p.m. contradicts the first fact.
+
+- id: dev-moved-pet-sources
+  question: I run a pet shop. Can I sell rabbits I buy from a local breeder?
+  category: amended_since
+  expect: answer
+  required:
+    - [ "bl:1105-2025:cl1:O" ]
+  acceptable: [ "tmc:545-252:*", "tmc:545-260.2:*", "bl:1105-2025:cl1:G-J", "bl:1105-2025:cl1:A-F" ]
+  key_facts:
+    - No — a pet shop may obtain dogs, cats, rabbits and guinea pigs only from animal centres, registered humane societies, registered rescue groups, or people surrendering their pets for no compensation.
+    - By-law 1105-2025 set this in the new § 545-252, in force September 1, 2025.
+  split: dev
+  notes: >
+    A moved rule (#57): 1105-2025 deleted § 545-260.2 (cats and dogs from shelters only) and put
+    the sourcing rule, widened to rabbits and guinea pigs, in a new § 545-252 A(9). Saying the
+    rule was deleted, or that it covers only cats and dogs, contradicts the first fact.
