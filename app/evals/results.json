@@ -294,6 +294,70 @@
      "mark": null
     }
    ]
+  },
+  {
+   "rung": "shipped-3",
+   "why": "The shipped-3 stack with prompt fix-5, run after the gold audit and scored against the widened gold.",
+   "highlight": false,
+   "run": "2026-11-02-shipped-3-215817",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "0 / 17",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "0.94",
+     "mark": null
+    },
+    {
+     "text": "2.7 s",
+     "mark": null
+    }
+   ]
+  },
+  {
+   "rung": "shipped",
+   "why": "The shipped stack with prompt default-9, run after the gold audit and scored against the widened gold.",
+   "highlight": false,
+   "run": "2026-11-02-shipped-beside3-220317",
+   "cells": [
+    {
+     "text": "7 / 7",
+     "mark": null
+    },
+    {
+     "text": "0 / 17",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "1.00",
+     "mark": null
+    },
+    {
+     "text": "0.89",
+     "mark": null
+    },
+    {
+     "text": "2.4 s",
+     "mark": null
+    }
+   ]
   }
  ],
  "side": [
@@ -363,7 +427,7 @@
   }
  ],
  "shipBar": {
-  "rung": "shipped-2",
+  "rung": "shipped",
   "unmet": [
    "a contradicted key fact"
   ]

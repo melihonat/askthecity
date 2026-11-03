@@ -1,0 +1,33 @@
+{
+ "run_id": "2026-11-02-shipped-3-215817",
+ "checker": {
+  "model": "claude-sonnet-5",
+  "prompt_version": "1",
+  "prompt_hash": "aa2b9b5419b9"
+ },
+ "calls": [
+  {
+   "id": "rules-drone-park",
+   "run": 1,
+   "verdicts": [
+    {
+     "sentence": 1,
+     "text": "The passages don't say anything specific to High Park.",
+     "verdict": "true",
+     "passage": 0,
+     "chunkId": null,
+     "span": "",
+     "span_found": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "answers": 51,
+  "absence": 1,
+  "false": 0,
+  "answers_with_false": 0,
+  "unfound_quotes": 0,
+  "unchecked": 0
+ }
+}
