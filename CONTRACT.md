@@ -170,7 +170,7 @@ unknown rung is a 400. Without the header the field is ignored and every request
 `shipped`.
 
 ```ts
-type Rung = "dense" | "hybrid" | "rerank" | "shipped" | "shipped-2" | "side-sonnet" | "side-quoted"; // + shipped-3
+type Rung = "dense" | "hybrid" | "rerank" | "shipped" | "shipped-2" | "shipped-3" | "side-sonnet" | "side-quoted";
 
 type RungConfig = {
   search: "vector" | "hybrid";      // search_chunks mode arg: vector skips FTS and the pin

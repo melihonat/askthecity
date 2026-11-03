@@ -82,6 +82,7 @@ The table is done when every rung above has a committed 3-run result and the las
 | Rung | Change | Why |
 | --- | --- | --- |
 | `shipped-2` | Prompt `fix`: cite only the passage that states each sentence (at most two, plus their amendments and definitions), and lead with the rule in force; passages carry a computed `in_force` / `out_of_date` mark | `shipped` on `e818f4d`: cite precision 0.80, and an answer that called a deleted § the current rule |
+| `shipped-3` | Generator Sonnet 5.5 on `shipped-2` (prompt `fix-5`) | `shipped-2` with fix-3 on gold 2: 2 contradicted facts (a moved rule called deleted). On dev, Haiku opens a deleted ban with the old rule's "No" whatever the prompt says; Sonnet with fix-5 had 0 contradicted (#57, `392c9e2`) |
 
 - `shipped` keeps the `default` prompt, so the re-run beside `shipped-2` is the stack the
   ladder measured. The public app switches to the fix only once `shipped-2` passes.

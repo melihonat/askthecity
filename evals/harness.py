@@ -31,13 +31,13 @@ RUNS_DIR = ROOT / "evals" / "runs"
 
 EVAL_HEADER = "x-eval-key"       # lib/ask/eval.ts
 EVAL_RUN_HEADER = "x-eval-run"
-# lib/ask/config.ts RUNGS; `shipped-3` is the last fix rung LADDER.md allows, so no suffix may name it either
-RUNGS = ["dense", "hybrid", "rerank", "shipped", "shipped-2", "side-sonnet", "side-quoted"]
-RESERVED = set(RUNGS) | {"shipped-3"}
+# lib/ask/config.ts RUNGS; `shipped-3` is the last fix rung LADDER.md allows
+RUNGS = ["dense", "hybrid", "rerank", "shipped", "shipped-2", "shipped-3", "side-sonnet", "side-quoted"]
+RESERVED = set(RUNGS)
 GATEWAY = "https://ai-gateway.vercel.sh"
 COST_PER_CALL = 0.0011           # an answered Haiku question, STACK.md; refusals cost less
 # Sonnet 5.5 is 20× Haiku 5.5's per-token price: generation ≈ $0.011 plus the same rerank
-RUNG_COST_PER_CALL = {"side-sonnet": 0.012}
+RUNG_COST_PER_CALL = {"side-sonnet": 0.012, "shipped-3": 0.014}  # shipped-3: measured on dev, 392c9e2
 JUDGE_USD_PER_MTOK = (2.0, 10.0)  # Sonnet 5 input, output; billed to the judge's own key
 RESERVE_USD = 3.0                # left for the public demo (evals/LADDER.md, "Spend preflight")
 TIMEOUT_S = 60

@@ -399,6 +399,7 @@ describe("ask", () => {
       ["rerank", "hybrid", true, false],
       ["shipped", "hybrid", true, true],
       ["shipped-2", "hybrid", true, true],
+      ["shipped-3", "hybrid", true, true],
       ["side-sonnet", "hybrid", true, true],
       ["side-quoted", "hybrid", true, true],
     ] as const)("%s: search %s, rerank %s, companions %s", async (rung, search, rerank, companions) => {
@@ -430,6 +431,7 @@ describe("ask", () => {
     it.each([
       ["shipped", MAX_OUTPUT_TOKENS],
       ["side-sonnet", 1600],
+      ["shipped-3", 1600],
       ["side-quoted", 1200],
     ] as const)("%s generates with an output cap of %i tokens", async (rung, cap) => {
       const deps = fakeDeps(ROWS, ROWS.map(() => HIGH), ANSWER);
@@ -459,6 +461,10 @@ describe("ask", () => {
 
     it("shipped-2 changes only the prompt", () => {
       expect(RUNGS["shipped-2"]).toEqual({ ...RUNGS.shipped, prompt: "fix" });
+    });
+
+    it("shipped-3 changes only the generator on shipped-2, with side-sonnet's cap", () => {
+      expect(RUNGS["shipped-3"]).toEqual({ ...RUNGS["shipped-2"], model: RUNGS["side-sonnet"].model, maxOutputTokens: 1600 });
     });
 
     // shipped-2 is compared against shipped re-run on the same commit (LADDER.md, "Ship bar"), so adding
